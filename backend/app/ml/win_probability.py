@@ -1,4 +1,11 @@
-"""Win probability model for predicting project win rates."""
+"""
+Win probability model for predicting project win rates.
+
+Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+
+This module contains proprietary ML algorithms and predictive models.
+"""
 from typing import Dict, Any, List
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier

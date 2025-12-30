@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "description": "Construction Intelligence Platform - Enterprise SaaS Frontend",
+  "author": "Poor Dude Holdings LLC",
+  "copyright": "Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.",
+  "license": "PROPRIETARY",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

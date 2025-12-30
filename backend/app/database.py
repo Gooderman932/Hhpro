@@ -1,4 +1,9 @@
-"""Database connection and session management."""
+"""
+Database connection and session management.
+
+Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+"""
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker

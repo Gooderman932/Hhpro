@@ -1,0 +1,76 @@
+COPYRIGHT NOTICE
+
+Construction Intelligence Platform
+Enterprise SaaS for Market Intelligence and Project Discovery
+
+Copyright (c) 2025 Poor Dude Holdings LLC
+All Rights Reserved.
+
+================================================================================
+
+PROPRIETARY AND CONFIDENTIAL
+
+This software product, including all its components, source code, object code,
+documentation, and related materials (collectively, the "Software"), is the 
+exclusive property of Poor Dude Holdings LLC.
+
+INTELLECTUAL PROPERTY RIGHTS
+
+Poor Dude Holdings LLC retains all rights, title, and interest in and to:
+
+1. SOURCE CODE
+   - All backend Python/FastAPI code
+   - All frontend React/TypeScript code
+   - All database schemas and models
+   - All API endpoints and interfaces
+   - All service modules and business logic
+   - All ML/AI models and algorithms
+
+2. DOCUMENTATION
+   - Technical documentation
+   - User guides and manuals
+   - API documentation
+   - Architecture diagrams
+   - Implementation guides
+
+3. TRADE SECRETS
+   - Proprietary algorithms
+   - Business logic and methodologies
+   - Data processing techniques
+   - Opportunity scoring formulas
+   - Win probability calculations
+   - Demand forecasting models
+
+4. TRADEMARKS
+   - "Construction Intelligence Platform"
+   - "Poor Dude Holdings"
+   - Associated logos and branding
+
+PATENT PENDING
+
+Certain features and methodologies implemented in this Software may be subject
+to pending patent applications owned by Poor Dude Holdings LLC.
+
+UNAUTHORIZED USE PROHIBITED
+
+Any unauthorized use, reproduction, modification, distribution, or reverse
+engineering of this Software is strictly prohibited and may result in severe
+civil and criminal penalties.
+
+THIRD-PARTY COMPONENTS
+
+This Software may include third-party open-source components. Such components
+are used in accordance with their respective licenses and remain the property
+of their respective owners. This does not diminish Poor Dude Holdings LLC's
+proprietary rights in the original portions of the Software.
+
+CONTACT INFORMATION
+
+For licensing inquiries:
+Email: legal@poorduceholdings.com
+Web: https://poorduceholdings.com
+Address: Poor Dude Holdings LLC
+         [Address to be provided]
+
+Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+Unauthorized use, copying, or distribution is strictly prohibited.

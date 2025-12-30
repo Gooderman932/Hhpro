@@ -1,3 +1,10 @@
+/*
+ * Construction Intelligence Platform - Main Application
+ * 
+ * Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+ * PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+ */
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Navigation from './components/common/Navigation'
 import ProjectRadar from './components/dashboard/ProjectRadar'

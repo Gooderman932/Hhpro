@@ -1,4 +1,9 @@
-"""Project data models."""
+"""
+Project data models.
+
+Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+"""
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime, Text, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func

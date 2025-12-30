@@ -1,3 +1,12 @@
+/*
+ * Scenario Analysis Component - Proprietary Financial Modeling
+ * 
+ * Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+ * PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+ * 
+ * This component contains proprietary business logic and algorithms.
+ */
+
 import { useState } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 

@@ -1,4 +1,11 @@
-"""Opportunity scoring service."""
+"""
+Opportunity scoring service.
+
+Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+
+This module contains proprietary scoring algorithms and business logic.
+"""
 from typing import Dict, Any
 from sqlalchemy.orm import Session
 from ..models.project import Project

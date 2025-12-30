@@ -1,4 +1,9 @@
-"""FastAPI application entry point."""
+"""
+FastAPI application entry point.
+
+Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .config import settings

@@ -1,3 +1,10 @@
+/*
+ * Project Radar Dashboard Component
+ * 
+ * Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+ * PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+ */
+
 import { useQuery } from '@tanstack/react-query'
 import { getProjects, getAnalyticsSummary } from '../../services/api'
 import { MapPin, DollarSign, Briefcase } from 'lucide-react'

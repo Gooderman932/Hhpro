@@ -1,3 +1,8 @@
+# Construction Intelligence Platform - Frontend Container
+#
+# Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+# PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+
 FROM node:20-alpine
 
 WORKDIR /app

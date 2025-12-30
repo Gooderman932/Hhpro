@@ -1,6 +1,22 @@
 # Construction Intelligence Platform
 
+**PROPRIETARY SOFTWARE - Copyright (c) 2025 Poor Dude Holdings LLC**
+
 Enterprise SaaS platform for construction market intelligence, project discovery, and competitive analysis.
+
+---
+
+## ⚖️ COPYRIGHT & LICENSE
+
+**Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.**
+
+This software is proprietary and confidential. Unauthorized copying, distribution, modification, or use of this software, via any medium, is strictly prohibited without express written permission from Poor Dude Holdings LLC.
+
+See [LICENSE](LICENSE) and [COPYRIGHT](COPYRIGHT) files for complete terms.
+
+**For licensing inquiries:** legal@poorduceholdings.com
+
+---
 
 ## 🏗️ Overview
 
@@ -429,4 +445,21 @@ docker-compose -f docker-compose.prod.yml build
 
 ---
 
-Built with ❤️ for the construction industry
+## 📄 Legal & Copyright
+
+**Construction Intelligence Platform**  
+**Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.**
+
+This software and associated documentation are proprietary and confidential information of Poor Dude Holdings LLC. Unauthorized use, reproduction, distribution, or modification is strictly prohibited and may result in legal action.
+
+**Trademarks:** "Construction Intelligence Platform" and associated marks are trademarks of Poor Dude Holdings LLC.
+
+**Patent Pending:** Certain features and methodologies are subject to pending patent applications.
+
+For licensing, partnership, or other inquiries:
+- **Email:** legal@poorduceholdings.com
+- **Website:** https://poorduceholdings.com
+
+---
+
+Built by Poor Dude Holdings LLC - Enterprise Construction Intelligence Solutions

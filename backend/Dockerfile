@@ -1,3 +1,8 @@
+# Construction Intelligence Platform - Backend Container
+#
+# Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+# PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+
 FROM python:3.11-slim
 
 WORKDIR /app

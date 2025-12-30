@@ -1,3 +1,10 @@
+/*
+ * API Service - Backend Communication Layer
+ * 
+ * Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+ * PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+ */
+
 import axios from 'axios'
 import type { Project, AnalyticsSummary, Competitor, AuthToken, User } from '../types'
 

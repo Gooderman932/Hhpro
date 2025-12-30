@@ -1,3 +1,8 @@
+# Construction Intelligence Platform - Docker Compose Configuration
+#
+# Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+# PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+
 version: '3.8'
 
 services:
