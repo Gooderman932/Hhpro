@@ -6,6 +6,7 @@ import Analytics from './components/dashboard/Analytics'
 import CompetitorMap from './components/intelligence/CompetitorMap'
 import RelationshipGraph from './components/intelligence/RelationshipGraph'
 import DemandForecast from './components/pricing/DemandForecast'
+import ScenarioAnalysis from './components/pricing/ScenarioAnalysis'
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/intelligence/competitors" element={<CompetitorMap />} />
             <Route path="/intelligence/relationships" element={<RelationshipGraph />} />
             <Route path="/pricing/forecast" element={<DemandForecast />} />
+            <Route path="/pricing/scenarios" element={<ScenarioAnalysis />} />
           </Routes>
         </main>
       </div>
