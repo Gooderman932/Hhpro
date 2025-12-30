@@ -1,4 +1,20 @@
 """
+FastAPI application entry point.
+
+Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+"""
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from .config import settings
+from .api import (
+    projects_router,
+    analytics_router,
+    intelligence_router,
+    auth_router,
+)
+
+# Create FastAPI application
 Main FastAPI application for Construction Intelligence Platform
 """
 from fastapi import FastAPI, Request, status
@@ -45,6 +61,9 @@ app = FastAPI(
     title=settings.APP_NAME,
     version=settings.APP_VERSION,
     description="Enterprise SaaS platform for construction market intelligence",
+)
+
+# Configure CORS
     lifespan=lifespan,
     docs_url="/api/docs" if settings.DEBUG else None,
     redoc_url="/api/redoc" if settings.DEBUG else None,
@@ -59,6 +78,27 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Include routers
+app.include_router(auth_router)
+app.include_router(projects_router)
+app.include_router(analytics_router)
+app.include_router(intelligence_router)
+
+
+@app.get("/")
+async def root():
+    """Root endpoint."""
+    return {
+        "message": "Construction Intelligence Platform API",
+        "version": settings.APP_VERSION,
+        "docs": "/docs",
+    }
+
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {"status": "healthy"}
 # Compression middleware
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
@@ -155,6 +195,7 @@ app.include_router(
 
 if __name__ == "__main__":
     import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
     
     uvicorn.run(
         "app.main:app",
