@@ -1,0 +1,32 @@
+[
+  {
+    "title": "Downtown Office Tower Renovation",
+    "description": "Major renovation of 30-story office building including HVAC, electrical, and interior upgrades",
+    "project_type": "opportunity",
+    "sector": "Commercial",
+    "value": 15000000,
+    "city": "San Francisco",
+    "state": "CA",
+    "status": "active"
+  },
+  {
+    "title": "Regional Hospital Expansion",
+    "description": "New patient wing with 100 beds, surgical suites, and imaging center",
+    "project_type": "tender",
+    "sector": "Healthcare",
+    "value": 45000000,
+    "city": "Seattle",
+    "state": "WA",
+    "status": "active"
+  },
+  {
+    "title": "Interstate Highway Bridge Replacement",
+    "description": "Complete replacement of aging bridge structure on I-90 corridor",
+    "project_type": "tender",
+    "sector": "Infrastructure",
+    "value": 120000000,
+    "city": "Boston",
+    "state": "MA",
+    "status": "active"
+  }
+]

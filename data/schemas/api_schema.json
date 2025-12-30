@@ -1,0 +1,32 @@
+{
+  "project_schema": {
+    "title": "string (required)",
+    "description": "string (optional)",
+    "project_type": "string (opportunity|permit|tender)",
+    "sector": "string (Commercial|Residential|Infrastructure|Healthcare|Education|Industrial)",
+    "status": "string (active|awarded|completed|cancelled)",
+    "value": "number (optional)",
+    "estimated_start_date": "ISO 8601 date (optional)",
+    "estimated_completion_date": "ISO 8601 date (optional)",
+    "address": "string (optional)",
+    "city": "string (optional)",
+    "state": "string (optional, 2-letter code)",
+    "zip_code": "string (optional)",
+    "country": "string (default: USA)",
+    "source": "string (optional)",
+    "source_url": "string (optional)"
+  },
+  "company_schema": {
+    "name": "string (required)",
+    "company_type": "string (GC|subcontractor|supplier|owner)",
+    "industry": "string (optional)",
+    "address": "string (optional)",
+    "city": "string (optional)",
+    "state": "string (optional)",
+    "phone": "string (optional)",
+    "email": "string (optional)",
+    "website": "string (optional)",
+    "annual_revenue": "number (optional)",
+    "employee_count": "number (optional)"
+  }
+}
