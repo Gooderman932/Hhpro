@@ -1,7 +1,7 @@
 """
 FastAPI application entry point.
 
-Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved. 
+Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
 """
 from fastapi import FastAPI, Request, status
@@ -10,37 +10,28 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from contextlib import asynccontextmanager
-import time
 from loguru import logger
+import time
 
-from app.config import settings
-from app.database import init_db
-
-# Import routers
-from app.api import (
-    projects,
-    analytics,
-    intelligence,
-    auth,
+from .config import settings
+from .database import init_db
+from .api import (
+    projects_router,
+    analytics_router,
+    intelligence_router,
+    auth_router,
 )
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Startup and shutdown events
-    """
+    """Startup and shutdown events"""
     # Startup
     logger.info(f"Starting {settings.APP_NAME} v{settings.APP_VERSION}")
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     
-    # Initialize database
     init_db()
     logger.info("Database initialized")
-    
-    # Load ML models (if needed)
-    # await load_ml_models()
-    logger.info("ML models loaded")
     
     yield
     
@@ -88,34 +79,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     """Handle validation errors"""
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "detail": exc.errors(),
-            "message": "Validation error"
-        },
+        content={"detail": exc.errors(), "message": "Validation error"},
     )
-
-
-# Root endpoint
-@app.get("/", tags=["System"])
-async def root():
-    """Root endpoint"""
-    return {
-        "name": settings.APP_NAME,
-        "version": settings.APP_VERSION,
-        "docs": "/api/docs",
-        "health": "/health"
-    }
-
-
-# Health check
-@app.get("/health", tags=["System"])
-async def health_check():
-    """Health check endpoint for monitoring"""
-    return {
-        "status": "healthy",
-        "version": settings.APP_VERSION,
-        "environment": settings.ENVIRONMENT
-    }
 
 
 @app.exception_handler(Exception)
@@ -131,35 +96,38 @@ async def general_exception_handler(request: Request, exc: Exception):
     )
 
 
+# Health check
+@app.get("/health", tags=["System"])
+async def health_check():
+    """Health check endpoint for monitoring"""
+    return {
+        "status": "healthy",
+        "version": settings.APP_VERSION,
+        "environment":  settings.ENVIRONMENT
+    }
+
+
+# Root endpoint
+@app.get("/", tags=["System"])
+async def root():
+    """Root endpoint with API information"""
+    return {
+        "name": settings.APP_NAME,
+        "version": settings.APP_VERSION,
+        "docs": "/api/docs",
+        "health": "/health"
+    }
+
+
 # Include API routers
-app.include_router(
-    auth.router,
-    prefix=f"{settings.API_V1_PREFIX}/auth",
-    tags=["Authentication"]
-)
-
-app.include_router(
-    projects.router,
-    prefix=f"{settings.API_V1_PREFIX}/projects",
-    tags=["Projects"]
-)
-
-app.include_router(
-    analytics.router,
-    prefix=f"{settings.API_V1_PREFIX}/analytics",
-    tags=["Analytics"]
-)
-
-app.include_router(
-    intelligence.router,
-    prefix=f"{settings.API_V1_PREFIX}/intelligence",
-    tags=["Intelligence"]
-)
+app.include_router(auth_router, prefix=f"{settings.API_V1_PREFIX}/auth", tags=["Authentication"])
+app.include_router(projects_router, prefix=f"{settings.API_V1_PREFIX}/projects", tags=["Projects"])
+app.include_router(analytics_router, prefix=f"{settings.API_V1_PREFIX}/analytics", tags=["Analytics"])
+app.include_router(intelligence_router, prefix=f"{settings.API_V1_PREFIX}/intelligence", tags=["Intelligence"])
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": 
     import uvicorn
-
     uvicorn.run(
         "app.main:app",
         host="0.0.0.0",
