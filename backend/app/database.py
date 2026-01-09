@@ -34,5 +34,5 @@ def get_db():
 
 def init_db():
     """Initialize database by creating all tables."""
-    from .models import user, project, company, prediction
+    from .models import User, Tenant, Company, Project, ProjectParticipation, Prediction, OpportunityScore
     Base.metadata.create_all(bind=engine)

@@ -7,8 +7,16 @@ PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
 import sys
 import os
 from pathlib import Path
-from loguru import logger
 from typing import Optional
+
+try:
+    from loguru import logger
+    LOGURU_AVAILABLE = True
+except ImportError:
+    LOGURU_AVAILABLE = False
+    # Fallback to standard logging if loguru is not available
+    import logging
+    logger = logging.getLogger(__name__)
 
 
 def setup_logging(
@@ -24,6 +32,19 @@ def setup_logging(
         log_dir: Directory for log files (default: ./logs)
         environment: Environment name (development, staging, production)
     """
+    if not LOGURU_AVAILABLE:
+        # Fallback to standard logging
+        logging.basicConfig(
+            level=getattr(logging, log_level, logging.INFO),
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.StreamHandler(sys.stdout),
+                logging.FileHandler('app.log') if log_dir else logging.NullHandler()
+            ]
+        )
+        logging.info(f"Using standard logging (loguru not available) - Level: {log_level}")
+        return logging.getLogger(__name__)
+    
     # Remove default handler
     logger.remove()
     

@@ -144,30 +144,17 @@ else
     print_success "Virtual environment already exists"
 fi
 
-# Activate virtual environment
-print_info "Activating virtual environment..."
-if [ -f "venv/bin/activate" ]; then
-    source venv/bin/activate
-    print_success "Virtual environment activated"
-elif [ -f "venv/Scripts/activate" ]; then
-    source venv/Scripts/activate
-    print_success "Virtual environment activated"
-else
-    print_error "Could not find virtual environment activation script"
-    exit 1
-fi
-
 # Install Python dependencies
 print_info "Installing Python dependencies (this may take a few minutes)..."
-if pip install --upgrade pip > /dev/null 2>&1; then
+if "$PROJECT_ROOT/backend/venv/bin/pip" install --upgrade pip > /dev/null 2>&1 || "$PROJECT_ROOT/backend/venv/Scripts/pip.exe" install --upgrade pip > /dev/null 2>&1; then
     print_success "pip upgraded"
 fi
 
-if pip install -r requirements.txt > /dev/null 2>&1; then
+if "$PROJECT_ROOT/backend/venv/bin/pip" install -r requirements.txt > /dev/null 2>&1 || "$PROJECT_ROOT/backend/venv/Scripts/pip.exe" install -r requirements.txt > /dev/null 2>&1; then
     print_success "Python dependencies installed"
 else
     print_error "Failed to install Python dependencies"
-    print_info "Try running: pip install -r backend/requirements.txt"
+    print_info "Try running: cd backend && venv/bin/pip install -r requirements.txt"
     exit 1
 fi
 
