@@ -17,7 +17,7 @@ class Prediction(Base):
     confidence = Column(Float)
     model_version = Column(String)
     features = Column(JSON)  # Store features used for prediction
-    metadata = Column(JSON)  # Additional metadata
+    meta_data = Column("metadata", JSON)  # Additional metadata (renamed from 'metadata' to avoid SQLAlchemy reserved name)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relationships
@@ -42,4 +42,3 @@ class OpportunityScore(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
-    project = relationship("Project", back_populates="opportunity_scores")
