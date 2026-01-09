@@ -34,12 +34,13 @@ def setup_logging(
     """
     if not LOGURU_AVAILABLE:
         # Fallback to standard logging
+        log_file = os.path.join(log_dir if log_dir else '.', 'app.log')
         logging.basicConfig(
             level=getattr(logging, log_level, logging.INFO),
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
             handlers=[
                 logging.StreamHandler(sys.stdout),
-                logging.FileHandler('app.log') if log_dir else logging.NullHandler()
+                logging.FileHandler(log_file) if log_dir else logging.StreamHandler(sys.stdout)
             ]
         )
         logging.info(f"Using standard logging (loguru not available) - Level: {log_level}")

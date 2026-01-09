@@ -146,11 +146,22 @@ fi
 
 # Install Python dependencies
 print_info "Installing Python dependencies (this may take a few minutes)..."
-if "$PROJECT_ROOT/backend/venv/bin/pip" install --upgrade pip > /dev/null 2>&1 || "$PROJECT_ROOT/backend/venv/Scripts/pip.exe" install --upgrade pip > /dev/null 2>&1; then
+
+# Determine pip path
+if [ -f "$PROJECT_ROOT/backend/venv/bin/pip" ]; then
+    PIP_PATH="$PROJECT_ROOT/backend/venv/bin/pip"
+elif [ -f "$PROJECT_ROOT/backend/venv/Scripts/pip.exe" ]; then
+    PIP_PATH="$PROJECT_ROOT/backend/venv/Scripts/pip.exe"
+else
+    print_error "Could not find pip in virtual environment"
+    exit 1
+fi
+
+if "$PIP_PATH" install --upgrade pip > /dev/null 2>&1; then
     print_success "pip upgraded"
 fi
 
-if "$PROJECT_ROOT/backend/venv/bin/pip" install -r requirements.txt > /dev/null 2>&1 || "$PROJECT_ROOT/backend/venv/Scripts/pip.exe" install -r requirements.txt > /dev/null 2>&1; then
+if "$PIP_PATH" install -r requirements.txt > /dev/null 2>&1; then
     print_success "Python dependencies installed"
 else
     print_error "Failed to install Python dependencies"
