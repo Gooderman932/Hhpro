@@ -12,7 +12,6 @@ class Settings(BaseSettings):
     # Application
     APP_NAME: str = "BuildIntel Pro"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = False
     ENVIRONMENT: str = "production"
     COMPANY_NAME: str = "Your Company Name"
     COMPANY_LOGO_URL: Optional[str] = None
@@ -26,8 +25,8 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
     
     # Database
-    DATABASE_URL: str = "postgresql://user:password@localhost:5432/construction_intel"
-    DATABASE_ECHO: bool = False  # Added: Set to True to see SQL queries in logs
+    DATABASE_URL: str = "sqlite:///./construction_intel.db"
+    DATABASE_ECHO: bool = False  # Set to True to see SQL queries in logs
     DATABASE_POOL_SIZE: int = 20
     DATABASE_MAX_OVERFLOW: int = 40
     
@@ -81,3 +80,100 @@ class Settings(BaseSettings):
     SENTRY_ENVIRONMENT: Optional[str] = None
     SENTRY_TRACES_SAMPLE_RATE: float = 0.1
     LOG_LEVEL: str = "INFO"
+    
+    # CORS
+    CORS_ORIGINS: list = [
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "https://app.constructionintel.com"
+    ]
+    
+    # File Upload
+    MAX_UPLOAD_SIZE: int = 10 * 1024 * 1024  # 10MB
+    ALLOWED_UPLOAD_EXTENSIONS: list = [".pdf", ".csv", ".xlsx", ".json", ".docx"]
+    UPLOAD_STORAGE_PATH: str = "./uploads"
+    
+    # Cloud Storage (optional)
+    AWS_S3_BUCKET: Optional[str] = None
+    AWS_ACCESS_KEY_ID: Optional[str] = None
+    AWS_SECRET_ACCESS_KEY: Optional[str] = None
+    AWS_REGION: str = "us-east-1"
+    
+    # Email/SMTP
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USER: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_FROM_EMAIL: Optional[str] = None
+    SMTP_FROM_NAME: str = "BuildIntel Pro"
+    
+    # SSO Providers
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    GOOGLE_REDIRECT_URI: Optional[str] = None
+    AZURE_CLIENT_ID: Optional[str] = None
+    AZURE_CLIENT_SECRET: Optional[str] = None
+    AZURE_TENANT_ID: Optional[str] = None
+    OKTA_DOMAIN: Optional[str] = None
+    OKTA_CLIENT_ID: Optional[str] = None
+    OKTA_CLIENT_SECRET: Optional[str] = None
+    
+    # Stripe Payments
+    STRIPE_PUBLIC_KEY: Optional[str] = None
+    STRIPE_SECRET_KEY: Optional[str] = None
+    STRIPE_WEBHOOK_SECRET: Optional[str] = None
+    STRIPE_PRICE_ID_PROFESSIONAL: Optional[str] = None
+    STRIPE_PRICE_ID_ENTERPRISE: Optional[str] = None
+    
+    # Feature Flags
+    ENABLE_WIN_PROBABILITY: bool = True
+    ENABLE_DEMAND_FORECAST: bool = True
+    ENABLE_COMPETITIVE_INTEL: bool = True
+    ENABLE_WHITE_LABEL: bool = True
+    ENABLE_API_ACCESS: bool = True
+    ENABLE_EXPORTS: bool = True
+    ENABLE_WEBHOOKS: bool = True
+    ENABLE_ENTITY_EXTRACTION: bool = True
+    ENABLE_PROJECT_CLASSIFICATION: bool = True
+    ENABLE_SEMANTIC_SEARCH: bool = True
+    ENABLE_SCENARIO_ANALYSIS: bool = False
+    ENABLE_RISK_SCORING: bool = False
+    
+    # Deployment URLs
+    FRONTEND_URL: str = "http://localhost:3000"
+    BACKEND_URL: str = "http://localhost:8000"
+    
+    # Regional Settings
+    DEFAULT_COUNTRY: str = "USA"
+    DEFAULT_CURRENCY: str = "USD"
+    DEFAULT_TIMEZONE: str = "America/New_York"
+    DEFAULT_LANGUAGE: str = "en"
+    
+    # Business Rules
+    DEFAULT_WIN_PROBABILITY_THRESHOLD: float = 0.7
+    DEFAULT_OPPORTUNITY_SCORE_THRESHOLD: float = 0.6
+    FORECASTING_PERIODS_DEFAULT: int = 6
+    
+    # Data Retention
+    DATA_RETENTION_DAYS: int = 730  # 2 years
+    ARCHIVE_OLD_PROJECTS: bool = True
+    ARCHIVE_AFTER_DAYS: int = 365
+    
+    # Admin
+    ADMIN_EMAIL: Optional[str] = None
+    ADMIN_PASSWORD: Optional[str] = None
+    SUPPORT_EMAIL: Optional[str] = None
+    SUPPORT_PHONE: Optional[str] = None
+    
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
+
+
+# Global settings instance
+settings = Settings()
+
+
+def get_settings() -> Settings:
+    """Dependency for FastAPI"""
+    return settings
