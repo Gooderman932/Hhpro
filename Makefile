@@ -17,6 +17,7 @@ help:
 	@echo "  make prod-stop    - Stop production environment"
 	@echo "  make prod-logs    - View production logs"
 	@echo "  make deploy       - Deploy to production"
+	@echo "  make pre-test     - Run pre-deployment tests"
 	@echo ""
 	@echo "Database:"
 	@echo "  make db-init      - Initialize database"
@@ -76,6 +77,11 @@ deploy:
 	@echo "Deploying to production..."
 	@chmod +x scripts/deployment/deploy.sh
 	@./scripts/deployment/deploy.sh
+
+pre-test:
+	@echo "Running pre-deployment tests..."
+	@chmod +x scripts/deployment/pre-deploy-test.sh
+	@./scripts/deployment/pre-deploy-test.sh
 
 # Database
 db-init:

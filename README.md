@@ -352,6 +352,80 @@ project = service.ingest_project(project_data, tenant_id=1, source="manual")
 
 ## 🚢 Production Deployment
 
+### Quick Start
+
+For a rapid production deployment:
+
+```bash
+# 1. Clone and configure
+git clone https://github.com/Gooderman932/market-data.git
+cd market-data
+cp .env.production .env
+nano .env  # Update all CHANGE_THIS values
+
+# 2. Deploy
+./scripts/deployment/deploy.sh
+
+# 3. Initialize database
+make db-init
+```
+
+**📖 Detailed Guides:**
+- **Quick Deploy**: [QUICK_DEPLOY.md](QUICK_DEPLOY.md) - 30-minute setup
+- **Full Deployment**: [DEPLOYMENT.md](DEPLOYMENT.md) - Comprehensive guide
+- **SSL Setup**: [SSL_SETUP.md](SSL_SETUP.md) - HTTPS configuration
+- **Security**: [SECURITY.md](SECURITY.md) - Hardening guide
+- **Checklist**: [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) - Pre-deployment verification
+
+### Production Features
+
+✅ **Infrastructure**
+- Production-optimized Docker containers
+- Nginx reverse proxy with rate limiting
+- Redis caching layer
+- PostgreSQL 16 with connection pooling
+- Automated health checks
+
+✅ **Security**
+- HTTPS/TLS support
+- Security headers configured
+- Rate limiting on API endpoints
+- Non-root container users
+- Secret management via environment variables
+
+✅ **Operations**
+- Automated deployment script
+- Database backup automation
+- Health monitoring
+- CI/CD pipeline (GitHub Actions)
+- Rolling updates support
+
+✅ **Monitoring**
+- Application health endpoints
+- Container health checks
+- Resource usage monitoring
+- Log aggregation ready
+- Error tracking integration (Sentry)
+
+### Common Operations
+
+```bash
+# Deploy/Update
+make deploy
+
+# Backup database
+make backup
+
+# Check health
+./scripts/deployment/health-check.sh
+
+# View logs
+make logs
+
+# Restart services
+make restart
+```
+
 ### Docker Production Build
 
 1. Build production images:
@@ -359,20 +433,44 @@ project = service.ingest_project(project_data, tenant_id=1, source="manual")
 docker-compose -f docker-compose.prod.yml build
 ```
 
-2. Deploy with proper environment variables
-3. Use a reverse proxy (nginx) for SSL/TLS
-4. Set up database backups
-5. Configure logging and monitoring
+2. Deploy with proper environment variables:
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+3. Initialize database:
+```bash
+make db-init
+make db-seed  # Optional: sample data
+```
+
+4. Verify deployment:
+```bash
+make health
+```
+
+### Prerequisites for Production
+
+- Docker & Docker Compose
+- Domain name with SSL/TLS certificates
+- Minimum 4GB RAM, 2 CPU cores, 50GB storage
+- PostgreSQL 16 compatible environment
+- Redis 7+ for caching
 
 ### Security Considerations
 
-- Change default SECRET_KEY
-- Use strong passwords
-- Enable HTTPS in production
-- Implement rate limiting
-- Regular security updates
-- Database encryption at rest
-- Secure API key storage
+✅ **Required Before Production:**
+- [ ] Change default SECRET_KEY
+- [ ] Use strong passwords for PostgreSQL and Redis
+- [ ] Enable HTTPS with valid SSL certificates
+- [ ] Configure firewall (allow only 22, 80, 443)
+- [ ] Set up database backups
+- [ ] Configure CORS origins (no wildcards)
+- [ ] Disable DEBUG mode (set ENVIRONMENT=production)
+- [ ] Set up monitoring and alerts
+- [ ] Review and implement [SECURITY.md](SECURITY.md)
+
+See [SECURITY.md](SECURITY.md) for comprehensive security hardening steps.
 
 ## 📊 Data Models
 
