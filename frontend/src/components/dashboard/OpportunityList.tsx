@@ -2,15 +2,29 @@ import { useQuery } from '@tanstack/react-query'
 import { getProjects } from '../../services/api'
 import DataTable from '../common/DataTable'
 import type { Project } from '../../types'
+import { useState } from 'react'
 
 const OpportunityList = () => {
-  const { data: projects, isLoading } = useQuery({
+  // Add error state tracking
+  const [error, setError] = useState<string | null>(null)
+  
+  const { 
+    data: projects, 
+    isLoading, 
+    isError, 
+    error: queryError 
+  } = useQuery({
     queryKey: ['opportunities'],
     queryFn: () => getProjects({ limit: 50 }),
+    onError: (error) => {
+      console.error('Failed to fetch projects:', error)
+      setError('Failed to load project data. Please try again later.')
+    }
   })
 
-  const formatCurrency = (value: number | null) => {
-    if (!value) return '-'
+  const formatCurrency = (value: number | null | undefined) => {
+    // Handle all null/undefined cases explicitly
+    if (value === null || value === undefined || isNaN(value)) return '-'
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
@@ -30,13 +44,14 @@ const OpportunityList = () => {
     {
       key: 'sector',
       header: 'Sector',
-      render: (value: string | null) => (
-        value ? (
+      render: (value: string | null | undefined) => {
+        if (!value) return '-'
+        return (
           <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
             {value}
           </span>
-        ) : '-'
-      ),
+        )
+      },
     },
     {
       key: 'project_type',
@@ -46,6 +61,7 @@ const OpportunityList = () => {
       key: 'city',
       header: 'Location',
       render: (_: any, row: Project) => {
+        // Safely handle potential null/undefined values
         if (row.city && row.state) {
           return `${row.city}, ${row.state}`
         }
@@ -55,48 +71,30 @@ const OpportunityList = () => {
     {
       key: 'value',
       header: 'Value',
-      render: (value: number | null) => (
+      render: (value: number | null | undefined) => (
         <span className="font-medium">{formatCurrency(value)}</span>
       ),
     },
     {
       key: 'status',
       header: 'Status',
-      render: (value: string) => (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-          value === 'active'
-            ? 'bg-green-100 text-green-800'
-            : value === 'awarded'
-            ? 'bg-blue-100 text-blue-800'
-            : 'bg-gray-100 text-gray-800'
-        }`}>
-          {value}
-        </span>
-      ),
+      render: (value: string) => {
+        // Add validation to prevent crashes
+        if (!value) return '-'
+        return (
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+            value === 'active'
+              ? 'bg-green-100 text-green-800'
+              : value === 'awarded'
+              ? 'bg-blue-100 text-blue-800'
+              : 'bg-gray-100 text-gray-800'
+          }`}>
+            {value}
+          </span>
+        )
+      },
     },
   ]
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Opportunities</h1>
-        <p className="mt-2 text-gray-600">
-          Browse and analyze construction opportunities
-        </p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">All Projects</h2>
-        </div>
-        <DataTable
-          data={projects || []}
-          columns={columns}
-          loading={isLoading}
-        />
-      </div>
-    </div>
-  )
-}
-
-export default OpportunityList
+  // Handle error state in UI
+  if (isError &&
