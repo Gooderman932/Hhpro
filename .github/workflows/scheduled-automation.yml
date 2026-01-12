@@ -63,7 +63,7 @@ jobs:
           python tools/automated_platform.py
       
       - name: Upload automation reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.1.3
         if: always()
         with:
           name: automation-reports-${{ github.run_number }}

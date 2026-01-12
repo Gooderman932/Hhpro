@@ -83,7 +83,7 @@ jobs:
           pip-audit -r backend/requirements.txt || true
       
       - name: Upload security reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.1.3
         if: always()
         with:
           name: python-security-reports
@@ -120,7 +120,7 @@ jobs:
           npm audit || true
       
       - name: Upload npm audit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.1.3
         if: always()
         with:
           name: npm-security-report
@@ -189,7 +189,7 @@ jobs:
             aquasec/trivy image --format json --output frontend-trivy.json frontend:scan || true
       
       - name: Upload Trivy JSON reports
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.1.3
         if: always()
         with:
           name: trivy-reports
@@ -206,7 +206,7 @@ jobs:
     
     steps:
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.3
       
       - name: Generate security summary
         run: |
