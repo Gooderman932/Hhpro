@@ -1,0 +1,171 @@
+name: Database Migrations
+
+on:
+  push:
+    paths:
+      - 'backend/alembic/versions/**'
+    branches: [ main, develop ]
+  pull_request:
+    paths:
+      - 'backend/alembic/versions/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to apply migrations'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+        default: 'staging'
+
+jobs:
+  verify-migrations:
+    name: Verify Migration Scripts
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_migrations
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Test migrations on temporary database
+        working-directory: ./backend
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_migrations
+        run: |
+          echo "Testing migrations..."
+          alembic upgrade head
+          alembic downgrade -1
+          alembic upgrade head
+      
+      - name: Check migration consistency
+        working-directory: ./backend
+        run: |
+          echo "Checking for migration conflicts..."
+          alembic history
+          alembic current
+
+  apply-staging-migrations:
+    name: Apply Migrations to Staging
+    runs-on: ubuntu-latest
+    needs: verify-migrations
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Apply migrations to staging
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+        run: |
+          echo "Applying migrations to staging database..."
+          alembic upgrade head
+      
+      - name: Verify migration success
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_STAGING }}
+        run: |
+          echo "Verifying migrations..."
+          alembic current
+      
+      - name: Send notification
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          echo "Staging migrations: $STATUS"
+
+  apply-production-migrations:
+    name: Apply Migrations to Production
+    runs-on: ubuntu-latest
+    needs: verify-migrations
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment:
+      name: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        working-directory: ./backend
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Backup database
+        run: |
+          echo "Creating database backup before migrations..."
+          # Add your database backup command here
+      
+      - name: Apply migrations to production
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
+        run: |
+          echo "Applying migrations to production database..."
+          alembic upgrade head
+      
+      - name: Verify migration success
+        working-directory: ./backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
+        run: |
+          echo "Verifying migrations..."
+          alembic current
+      
+      - name: Send notification
+        if: always()
+        run: |
+          STATUS="${{ job.status }}"
+          echo "Production migrations: $STATUS"
+          # Add critical alert notification here

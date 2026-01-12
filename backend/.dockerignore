@@ -1,0 +1,49 @@
+# Ignore Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+
+# Ignore virtual environments
+venv/
+env/
+ENV/
+
+# Ignore test and coverage files
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# Ignore development files
+.env
+.env.local
+.vscode/
+.idea/
+
+# Ignore documentation
+*.md
+docs/
+
+# Ignore git
+.git/
+.gitignore
+
+# Ignore test files
+tests/
+test_*.py
+*_test.py
+
+# Ignore CI/CD files
+.github/
+
+# Ignore data files
+data/
+*.db
+*.sqlite
+
+# Ignore logs
+*.log
+logs/

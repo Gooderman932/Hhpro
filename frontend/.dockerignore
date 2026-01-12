@@ -1,0 +1,56 @@
+# Ignore node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignore build output (will be created during build)
+dist/
+build/
+
+# Ignore development files
+.env
+.env.local
+.env.development
+.env.test
+.env.production.local
+
+# Ignore IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Ignore test files
+coverage/
+.nyc_output/
+
+# Ignore git
+.git/
+.gitignore
+
+# Ignore documentation
+*.md
+docs/
+
+# Ignore CI/CD files
+.github/
+
+# Ignore cache
+.cache/
+.parcel-cache/
+
+# Ignore config files not needed in production
+*.config.js
+tsconfig*.json
+.eslintrc*
+.prettierrc*
+
+# Keep only necessary files for build
+!package.json
+!package-lock.json
+!vite.config.ts
+!tsconfig.json
+!tsconfig.node.json
+!postcss.config.js
+!tailwind.config.js
