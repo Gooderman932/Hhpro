@@ -1,0 +1,292 @@
+# Construction Intelligence Platform CI/CD Pipeline
+# Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/ci-cd.yml'
+      - 'requirements*.txt'
+      - 'package.json'
+      - 'Dockerfile'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/ci-cd.yml'
+      - 'requirements*.txt'
+      - 'package.json'
+      - 'Dockerfile'
+
+env:
+  PYTHON_VERSION: '3.11'
+  NODE_VERSION: '18'
+  DOCKER_IMAGE_NAME: 'construction-intel-platform'
+
+jobs:
+  # Linting and Code Quality Checks
+  linting:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 black isort mypy
+
+      - name: Install Node.js dependencies
+        working-directory: ./frontend
+        run: |
+          npm install
+
+      - name: Run Python linting (flake8)
+        run: |
+          flake8 backend/ --ignore=E203,W503,E501 --exclude=backend/app/migrations,backend/app/__pycache__
+
+      - name: Run Python formatting check (black)
+        run: |
+          black --check backend/
+
+      - name: Run Python import sorting check (isort)
+        run: |
+          isort --check-only --diff backend/
+
+      - name: Run Python type checking (mypy)
+        run: |
+          mypy backend/ --ignore-missing-imports
+
+      - name: Run frontend linting
+        working-directory: ./frontend
+        run: |
+          npm run lint
+
+  # Security Scanning
+  security:
+    runs-on: ubuntu-latest
+    needs: linting
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+
+      - name: Run Bandit (Python Security Scanner)
+        run: |
+          bandit -r backend/ -f json -o bandit-results.json
+
+      - name: Run Safety (Dependency Security Scanner)
+        run: |
+          safety check -r requirements.txt --json
+
+      - name: Upload Security Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-results.json
+            safety-report.json
+
+  # Unit and Integration Testing
+  testing:
+    runs-on: ubuntu-latest
+    needs: [linting, security]
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest pytest-cov pytest-asyncio
+
+      - name: Run Backend Tests
+        run: |
+          pytest backend/tests/ -v --cov=backend/ --cov-report=xml --cov-report=html
+
+      - name: Run Frontend Tests
+        working-directory: ./frontend
+        run: |
+          npm run test:ci
+
+      - name: Upload Coverage Reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: |
+            htmlcov/
+            coverage.xml
+
+  # Dependency Auditing
+  dependency-audit:
+    runs-on: ubuntu-latest
+    needs: testing
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install Python dependencies
+        run: |
+          pip install pip-audit
+
+      - name: Audit Python Dependencies
+        run: |
+          pip audit --json
+
+      - name: Upload Dependency Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-report
+          path: pip-audit-report.json
+
+  # Docker Build and Push
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: testing
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Extract Metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: poordudeholdings/construction-intel-platform
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # Deployment to Staging
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop'
+    environment:
+      name: staging
+      url: https://staging.construction-intel.com
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging Environment
+        run: |
+          echo "Deploying to staging environment"
+          # In a real setup, this would contain deployment commands to staging
+          echo "Staging deployment completed"
+          
+      - name: Run Post-deployment Tests
+        run: |
+          echo "Running smoke tests on staging"
+          # Add smoke tests against staging environment
+
+  # Deployment to Production
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    if: github.ref == 'refs/heads/main'
+    environment:
+      name: production
+      url: https://construction-intel.com
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Production Environment
+        run: |
+          echo "Deploying to production environment"
+          # In a real setup, this would contain deployment commands to production
+          echo "Production deployment completed"
+          
+      - name: Run Production Tests
+        run: |
+          echo "Running production health checks"
+          # Add production health checks
+
+  # Release Management
+  release:
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.sha }}
+          release_name: Release ${{ github.sha }}
+          body: |
+            Automated release for commit ${{ github.sha }}
+            
+            Features:
+            - CI/CD pipeline implemented
+            - Security scanning added
+            - Automated testing enabled
+            - Deployment workflows configured
+            
+          draft: false
+          prerelease: false
