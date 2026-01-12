@@ -4,6 +4,13 @@
 
 Enterprise SaaS platform for construction market intelligence, project discovery, and competitive analysis.
 
+[![CI Pipeline](https://github.com/Gooderman932/market-data/actions/workflows/ci.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/ci.yml)
+[![Security Scanning](https://github.com/Gooderman932/market-data/actions/workflows/security.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/security.yml)
+[![Docker Build](https://github.com/Gooderman932/market-data/actions/workflows/docker.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/docker.yml)
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Node.js 20+](https://img.shields.io/badge/node.js-20+-green.svg)](https://nodejs.org/)
+
 ---
 
 ## ⚖️ COPYRIGHT & LICENSE
@@ -47,6 +54,9 @@ A comprehensive platform that combines AI/ML capabilities with real-time constru
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
 - **API Documentation**: FastAPI automatic OpenAPI/Swagger
+- **CI/CD**: GitHub Actions
+- **Container Registry**: GitHub Container Registry (GHCR)
+- **Caching**: Redis 7
 
 ## 📁 Project Structure
 
@@ -349,6 +359,51 @@ project_data = {
 
 project = service.ingest_project(project_data, tenant_id=1, source="manual")
 ```
+
+## 🔄 CI/CD Pipeline
+
+The platform includes a comprehensive automated CI/CD pipeline built with GitHub Actions.
+
+### Automated Workflows
+
+- **CI Pipeline**: Automated testing, linting, and code quality checks on every push
+- **Security Scanning**: Weekly security audits with CodeQL, Trivy, and dependency scanning
+- **Docker Builds**: Automated multi-stage Docker image builds and publishing to GHCR
+- **Deployments**: Manual deployment workflows for staging and production
+- **Database Migrations**: Safe, automated database migration workflows
+- **Platform Automation**: Scheduled daily automation tasks
+
+### Quick Commands
+
+```bash
+# Run all CI checks locally
+make ci
+
+# Run security scans
+make security-scan
+
+# Deploy to staging
+make deploy-staging
+
+# Deploy to production
+make deploy-prod
+```
+
+### Documentation
+
+- [CI/CD Guide](docs/CICD.md) - Complete workflow documentation
+- [Deployment Guide](docs/DEPLOYMENT.md) - Deployment procedures and best practices
+- [Developer Guide](docs/DEVELOPER.md) - Local development setup and workflows
+- [Secrets Configuration](.github/SECRETS.md) - Required GitHub secrets
+
+### Available Makefile Commands
+
+Run `make help` to see all available commands:
+- Development: `make dev`, `make dev-logs`, `make dev-stop`
+- Testing: `make test`, `make test-backend`, `make test-frontend`
+- Code Quality: `make lint`, `make format`, `make type-check`
+- Database: `make migrate`, `make migrate-create`, `make db-reset`
+- Docker: `make build`, `make build-prod`, `make logs`
 
 ## 🚢 Production Deployment
 
