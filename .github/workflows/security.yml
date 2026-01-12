@@ -106,11 +106,11 @@ jobs:
       
       - name: Build backend Docker image
         run: |
-          docker build -t backend-security-scan:latest ./backend
+          docker build -t backend-security-scan:latest -f backend/Dockerfile.prod backend/
       
       - name: Build frontend Docker image
         run: |
-          docker build -t frontend-security-scan:latest ./frontend
+          docker build -t frontend-security-scan:latest -f frontend/Dockerfile.prod frontend/
       
       - name: Run Trivy scan on backend image
         uses: aquasecurity/trivy-action@master

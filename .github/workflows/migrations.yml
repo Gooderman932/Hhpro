@@ -142,10 +142,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Backup database
+      - name: Backup database before migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL_PRODUCTION }}
         run: |
-          echo "Creating database backup before migrations..."
-          # Add your database backup command here
+          echo "Database backup would be created here"
+          echo "In production, implement: pg_dump to S3/backup service"
+          # Example: pg_dump $DATABASE_URL | gzip > backup-$(date +%Y%m%d-%H%M%S).sql.gz
+          # aws s3 cp backup-*.sql.gz s3://your-backup-bucket/
       
       - name: Apply migrations to production
         working-directory: ./backend

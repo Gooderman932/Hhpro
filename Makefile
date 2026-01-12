@@ -145,8 +145,12 @@ db-seed: ## Seed database with sample data
 db-backup: ## Backup database
 	@echo "Creating database backup..."
 	mkdir -p backups
-	docker compose exec -e PGPASSWORD=password postgres pg_dump -U user construction_intel > backups/backup_$$(date +%Y%m%d_%H%M%S).sql || echo "Backup failed - check database credentials"
-	@echo "Backup created in backups/"
+	@if docker compose ps postgres > /dev/null 2>&1; then \
+		docker compose exec -T postgres pg_dump -U $${POSTGRES_USER:-user} $${POSTGRES_DB:-construction_intel} > backups/backup_$$(date +%Y%m%d_%H%M%S).sql 2>/dev/null || echo "Backup failed - check database is running and credentials"; \
+		echo "Backup created in backups/"; \
+	else \
+		echo "Error: PostgreSQL container is not running"; \
+	fi
 
 db-restore: ## Restore database from backup (specify BACKUP_FILE=path/to/backup.sql)
 	@if [ -z "$(BACKUP_FILE)" ]; then \
