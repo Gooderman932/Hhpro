@@ -1,56 +1,71 @@
-# BuildIntel Pro - Setup Guide
+# Construction Intelligence Platform - Setup Guide
 
 Complete guide to set up and configure your Construction Intelligence Platform.
 
 ## 🚀 Quick Start (5 Minutes)
 
 ### Prerequisites
-- Python 3.10+
-- PostgreSQL 14+
-- Redis 6+
-- Node.js 18+ (for frontend)
-- OpenAI API key (for ML features)
+- **Docker & Docker Compose** (recommended) OR
+- **Python 3.11+** and **Node.js 20+** (for local development)
+- **PostgreSQL 16+** (if running without Docker)
+- **Redis 7+** (for caching)
+- **OpenAI API key** (optional, for ML features)
 
-### Step 1: Clone and Setup Backend
+### Quickest Setup (Using Make + Docker)
 
 ```bash
-# Navigate to backend directory
-cd backend
+# Clone the repository
+git clone https://github.com/Gooderman932/market-data.git
+cd market-data
 
-# Create virtual environment
-python -m venv venv
+# Setup environment (creates .env if needed)
+make setup
 
-# Activate virtual environment
-# On macOS/Linux:
-source venv/bin/activate
-# On Windows:
-venv\Scripts\activate
+# Start all services (PostgreSQL, Redis, Backend, Frontend)
+make dev
 
-# Install dependencies
-pip install -r requirements.txt
+# Initialize database (in a new terminal)
+docker-compose exec backend python ../scripts/setup_db.py
+docker-compose exec backend python ../scripts/seed_data.py
 
-# Download spaCy model for entity extraction
-python -m spacy download en_core_web_lg
+# Access the application
+# Frontend: http://localhost:5173
+# Backend: http://localhost:8000
+# API Docs: http://localhost:8000/docs
 ```
 
-### Step 2: Configure Environment
+**Login credentials:**
+- Email: `demo@example.com`
+- Password: `demo123`
+
+### All Available Commands
+
+Run `make help` to see all 40+ available commands. Key commands:
 
 ```bash
-# Copy example environment file
-cp ../.env.example ../.env
+# Development
+make dev              # Start development environment
+make dev-logs         # View logs
+make dev-stop         # Stop environment
+make dev-restart      # Restart environment
 
-# Edit .env with your settings
-nano ../.env  # or use your preferred editor
-```
+# Testing
+make test             # Run all tests
+make test-coverage    # Generate coverage report
+make ci               # Run CI checks locally
 
-**Minimum Required Settings:**
-```bash
-# In .env file:
-APP_NAME="BuildIntel Pro"
-DATABASE_URL="postgresql://user:password@localhost:5432/buildintel_db"
-REDIS_URL="redis://localhost:6379/0"
-OPENAI_API_KEY="sk-proj-your-key-here"
-SECRET_KEY="generate-a-random-string-here"
+# Code Quality
+make lint             # Run all linters
+make format           # Auto-format code
+
+# Database
+make migrate          # Run migrations
+make migrate-create   # Create new migration
+make db-reset         # Reset database
+
+# Deployment
+make deploy-staging   # Deploy to staging
+make deploy-prod      # Deploy to production
 ```
 
 **Generate SECRET_KEY:**
@@ -187,12 +202,33 @@ docker run --name buildintel-redis \
 
 ## 📊 Running with Docker Compose
 
-**Quick Start Everything:**
+**Using Make (Recommended):**
 
 ```bash
-# Create docker-compose.yml in root directory
-# (I'll provide this file next)
+# Start all services (PostgreSQL, Redis, Backend, Frontend)
+make dev
 
+# View logs from all services
+make dev-logs
+
+# View logs from specific service
+make logs-backend
+make logs-frontend
+make logs-db
+
+# Stop all services
+make dev-stop
+
+# Restart services
+make dev-restart
+
+# Check running containers
+make ps
+```
+
+**Without Make (Traditional Method):**
+
+```bash
 # Start all services
 docker-compose up -d
 
@@ -203,17 +239,64 @@ docker-compose logs -f
 docker-compose down
 ```
 
+### Production Docker Configuration
+
+For production deployments, use the production docker-compose:
+
+```bash
+# Build production images
+make build-prod
+# Or: docker-compose -f docker-compose.prod.yml build
+
+# Start production services
+docker-compose -f docker-compose.prod.yml up -d
+
+# Production images use:
+# - Multi-stage builds for optimization
+# - Non-root users for security
+# - Health checks for monitoring
+# - Resource limits
+# - Nginx with security headers (frontend)
+```
+
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for complete production deployment guide.
+
 ---
 
 ## 🧪 Testing the Setup
 
-### 1. Backend Health Check
+### Using Helper Scripts
+
 ```bash
-curl http://localhost:8000/health
-# Should return: {"status":"healthy","version":"1.0.0"}
+# Comprehensive health check of all services
+./scripts/health_check.sh
+
+# Create database backup
+./scripts/backup_database.sh
 ```
 
-### 2. Database Connection
+### Using Makefile
+
+```bash
+# Check service health
+make health
+
+# Run all tests
+make test
+
+# Run tests with coverage
+make test-coverage
+```
+
+### Manual Health Checks
+
+#### 1. Backend Health Check
+```bash
+curl http://localhost:8000/health
+# Should return: {"status":"healthy","version":"0.1.0","environment":"development"}
+```
+
+#### 2. Database Connection
 ```bash
 python -c "
 from app.database import engine
@@ -224,7 +307,7 @@ with engine.connect() as conn:
 "
 ```
 
-### 3. Redis Connection
+#### 3. Redis Connection
 ```bash
 python -c "
 import redis
@@ -234,31 +317,13 @@ print('Redis connected:', r.get('test'))
 "
 ```
 
-### 4. OpenAI API
+#### 4. Docker Services Status
 ```bash
-python -c "
-import openai
-from app.config import settings
-client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
-response = client.chat.completions.create(
-    model='gpt-4o-mini',
-    messages=[{'role': 'user', 'content': 'Say hello'}],
-    max_tokens=10
-)
-print('OpenAI connected:', response.choices[0].message.content)
-"
-```
+# Using Make
+make ps
 
-### 5. ML Services
-```bash
-python -c "
-from app.ml.project_classifier import classify_project
-result = classify_project(
-    'New 100,000 SF Office Building',
-    'Proposed commercial office development...'
-)
-print('Classification:', result['project_type'], result['confidence'])
-"
+# Or directly
+docker-compose ps
 ```
 
 ---
@@ -439,10 +504,30 @@ volumes:
 
 ## 🔄 Migrations
 
-### Create New Migration
+### Using Makefile (Recommended)
+
+```bash
+# Run all pending migrations
+make migrate
+
+# Create a new migration
+make migrate-create msg="add user preferences table"
+
+# Rollback last migration
+make migrate-rollback
+
+# View migration history
+make migrate-history
+
+# Check current migration
+make migrate-current
+```
+
+### Manual Migration Commands
 
 ```bash
 # After modifying models, create migration
+cd backend
 alembic revision --autogenerate -m "Add new field to projects"
 
 # Review the generated migration file
@@ -450,11 +535,7 @@ alembic revision --autogenerate -m "Add new field to projects"
 
 # Apply migration
 alembic upgrade head
-```
 
-### Rollback Migration
-
-```bash
 # Rollback one version
 alembic downgrade -1
 
@@ -464,6 +545,26 @@ alembic downgrade abc123
 # Rollback all
 alembic downgrade base
 ```
+
+### CI/CD Migration Workflow
+
+Migrations can also be run via GitHub Actions:
+
+```bash
+# Using GitHub CLI
+gh workflow run migrations.yml \
+  -f environment=staging \
+  -f action=upgrade \
+  -f dry_run=true  # Test first
+
+# After verifying dry run
+gh workflow run migrations.yml \
+  -f environment=staging \
+  -f action=upgrade \
+  -f dry_run=false
+```
+
+See [docs/CICD.md](docs/CICD.md) for more on automated migrations.
 
 ---
 
@@ -499,17 +600,34 @@ python scripts/train_demand_forecast.py --country USA --periods 12
 
 ## 🚨 Troubleshooting
 
+### Using Helper Scripts
+
+```bash
+# Comprehensive health check
+./scripts/health_check.sh
+
+# Check specific service logs
+make logs-backend
+make logs-frontend
+make logs-db
+```
+
 ### Database Connection Errors
 
 ```bash
 # Check PostgreSQL is running
 pg_isready -h localhost -p 5432
+# Or with Docker: docker-compose ps postgres
 
 # Test connection
-psql -U buildintel_user -d buildintel_db -h localhost
+psql -U user -d construction_intel -h localhost
+# Or with Make: make db-shell
 
 # Check DATABASE_URL format
 echo $DATABASE_URL
+
+# Reset database if needed
+make db-reset  # WARNING: Destroys all data!
 ```
 
 ### Redis Connection Errors
@@ -521,16 +639,25 @@ redis-cli ping
 
 # Test connection
 redis-cli -h localhost -p 6379
+
+# View Redis logs
+make logs  # Shows all service logs including Redis
 ```
 
-### OpenAI API Errors
+### Docker Issues
 
 ```bash
-# Test API key
-curl https://api.openai.com/v1/models \
-  -H "Authorization: Bearer $OPENAI_API_KEY"
+# Clean up Docker resources
+make clean
 
-# Check usage/billing at: https://platform.openai.com/usage
+# Rebuild containers
+make build
+
+# View container status
+make ps
+
+# Restart all services
+make dev-restart
 ```
 
 ### Import Errors
@@ -541,15 +668,55 @@ which python  # Should show venv path
 
 # Reinstall dependencies
 pip install --force-reinstall -r requirements.txt
+
+# Or rebuild Docker containers
+make build
+```
+
+### Pre-commit Hook Issues
+
+```bash
+# Install pre-commit hooks
+make install-hooks
+
+# Run hooks manually
+pre-commit run --all-files
+
+# Skip hooks temporarily (not recommended)
+git commit --no-verify
 ```
 
 ---
 
-## 📞 Support
+## 📞 Support & Documentation
 
-- **Documentation**: http://localhost:8000/api/docs
-- **GitHub Issues**: [your-repo]/issues
-- **Email**: support@yourcompany.com
+### Documentation
+- **CI/CD Pipeline**: [docs/CICD.md](docs/CICD.md) - GitHub Actions workflows
+- **Deployment Guide**: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) - Production deployment
+- **Developer Guide**: [docs/DEVELOPER.md](docs/DEVELOPER.md) - Local development setup
+- **API Documentation**: http://localhost:8000/docs - Interactive Swagger UI
+- **Secrets Configuration**: [.github/SECRETS.md](.github/SECRETS.md) - Required secrets
+- **Environment Template**: [.env.production.example](.env.production.example) - Production config
+
+### Quick Help
+
+```bash
+# Show all available Make commands
+make help
+
+# Run health checks
+make health
+./scripts/health_check.sh
+
+# View logs
+make dev-logs
+make logs-backend
+make logs-frontend
+
+# Get support
+# - GitHub Issues: https://github.com/Gooderman932/market-data/issues
+# - Email: support@yourcompany.com
+```
 
 ---
 
@@ -557,24 +724,74 @@ pip install --force-reinstall -r requirements.txt
 
 After setup is complete:
 
-1. **Create First Tenant**: Use admin panel or API
-2. **Import Sample Data**: Run seed script
-3. **Test ML Features**: Classify projects, score opportunities
-4. **Set Up Frontend**: Follow frontend/README.md
-5. **Configure Monitoring**: Set up Sentry, logging
-6. **Schedule Background Jobs**: Cron for model retraining
-7. **Deploy to Production**: Follow deployment guide
+1. **Explore the Platform**
+   - Access frontend at http://localhost:5173
+   - Review API docs at http://localhost:8000/docs
+   - Test the health endpoint: http://localhost:8000/health
+
+2. **Developer Setup**
+   - Install pre-commit hooks: `make install-hooks`
+   - Run tests: `make test`
+   - Run linters: `make lint`
+   - Format code: `make format`
+
+3. **Learn the Tools**
+   - Run `make help` to see all 40+ commands
+   - Read [docs/DEVELOPER.md](docs/DEVELOPER.md) for development workflow
+   - Check [docs/CICD.md](docs/CICD.md) for CI/CD pipeline
+
+4. **Database Management**
+   - Create migrations: `make migrate-create msg="description"`
+   - Run migrations: `make migrate`
+   - Backup database: `make backup`
+
+5. **Production Deployment**
+   - Review [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+   - Configure GitHub secrets from [.github/SECRETS.md](.github/SECRETS.md)
+   - Use production environment template: `.env.production.example`
+
+6. **CI/CD Integration**
+   - GitHub Actions run automatically on push
+   - Security scans run weekly
+   - Deployment workflows available for staging/production
+   - Database migrations can be run via workflows
+
+7. **Monitoring**
+   - Configure Prometheus: see `monitoring/prometheus.yml`
+   - Set up alerts: see `monitoring/alerts.yml`
+   - Use health check script: `./scripts/health_check.sh`
 
 ---
 
 ## 🎉 Success!
 
-Your BuildIntel Pro platform is now running. Visit:
+Your Construction Intelligence Platform is now running. 
 
-- **API**: http://localhost:8000
-- **API Docs**: http://localhost:8000/api/docs
+### Access Points
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
 - **Health Check**: http://localhost:8000/health
 
-**Default Admin Account** (if seeded):
-- Email: admin@buildintel.com
-- Password: Change this in production!
+### Default Credentials
+- **Email**: demo@example.com
+- **Password**: demo123
+
+### Quick Commands Reference
+```bash
+make help            # Show all available commands
+make dev             # Start development environment
+make test            # Run all tests
+make lint            # Run all linters
+make ci              # Run CI checks locally
+./scripts/health_check.sh  # Check service health
+```
+
+### Next Steps
+1. Review [docs/DEVELOPER.md](docs/DEVELOPER.md) for development workflow
+2. Check [docs/CICD.md](docs/CICD.md) for CI/CD pipeline info
+3. Read [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) before deploying to production
+
+---
+
+**Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.**
