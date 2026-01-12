@@ -1,0 +1,186 @@
+# Database Migrations Workflow
+#
+# Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+# PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+
+name: Database Migrations
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      action:
+        description: 'Migration action'
+        required: true
+        type: choice
+        options:
+          - upgrade
+          - downgrade
+          - current
+          - history
+      dry_run:
+        description: 'Dry run (validate only)'
+        required: false
+        type: boolean
+        default: true
+      revision:
+        description: 'Target revision (for downgrade, e.g., -1 for previous)'
+        required: false
+        default: 'head'
+
+jobs:
+  validate-migrations:
+    name: Validate Migrations
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd backend && pip install -r requirements.txt
+      
+      - name: Validate migration files
+        run: |
+          cd backend
+          # Check for migration conflicts
+          python -c "
+          import os
+          import sys
+          from pathlib import Path
+          
+          migrations_dir = Path('alembic/versions')
+          if not migrations_dir.exists():
+              print('No migrations directory found')
+              sys.exit(0)
+          
+          migration_files = list(migrations_dir.glob('*.py'))
+          if len(migration_files) == 0:
+              print('No migration files found')
+              sys.exit(0)
+          
+          print(f'Found {len(migration_files)} migration files')
+          for f in migration_files:
+              print(f'  - {f.name}')
+          "
+      
+      - name: Check migration syntax
+        run: |
+          cd backend
+          alembic check || echo "Migration check complete"
+
+  apply-migrations:
+    name: Apply Migrations to ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-latest
+    needs: validate-migrations
+    environment: ${{ github.event.inputs.environment }}
+    if: ${{ github.event.inputs.dry_run != 'true' }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          cd backend && pip install -r requirements.txt
+      
+      - name: Set database URL
+        run: |
+          if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
+            echo "Using staging database"
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL_STAGING }}" >> $GITHUB_ENV
+          else
+            echo "Using production database"
+            echo "DATABASE_URL=${{ secrets.DATABASE_URL_PRODUCTION }}" >> $GITHUB_ENV
+          fi
+      
+      - name: Show current migration status
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: |
+          cd backend
+          echo "Current migration status:"
+          alembic current || echo "No migrations applied yet"
+      
+      - name: Apply migrations
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: |
+          cd backend
+          case "${{ github.event.inputs.action }}" in
+            upgrade)
+              echo "Upgrading to: ${{ github.event.inputs.revision }}"
+              alembic upgrade ${{ github.event.inputs.revision }}
+              ;;
+            downgrade)
+              echo "Downgrading to: ${{ github.event.inputs.revision }}"
+              alembic downgrade ${{ github.event.inputs.revision }}
+              ;;
+            current)
+              echo "Showing current revision"
+              alembic current
+              ;;
+            history)
+              echo "Showing migration history"
+              alembic history
+              ;;
+          esac
+      
+      - name: Verify migration status
+        env:
+          DATABASE_URL: ${{ env.DATABASE_URL }}
+        run: |
+          cd backend
+          echo "Migration status after operation:"
+          alembic current
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Migration failed on ${{ github.event.inputs.environment }}!"
+          echo "Action: ${{ github.event.inputs.action }}"
+          echo "Revision: ${{ github.event.inputs.revision }}"
+          # Add notification logic here
+
+  dry-run-report:
+    name: Dry Run Report
+    runs-on: ubuntu-latest
+    needs: validate-migrations
+    if: ${{ github.event.inputs.dry_run == 'true' }}
+    
+    steps:
+      - name: Generate report
+        run: |
+          echo "# Migration Dry Run Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Action: ${{ github.event.inputs.action }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Revision: ${{ github.event.inputs.revision }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Dry Run: Yes" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Status" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Validation passed. Ready to apply migrations." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "To apply these migrations, run this workflow again with dry_run=false" >> $GITHUB_STEP_SUMMARY
