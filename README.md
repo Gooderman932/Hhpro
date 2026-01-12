@@ -2,6 +2,10 @@
 
 **PROPRIETARY SOFTWARE - Copyright (c) 2025 Poor Dude Holdings LLC**
 
+[![CI Pipeline](https://github.com/Gooderman932/market-data/actions/workflows/ci.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/ci.yml)
+[![Security Scan](https://github.com/Gooderman932/market-data/actions/workflows/security.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/security.yml)
+[![Deployment](https://github.com/Gooderman932/market-data/actions/workflows/deploy.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/deploy.yml)
+
 Enterprise SaaS platform for construction market intelligence, project discovery, and competitive analysis.
 
 ---
@@ -116,11 +120,38 @@ construction-intelligence-platform/
 └── docker-compose.yml
 ```
 
+## 🚀 Quick Start
+
+Get up and running in under 5 minutes using Make:
+
+```bash
+# Clone the repository
+git clone https://github.com/Gooderman932/market-data.git
+cd market-data
+
+# Quick start (installs dependencies and starts dev environment)
+make quickstart
+
+# Access the application
+# - Frontend: http://localhost:5173
+# - Backend API: http://localhost:8000
+# - API Docs: http://localhost:8000/api/docs
+```
+
+**Available Make Commands:**
+- `make dev` - Start development environment
+- `make test` - Run all tests
+- `make lint` - Run code quality checks
+- `make help` - See all available commands
+
+For detailed setup instructions, see [Development Guide](docs/DEVELOPMENT.md).
+
 ## 🛠️ Setup & Installation
 
 ### Prerequisites
 - Docker & Docker Compose (recommended)
 - OR: Python 3.11+, Node.js 20+, PostgreSQL 16
+- Make (optional, for convenience commands)
 
 ### Option 1: Docker (Recommended)
 
@@ -132,27 +163,20 @@ cd market-data
 
 2. Create environment file:
 ```bash
-cat > .env << EOF
-SECRET_KEY=your-secret-key-change-in-production
-OPENAI_API_KEY=your-openai-api-key-optional
-EOF
+cp .env.example .env
+# Edit .env with your configuration
 ```
 
 3. Start all services:
 ```bash
-docker-compose up -d
+make dev
+# or: docker compose up --build
 ```
 
-4. Set up database (first time only):
-```bash
-docker-compose exec backend python scripts/setup_db.py
-docker-compose exec backend python scripts/seed_data.py
-```
-
-5. Access the application:
+4. Access the application:
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8000
-- API Docs: http://localhost:8000/docs
+- API Docs: http://localhost:8000/api/docs
 
 ### Option 2: Local Development
 
@@ -442,6 +466,38 @@ docker-compose -f docker-compose.prod.yml build
 - Export and integration tools
 - Admin panel
 - Billing and subscription management
+
+## 🔄 CI/CD & Deployment
+
+This project includes comprehensive CI/CD automation:
+
+### GitHub Actions Workflows
+- **CI Pipeline**: Automated testing, linting, and builds on every PR
+- **Deployment**: Automatic staging deployment, manual production deployment
+- **Security Scanning**: Weekly vulnerability scans and security audits
+- **Scheduled Tasks**: Daily platform automation and weekly maintenance
+- **Database Migrations**: Automated migration testing and deployment
+
+### Quick Deployment Commands
+```bash
+# Deploy to staging (automatic on merge to main)
+git push origin main
+
+# Deploy to production (requires approval)
+gh workflow run deploy.yml --field environment=production
+
+# Run database migrations
+make db-migrate
+
+# Run platform automation
+make run-automation
+```
+
+### Documentation
+- **[Deployment Guide](docs/DEPLOYMENT.md)** - Complete deployment procedures
+- **[Development Workflow](docs/DEVELOPMENT.md)** - Development best practices
+- **[Automation Documentation](docs/AUTOMATION.md)** - Platform automation details
+- **[GitHub Secrets Setup](docs/GITHUB_SECRETS.md)** - Required secrets configuration
 
 ---
 
