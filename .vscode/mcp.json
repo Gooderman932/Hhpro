@@ -8,7 +8,251 @@
 			],
 			"gallery": "https://api.mcp.github.com",
 			"version": "1.0.0"
+		},
+		"io.github.github/github-mcp-server": {
+			"type": "http",
+			"url": "https://api.githubcopilot.com/mcp/",
+			"headers": {
+				"Authorization": "${input:Authorization}"
+			},
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.27.0"
+		},
+		"io.github.upstash/context7": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"@upstash/context7-mcp@1.0.31"
+			],
+			"env": {
+				"CONTEXT7_API_KEY": "${input:CONTEXT7_API_KEY}"
+			},
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.31"
+		},
+		"microsoft/playwright-mcp": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"@playwright/mcp@latest"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.0.1-seed"
+		},
+		"io.github.ChromeDevTools/chrome-devtools-mcp": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"chrome-devtools-mcp@0.12.1"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.12.1"
+		},
+		"oraios/serena": {
+			"type": "stdio",
+			"command": "uvx",
+			"args": [
+				"--from",
+				"git+https://github.com/oraios/serena",
+				"serena",
+				"start-mcp-server",
+				"serena==latest",
+				"--context",
+				"ide-assistant"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.0"
+		},
+		"firecrawl/firecrawl-mcp-server": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"firecrawl-mcp@latest"
+			],
+			"env": {
+				"FIRECRAWL_API_KEY": "${input:api_key}"
+			},
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.0"
+		},
+		"coplaydev/unity-mcp": {
+			"type": "stdio",
+			"command": "uv",
+			"args": [
+				"--directory",
+				"${input:unity_mcp_server_src}",
+				"run",
+				"server.py"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.0"
+		},
+		"makenotion/notion-mcp-server": {
+			"type": "http",
+			"url": "https://mcp.notion.com/sse",
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.0"
+		},
+		"com.microsoft/azure": {
+			"type": "stdio",
+			"command": "dnx",
+			"args": [
+				"Azure.Mcp@2.0.0-beta.6",
+				"--yes",
+				"--",
+				"server",
+				"start"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "2.0.0-beta.6"
+		},
+		"com.stripe/mcp": {
+			"type": "http",
+			"url": "https://mcp.stripe.com",
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.2.4"
+		},
+		"microsoftdocs/mcp": {
+			"type": "http",
+			"url": "https://learn.microsoft.com/api/mcp",
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.0"
+		},
+		"microsoft/azure-devops-mcp": {
+			"type": "stdio",
+			"command": "npx",
+			"args": [
+				"-y",
+				"@azure-devops/mcp@latest",
+				"${input:ado_org}",
+				"-d",
+				"${input:ado_domain}"
+			],
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.0"
+		},
+		"io.github.hashicorp/terraform-mcp-server": {
+			"type": "stdio",
+			"command": "docker",
+			"args": [
+				"run",
+				"-i",
+				"--rm",
+				"run",
+				"--rm",
+				"-i",
+				"-e",
+				"${input:e}",
+				"TFE_ADDRESS",
+				"-e",
+				"${input:e}",
+				"TFE_TOKEN",
+				"-e",
+				"${input:e}",
+				"ENABLE_TF_OPERATIONS",
+				"hashicorp/terraform-mcp-server:0.3.3",
+				"-e",
+				"TFE_ADDRESS",
+				"-e",
+				"TFE_TOKEN",
+				"-e",
+				"ENABLE_TF_OPERATIONS",
+				"docker.io/hashicorp/terraform-mcp-server:0.3.3"
+			],
+			"env": {
+				"TFE_ADDRESS": "${input:TFE_ADDRESS}",
+				"TFE_TOKEN": "${input:TFE_TOKEN}",
+				"ENABLE_TF_OPERATIONS": "${input:ENABLE_TF_OPERATIONS}"
+			},
+			"gallery": "https://api.mcp.github.com",
+			"version": "0.3.3"
+		},
+		"antfu/nuxt-mcp": {
+			"type": "http",
+			"url": "https://mcp.nuxt.com/sse",
+			"gallery": "https://api.mcp.github.com",
+			"version": "1.0.0"
 		}
 	},
-	"inputs": []
+	"inputs": [
+		{
+			"id": "Authorization",
+			"type": "promptString",
+			"description": "Authentication token (PAT or App token)",
+			"password": true
+		},
+		{
+			"id": "CONTEXT7_API_KEY",
+			"type": "promptString",
+			"description": "API key for authentication",
+			"password": true
+		},
+		{
+			"id": "api_key",
+			"type": "promptString",
+			"description": "your API key",
+			"password": true
+		},
+		{
+			"id": "unity_mcp_server_src",
+			"type": "promptString",
+			"description": "Absolute path to the Unity MCP Server 'src' folder installed by the Unity package (e.g., macOS: ~/Library/Application Support/UnityMCP/UnityMcpServer/src; Windows: %USERPROFILE%/AppData/Local/UnityMCP/UnityMcpServer/src; Linux: ~/.local/share/UnityMCP/UnityMcpServer/src).",
+			"password": false
+		},
+		{
+			"id": "ado_org",
+			"type": "promptString",
+			"description": "Azure DevOps organization name (e.g., contoso).",
+			"password": false
+		},
+		{
+			"id": "ado_domain",
+			"type": "promptString",
+			"description": "Repeat to enable specific domains: core, work, work-items, search, test-plans, repositories, wiki, pipelines, advanced-security.",
+			"password": false
+		},
+		{
+			"id": "e",
+			"type": "promptString",
+			"description": "Set an environment variable in the runtime",
+			"password": false
+		},
+		{
+			"id": "e",
+			"type": "promptString",
+			"description": "Set an environment variable in the runtime",
+			"password": false
+		},
+		{
+			"id": "e",
+			"type": "promptString",
+			"description": "Set an environment variable in the runtime",
+			"password": false
+		},
+		{
+			"id": "TFE_ADDRESS",
+			"type": "promptString",
+			"description": "HCP Terraform or Terraform Enterprise base URL.",
+			"password": false,
+			"default": "https://app.terraform.io"
+		},
+		{
+			"id": "TFE_TOKEN",
+			"type": "promptString",
+			"description": "HCP Terraform or Terraform Enterprise API token used to authenticate requests.",
+			"password": true
+		},
+		{
+			"id": "ENABLE_TF_OPERATIONS",
+			"type": "pickString",
+			"description": "Set to true to enable tools that execute Terraform operations requiring explicit approval.",
+			"password": false,
+			"default": "false",
+			"options": [
+				"true",
+				"false"
+			]
+		}
+	]
 }
