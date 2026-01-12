@@ -40,17 +40,6 @@ docs/
 .cache/
 .parcel-cache/
 
-# Ignore config files not needed in production
-*.config.js
-tsconfig*.json
+# Ignore most config files (keeping essential build configs)
 .eslintrc*
 .prettierrc*
-
-# Keep only necessary files for build
-!package.json
-!package-lock.json
-!vite.config.ts
-!tsconfig.json
-!tsconfig.node.json
-!postcss.config.js
-!tailwind.config.js

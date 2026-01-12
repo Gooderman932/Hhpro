@@ -77,7 +77,7 @@ python -c "import secrets; print(secrets.token_urlsafe(64))"
 
 **Security Notes:**
 - Use different key than staging
-- Minimum 64 characters
+- Minimum 64 characters for production
 - Never reuse or expose
 - Rotate periodically (e.g., every 90 days)
 

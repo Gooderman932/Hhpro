@@ -145,7 +145,7 @@ db-seed: ## Seed database with sample data
 db-backup: ## Backup database
 	@echo "Creating database backup..."
 	mkdir -p backups
-	docker compose exec postgres pg_dump -U user construction_intel > backups/backup_$$(date +%Y%m%d_%H%M%S).sql
+	docker compose exec -e PGPASSWORD=password postgres pg_dump -U user construction_intel > backups/backup_$$(date +%Y%m%d_%H%M%S).sql || echo "Backup failed - check database credentials"
 	@echo "Backup created in backups/"
 
 db-restore: ## Restore database from backup (specify BACKUP_FILE=path/to/backup.sql)

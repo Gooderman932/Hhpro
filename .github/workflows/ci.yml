@@ -128,7 +128,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./backend
-          file: ./backend/Dockerfile
+          file: ./backend/Dockerfile.prod
           push: false
           tags: construction-intel-backend:test
           cache-from: type=gha
@@ -138,7 +138,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
-          file: ./frontend/Dockerfile
+          file: ./frontend/Dockerfile.prod
           push: false
           tags: construction-intel-frontend:test
           cache-from: type=gha
