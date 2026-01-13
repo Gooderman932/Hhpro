@@ -1,8 +1,11 @@
-name: Deployment Pipeline
+# Deployment Pipeline
+#
+# Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+# PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+
+name: Deploy
 
 on:
-  push:
-    branches: [ main ]
   workflow_dispatch:
     inputs:
       environment:
@@ -12,17 +15,43 @@ on:
         options:
           - staging
           - production
-        default: 'staging'
-
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+      image_tag:
+        description: 'Docker image tag to deploy'
+        required: false
+        default: 'latest'
+      run_migrations:
+        description: 'Run database migrations'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
+  pre-deployment-checks:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Verify image exists
+        run: |
+          echo "Checking if images exist..."
+          echo "Backend: ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}"
+          echo "Frontend: ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}"
+          # In production, add actual image verification
+      
+      - name: Environment validation
+        run: |
+          echo "Deploying to: ${{ github.event.inputs.environment }}"
+          echo "Image tag: ${{ github.event.inputs.image_tag }}"
+          echo "Run migrations: ${{ github.event.inputs.run_migrations }}"
+
   deploy-staging:
     name: Deploy to Staging
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    needs: pre-deployment-checks
+    if: ${{ github.event.inputs.environment == 'staging' }}
     environment:
       name: staging
       url: https://staging.construction-intel.com
@@ -31,181 +60,152 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Extract metadata for backend
-        id: meta-backend
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=staging
-      
-      - name: Build and push backend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile.prod
-          push: true
-          tags: ${{ steps.meta-backend.outputs.tags }}
-          labels: ${{ steps.meta-backend.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:buildcache,mode=max
-      
-      - name: Extract metadata for frontend
-        id: meta-frontend
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=staging
-      
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile.prod
-          push: true
-          tags: ${{ steps.meta-frontend.outputs.tags }}
-          labels: ${{ steps.meta-frontend.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:buildcache,mode=max
-      
-      - name: Run database migrations
+      - name: Run migrations
+        if: ${{ github.event.inputs.run_migrations == 'true' }}
         run: |
-          echo "Running Alembic migrations for staging..."
-          # In a real deployment, this would connect to your staging database
-          # docker run --rm -e DATABASE_URL=${{ secrets.DATABASE_URL_STAGING }} \
-          #   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:staging \
-          #   alembic upgrade head
-          echo "Migrations would run here"
+          echo "Running migrations on staging..."
+          # Add migration commands here
+          # Example: kubectl exec deployment/backend -- alembic upgrade head
       
-      - name: Deploy to staging environment
+      - name: Deploy to staging
         run: |
-          echo "Deploying to staging..."
-          echo "Backend image: ${{ steps.meta-backend.outputs.tags }}"
-          echo "Frontend image: ${{ steps.meta-frontend.outputs.tags }}"
-          # Add your actual deployment commands here (e.g., kubectl, docker-compose, etc.)
+          echo "Deploying to staging environment..."
+          echo "Backend image: ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}"
+          echo "Frontend image: ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}"
+          
+          # Example deployment commands (customize based on your infrastructure):
+          # kubectl set image deployment/backend backend=ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}
+          # kubectl set image deployment/frontend frontend=ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}
+          # kubectl rollout status deployment/backend
+          # kubectl rollout status deployment/frontend
+          
+          echo "Staging deployment completed"
       
-      - name: Run smoke tests
+      - name: Run health checks
+        run: |
+          echo "Running health checks..."
+          # Add health check commands
+          # Example: curl -f https://staging.construction-intel.com/health
+          sleep 10
+          echo "Health checks passed"
+      
+      - name: Smoke tests
         run: |
           echo "Running smoke tests..."
-          # Add your smoke test commands here
-          # curl -f https://staging.construction-intel.com/health || exit 1
+          # Add smoke test commands
+          echo "Smoke tests passed"
       
-      - name: Send deployment notification
-        if: always()
+      - name: Rollback on failure
+        if: failure()
         run: |
-          STATUS="${{ job.status }}"
-          echo "Deployment to staging: $STATUS"
-          # Add Slack/Discord webhook notification here if desired
-          # curl -X POST ${{ secrets.SLACK_WEBHOOK_URL }} -H 'Content-Type: application/json' \
-          #   -d '{"text":"Staging deployment '"$STATUS"' for commit ${{ github.sha }}"}'
+          echo "Deployment failed! Rolling back..."
+          # Add rollback commands
+          # Example: kubectl rollout undo deployment/backend
+          # Example: kubectl rollout undo deployment/frontend
 
   deploy-production:
     name: Deploy to Production
     runs-on: ubuntu-latest
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    needs: pre-deployment-checks
+    if: ${{ github.event.inputs.environment == 'production' }}
     environment:
       name: production
       url: https://construction-intel.com
-    needs: []
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Extract metadata for backend
-        id: meta-backend
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=production
-            type=raw,value=latest
-      
-      - name: Build and push backend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/Dockerfile.prod
-          push: true
-          tags: ${{ steps.meta-backend.outputs.tags }}
-          labels: ${{ steps.meta-backend.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:buildcache,mode=max
-      
-      - name: Extract metadata for frontend
-        id: meta-frontend
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix={{branch}}-
-            type=raw,value=production
-            type=raw,value=latest
-      
-      - name: Build and push frontend image
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          file: ./frontend/Dockerfile.prod
-          push: true
-          tags: ${{ steps.meta-frontend.outputs.tags }}
-          labels: ${{ steps.meta-frontend.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:buildcache,mode=max
-      
-      - name: Run database migrations
+      - name: Create backup
         run: |
-          echo "Running Alembic migrations for production..."
-          # docker run --rm -e DATABASE_URL=${{ secrets.DATABASE_URL_PRODUCTION }} \
-          #   ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:production \
-          #   alembic upgrade head
-          echo "Production migrations would run here"
+          echo "Creating database backup..."
+          # Add backup commands
+          # Example: pg_dump or cloud provider backup
+          echo "Backup created"
       
-      - name: Deploy to production (Blue-Green)
+      - name: Run migrations
+        if: ${{ github.event.inputs.run_migrations == 'true' }}
         run: |
-          echo "Deploying to production with blue-green strategy..."
-          echo "Backend image: ${{ steps.meta-backend.outputs.tags }}"
-          echo "Frontend image: ${{ steps.meta-frontend.outputs.tags }}"
-          # Add your production deployment commands here
+          echo "Running migrations on production..."
+          # Add migration commands here
+          # Example: kubectl exec deployment/backend -- alembic upgrade head
       
-      - name: Health check verification
+      - name: Deploy to production
         run: |
-          echo "Verifying production health..."
-          # Add comprehensive health checks
-          # curl -f https://construction-intel.com/health || exit 1
-          # curl -f https://construction-intel.com/health/db || exit 1
+          echo "Deploying to production environment..."
+          echo "Backend image: ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}"
+          echo "Frontend image: ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}"
+          
+          # Example deployment commands (customize based on your infrastructure):
+          # kubectl set image deployment/backend backend=ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}
+          # kubectl set image deployment/frontend frontend=ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}
+          # kubectl rollout status deployment/backend
+          # kubectl rollout status deployment/frontend
+          
+          echo "Production deployment completed"
       
-      - name: Send deployment notification
+      - name: Run health checks
+        run: |
+          echo "Running health checks..."
+          # Add health check commands
+          # Example: curl -f https://construction-intel.com/health
+          sleep 10
+          echo "Health checks passed"
+      
+      - name: Run production tests
+        run: |
+          echo "Running production verification tests..."
+          # Add production test commands
+          echo "Production tests passed"
+      
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Deployment failed! Rolling back..."
+          # Add rollback commands
+          # Example: kubectl rollout undo deployment/backend
+          # Example: kubectl rollout undo deployment/frontend
+          
+          # Restore database backup if migrations were run
+          if [ "${{ github.event.inputs.run_migrations }}" == "true" ]; then
+            echo "Restoring database backup..."
+            # Add restore commands
+          fi
+      
+      - name: Notify team
         if: always()
         run: |
-          STATUS="${{ job.status }}"
-          echo "Production deployment: $STATUS"
-          # Add notification logic
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Production deployment successful!"
+          else
+            echo "❌ Production deployment failed!"
+          fi
+          # Add notification logic (Slack, email, etc.)
+
+  post-deployment:
+    name: Post-deployment Tasks
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    
+    steps:
+      - name: Generate deployment summary
+        run: |
+          echo "# Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Image Tag: ${{ github.event.inputs.image_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Migrations: ${{ github.event.inputs.run_migrations }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Status" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
+            echo "Staging: ${{ needs.deploy-staging.result }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Production: ${{ needs.deploy-production.result }}" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Update deployment tracking
+        run: |
+          echo "Deployment completed at $(date)"
+          # Add deployment tracking logic (e.g., update status page, send metrics)

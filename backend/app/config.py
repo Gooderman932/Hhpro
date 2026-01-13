@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     # Application
     APP_NAME: str = "BuildIntel Pro"
     APP_VERSION: str = "1.0.0"
-    ENVIRONMENT: str = "production"
+    ENVIRONMENT: str = "development"
+    DEBUG: bool = False
     COMPANY_NAME: str = "Your Company Name"
     COMPANY_LOGO_URL: Optional[str] = None
     COMPANY_WEBSITE: Optional[str] = None
@@ -168,6 +169,14 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Set DEBUG based on ENVIRONMENT if not explicitly set
+        if self.ENVIRONMENT == "production":
+            self.DEBUG = False
+        elif self.ENVIRONMENT == "development":
+            self.DEBUG = True
 
 
 # Global settings instance
