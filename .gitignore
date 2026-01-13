@@ -221,9 +221,59 @@ frontend/build/
 # Database
 *.db
 *.sqlite
+*.sql
+*.sql.gz
+
+# Backups
+backups/
+*.backup
 
 # Environment
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+
+# SSL/TLS Certificates
+*.pem
+*.key
+*.crt
+*.csr
+nginx/ssl/*.pem
+nginx/ssl/*.key
+
+# Logs
+logs/
+*.log
+nginx/logs/
+
+# Uploads
+uploads/
+*.upload
+
+# Models
+models/*.pkl
+models/*.joblib
+models/*.h5
+
+# SSL/TLS Certificates
+*.pem
+*.key
+*.crt
+*.csr
+nginx/ssl/*.pem
+nginx/ssl/*.key
+
+# Logs
+logs/
+*.log
+nginx/logs/
+
+# Uploads
+uploads/
+*.upload
+
+# Models
+models/*.pkl
+models/*.joblib
+models/*.h5

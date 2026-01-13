@@ -4,6 +4,13 @@
 
 Enterprise SaaS platform for construction market intelligence, project discovery, and competitive analysis.
 
+[![CI Pipeline](https://github.com/Gooderman932/market-data/actions/workflows/ci.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/ci.yml)
+[![Security Scanning](https://github.com/Gooderman932/market-data/actions/workflows/security.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/security.yml)
+[![Docker Build](https://github.com/Gooderman932/market-data/actions/workflows/docker.yml/badge.svg)](https://github.com/Gooderman932/market-data/actions/workflows/docker.yml)
+[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Node.js 20+](https://img.shields.io/badge/node.js-20+-green.svg)](https://nodejs.org/)
+
 ---
 
 ## ⚖️ COPYRIGHT & LICENSE
@@ -47,6 +54,9 @@ A comprehensive platform that combines AI/ML capabilities with real-time constru
 ### Infrastructure
 - **Containerization**: Docker & Docker Compose
 - **API Documentation**: FastAPI automatic OpenAPI/Swagger
+- **CI/CD**: GitHub Actions
+- **Container Registry**: GitHub Container Registry (GHCR)
+- **Caching**: Redis 7
 
 ## 📁 Project Structure
 
@@ -350,7 +360,126 @@ project_data = {
 project = service.ingest_project(project_data, tenant_id=1, source="manual")
 ```
 
+## 🔄 CI/CD Pipeline
+
+The platform includes a comprehensive automated CI/CD pipeline built with GitHub Actions.
+
+### Automated Workflows
+
+- **CI Pipeline**: Automated testing, linting, and code quality checks on every push
+- **Security Scanning**: Weekly security audits with CodeQL, Trivy, and dependency scanning
+- **Docker Builds**: Automated multi-stage Docker image builds and publishing to GHCR
+- **Deployments**: Manual deployment workflows for staging and production
+- **Database Migrations**: Safe, automated database migration workflows
+- **Platform Automation**: Scheduled daily automation tasks
+
+### Quick Commands
+
+```bash
+# Run all CI checks locally
+make ci
+
+# Run security scans
+make security-scan
+
+# Deploy to staging
+make deploy-staging
+
+# Deploy to production
+make deploy-prod
+```
+
+### Documentation
+
+- [CI/CD Guide](docs/CICD.md) - Complete workflow documentation
+- [Deployment Guide](docs/DEPLOYMENT.md) - Deployment procedures and best practices
+- [Developer Guide](docs/DEVELOPER.md) - Local development setup and workflows
+- [Secrets Configuration](.github/SECRETS.md) - Required GitHub secrets
+
+### Available Makefile Commands
+
+Run `make help` to see all available commands:
+- Development: `make dev`, `make dev-logs`, `make dev-stop`
+- Testing: `make test`, `make test-backend`, `make test-frontend`
+- Code Quality: `make lint`, `make format`, `make type-check`
+- Database: `make migrate`, `make migrate-create`, `make db-reset`
+- Docker: `make build`, `make build-prod`, `make logs`
+
 ## 🚢 Production Deployment
+
+### Quick Start
+
+For a rapid production deployment:
+
+```bash
+# 1. Clone and configure
+git clone https://github.com/Gooderman932/market-data.git
+cd market-data
+cp .env.production .env
+nano .env  # Update all CHANGE_THIS values
+
+# 2. Deploy
+./scripts/deployment/deploy.sh
+
+# 3. Initialize database
+make db-init
+```
+
+**📖 Detailed Guides:**
+- **Quick Deploy**: [QUICK_DEPLOY.md](QUICK_DEPLOY.md) - 30-minute setup
+- **Full Deployment**: [DEPLOYMENT.md](DEPLOYMENT.md) - Comprehensive guide
+- **SSL Setup**: [SSL_SETUP.md](SSL_SETUP.md) - HTTPS configuration
+- **Security**: [SECURITY.md](SECURITY.md) - Hardening guide
+- **Checklist**: [PRODUCTION_CHECKLIST.md](PRODUCTION_CHECKLIST.md) - Pre-deployment verification
+
+### Production Features
+
+✅ **Infrastructure**
+- Production-optimized Docker containers
+- Nginx reverse proxy with rate limiting
+- Redis caching layer
+- PostgreSQL 16 with connection pooling
+- Automated health checks
+
+✅ **Security**
+- HTTPS/TLS support
+- Security headers configured
+- Rate limiting on API endpoints
+- Non-root container users
+- Secret management via environment variables
+
+✅ **Operations**
+- Automated deployment script
+- Database backup automation
+- Health monitoring
+- CI/CD pipeline (GitHub Actions)
+- Rolling updates support
+
+✅ **Monitoring**
+- Application health endpoints
+- Container health checks
+- Resource usage monitoring
+- Log aggregation ready
+- Error tracking integration (Sentry)
+
+### Common Operations
+
+```bash
+# Deploy/Update
+make deploy
+
+# Backup database
+make backup
+
+# Check health
+./scripts/deployment/health-check.sh
+
+# View logs
+make logs
+
+# Restart services
+make restart
+```
 
 ### Docker Production Build
 
@@ -359,20 +488,44 @@ project = service.ingest_project(project_data, tenant_id=1, source="manual")
 docker-compose -f docker-compose.prod.yml build
 ```
 
-2. Deploy with proper environment variables
-3. Use a reverse proxy (nginx) for SSL/TLS
-4. Set up database backups
-5. Configure logging and monitoring
+2. Deploy with proper environment variables:
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+3. Initialize database:
+```bash
+make db-init
+make db-seed  # Optional: sample data
+```
+
+4. Verify deployment:
+```bash
+make health
+```
+
+### Prerequisites for Production
+
+- Docker & Docker Compose
+- Domain name with SSL/TLS certificates
+- Minimum 4GB RAM, 2 CPU cores, 50GB storage
+- PostgreSQL 16 compatible environment
+- Redis 7+ for caching
 
 ### Security Considerations
 
-- Change default SECRET_KEY
-- Use strong passwords
-- Enable HTTPS in production
-- Implement rate limiting
-- Regular security updates
-- Database encryption at rest
-- Secure API key storage
+✅ **Required Before Production:**
+- [ ] Change default SECRET_KEY
+- [ ] Use strong passwords for PostgreSQL and Redis
+- [ ] Enable HTTPS with valid SSL certificates
+- [ ] Configure firewall (allow only 22, 80, 443)
+- [ ] Set up database backups
+- [ ] Configure CORS origins (no wildcards)
+- [ ] Disable DEBUG mode (set ENVIRONMENT=production)
+- [ ] Set up monitoring and alerts
+- [ ] Review and implement [SECURITY.md](SECURITY.md)
+
+See [SECURITY.md](SECURITY.md) for comprehensive security hardening steps.
 
 ## 📊 Data Models
 

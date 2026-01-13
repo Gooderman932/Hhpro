@@ -1,0 +1,44 @@
+#!/usr/bin/env python3
+"""
+CLI tool to analyze Construction Intelligence Platform repository
+"""
+
+import argparse
+import json
+from tools.repo_analyzer import ConstructionPlatformAnalyzer
+
+def main():
+    parser = argparse.ArgumentParser(description='Analyze Construction Intelligence Platform repository')
+    parser.add_argument('--repo-path', default='.', help='Path to repository root')
+    parser.add_argument('--output', help='Output file path (JSON format)')
+    parser.add_argument('--brief', action='store_true', help='Show brief summary only')
+    
+    args = parser.parse_args()
+    
+    # Create analyzer
+    analyzer = ConstructionPlatformAnalyzer(args.repo_path)
+    
+    # Generate report
+    report = analyzer.generate_report()
+    
+    if args.brief:
+        # Show brief summary
+        print("=== CONSTRUCTION INTELLIGENCE PLATFORM ANALYSIS ===")
+        print(f"Repository: {report['metadata']['repository']}")
+        print(f"Analysis Date: {report['metadata']['analysis_date']}")
+        print("\nKey Features:")
+        for feature in report['structure_analysis']['key_features'][:5]:  # First 5 features
+            print(f"  • {feature}")
+        print(f"\nData Models: {', '.join(report['structure_analysis']['data_models'])}")
+        print(f"\nUse Cases: {len(report['use_cases'])} identified")
+    else:
+        # Show full report
+        if args.output:
+            with open(args.output, 'w') as f:
+                json.dump(report, f, indent=2)
+            print(f"Report saved to {args.output}")
+        else:
+            print(json.dumps(report, indent=2))
+
+if __name__ == "__main__":
+    main()

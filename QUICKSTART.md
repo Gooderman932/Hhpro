@@ -2,7 +2,7 @@
 
 ## 🚀 Get Started in 5 Minutes
 
-### Using Docker (Easiest)
+### Using Docker with Makefile (Recommended)
 
 1. **Clone and navigate to the project:**
    ```bash
@@ -10,25 +10,41 @@
    cd market-data
    ```
 
-2. **Start the services:**
+2. **Initial setup (creates .env if needed):**
    ```bash
-   docker-compose up -d
+   make setup
    ```
 
-3. **Initialize the database:**
+3. **Start all services:**
    ```bash
-   docker-compose exec backend python scripts/setup_db.py
-   docker-compose exec backend python scripts/seed_data.py
+   make dev
+   ```
+   This automatically starts PostgreSQL, Redis, backend, and frontend with hot-reload enabled.
+
+4. **Initialize the database** (in a new terminal):
+   ```bash
+   docker-compose exec backend python ../scripts/setup_db.py
+   docker-compose exec backend python ../scripts/seed_data.py
    ```
 
-4. **Access the application:**
+5. **Access the application:**
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:8000
    - API Documentation: http://localhost:8000/docs
+   - Health Check: http://localhost:8000/health
 
-5. **Login with demo credentials:**
+6. **Login with demo credentials:**
    - Email: `demo@example.com`
    - Password: `demo123`
+
+### Alternative: Traditional Docker Commands
+
+If you prefer not to use Make:
+```bash
+docker-compose up -d
+docker-compose exec backend python ../scripts/setup_db.py
+docker-compose exec backend python ../scripts/seed_data.py
+```
 
 ### Manual Setup (Without Docker)
 
@@ -126,24 +142,60 @@ curl -X POST http://localhost:8000/api/projects/ \
 
 ## 🛠️ Development
 
-### Running Tests
+### Using Makefile Commands (Recommended)
+
+The project includes a comprehensive Makefile with 40+ commands. Run `make help` to see all available commands.
+
+**Common commands:**
+```bash
+# Development environment
+make dev            # Start development environment
+make dev-logs       # View logs from all services
+make dev-stop       # Stop development environment
+make dev-restart    # Restart all services
+
+# Testing
+make test           # Run all tests (backend + frontend)
+make test-backend   # Run backend tests with pytest
+make test-frontend  # Run frontend build test
+make test-coverage  # Generate test coverage report
+
+# Code quality
+make lint           # Run all linters (Python + TypeScript)
+make format         # Auto-format all code
+make ci             # Run full CI checks locally
+
+# Database
+make migrate        # Run database migrations
+make db-reset       # Reset database (destroys all data!)
+
+# Docker
+make build          # Build Docker images
+make logs           # Show logs from all services
+make ps             # Show running containers
+```
+
+### Running Tests Manually
 ```bash
 # Backend tests
 cd backend
-pytest
+pytest tests/ -v --cov=app
 
 # Frontend tests
 cd frontend
-npm test
+npm run build  # Build test
+npm run lint   # ESLint check
 ```
 
 ### Code Quality
 ```bash
-# Backend linting
+# Backend linting (or use: make lint-backend)
 cd backend
 flake8 app/
+black --check app/
+mypy app/ --ignore-missing-imports
 
-# Frontend linting
+# Frontend linting (or use: make lint-frontend)
 cd frontend
 npm run lint
 ```
@@ -151,17 +203,48 @@ npm run lint
 ## 📚 Next Steps
 
 - Review the [full README](README.md) for detailed documentation
+- Check [CI/CD Documentation](docs/CICD.md) for automated workflows
+- See [Developer Guide](docs/DEVELOPER.md) for local development setup
+- Read [Deployment Guide](docs/DEPLOYMENT.md) for production deployment
 - Explore API endpoints at http://localhost:8000/docs
 - Check out the [data schemas](data/schemas/) for data format reference
 - Review [sample data](data/seeds/) for examples
 
+## 🔄 CI/CD Pipeline
+
+The project includes automated GitHub Actions workflows for:
+- **Continuous Integration**: Automated testing and linting on every push
+- **Security Scanning**: Weekly vulnerability scans with CodeQL and Trivy
+- **Docker Builds**: Automated image builds and publishing to GHCR
+- **Deployments**: Multi-environment deployment workflows
+- **Automation**: Daily scheduled platform management tasks
+
+See [docs/CICD.md](docs/CICD.md) for complete workflow documentation.
+
 ## 🆘 Troubleshooting
+
+### Using Helper Scripts
+
+The project includes helper scripts for common tasks:
+```bash
+# Check service health
+./scripts/health_check.sh
+
+# Create database backup
+./scripts/backup_database.sh
+
+# Deploy to environment
+./scripts/deploy.sh staging
+```
 
 ### Port Already in Use
 ```bash
 # Change ports in docker-compose.yml or stop conflicting services
 lsof -i :8000  # Check what's using port 8000
 lsof -i :5173  # Check what's using port 5173
+
+# Or use Make to stop services
+make dev-stop
 ```
 
 ### Database Connection Issues
@@ -170,16 +253,27 @@ lsof -i :5173  # Check what's using port 5173
 docker-compose ps postgres
 
 # View logs
-docker-compose logs postgres
-docker-compose logs backend
+make logs-db
+# Or: docker-compose logs postgres
+
+# Reset database if needed
+make db-reset  # WARNING: Destroys all data!
 ```
 
 ### Frontend Build Issues
 ```bash
-# Clear cache and reinstall
+# Using Make
+make clean  # Cleans all caches
+
+# Or manually
 cd frontend
 rm -rf node_modules package-lock.json
 npm install
+```
+
+### View All Available Commands
+```bash
+make help  # Shows all 40+ Makefile commands
 ```
 
 ## 💡 Tips
