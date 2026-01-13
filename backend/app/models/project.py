@@ -39,6 +39,8 @@ class Project(Base):
     tenant_id = Column(Integer, ForeignKey("tenants.id"), nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    owner_company_id = Column(Integer, ForeignKey("companies.id"))
+    owner_company = relationship("Company", back_populates="owned_projects")
     
     # Relationships
     participations = relationship("ProjectParticipation", back_populates="project")
