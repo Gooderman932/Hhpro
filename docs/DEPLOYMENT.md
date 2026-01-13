@@ -219,7 +219,6 @@ docker-compose -f docker-compose.prod.yml logs -f backend
 
 # Last 100 lines
 docker-compose -f docker-compose.prod.yml logs --tail=100 backend
-```
 
 ### Metrics
 
@@ -252,6 +251,7 @@ docker-compose -f docker-compose.prod.yml down
 
 # Restore database
 gunzip < backup.sql.gz | docker-compose -f docker-compose.prod.yml exec -T postgres \
+```
   psql -U user construction_intel
 
 # Start services
