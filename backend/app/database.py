@@ -30,3 +30,13 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+def init_db():
+    """Initialize database by creating all tables.
+    
+    Note: Models are imported inline to ensure they are all registered
+    with Base.metadata before table creation, avoiding potential import issues.
+    """
+    from .models import User, Tenant, Company, Project, ProjectParticipation, Prediction, OpportunityScore
+    Base.metadata.create_all(bind=engine)

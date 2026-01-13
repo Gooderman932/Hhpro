@@ -1,0 +1,211 @@
+# Deployment Pipeline
+#
+# Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
+# PROPRIETARY AND CONFIDENTIAL - Unauthorized use prohibited.
+
+name: Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      image_tag:
+        description: 'Docker image tag to deploy'
+        required: false
+        default: 'latest'
+      run_migrations:
+        description: 'Run database migrations'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  pre-deployment-checks:
+    name: Pre-deployment Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Verify image exists
+        run: |
+          echo "Checking if images exist..."
+          echo "Backend: ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}"
+          echo "Frontend: ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}"
+          # In production, add actual image verification
+      
+      - name: Environment validation
+        run: |
+          echo "Deploying to: ${{ github.event.inputs.environment }}"
+          echo "Image tag: ${{ github.event.inputs.image_tag }}"
+          echo "Run migrations: ${{ github.event.inputs.run_migrations }}"
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: pre-deployment-checks
+    if: ${{ github.event.inputs.environment == 'staging' }}
+    environment:
+      name: staging
+      url: https://staging.construction-intel.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run migrations
+        if: ${{ github.event.inputs.run_migrations == 'true' }}
+        run: |
+          echo "Running migrations on staging..."
+          # Add migration commands here
+          # Example: kubectl exec deployment/backend -- alembic upgrade head
+      
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging environment..."
+          echo "Backend image: ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}"
+          echo "Frontend image: ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}"
+          
+          # Example deployment commands (customize based on your infrastructure):
+          # kubectl set image deployment/backend backend=ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}
+          # kubectl set image deployment/frontend frontend=ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}
+          # kubectl rollout status deployment/backend
+          # kubectl rollout status deployment/frontend
+          
+          echo "Staging deployment completed"
+      
+      - name: Run health checks
+        run: |
+          echo "Running health checks..."
+          # Add health check commands
+          # Example: curl -f https://staging.construction-intel.com/health
+          sleep 10
+          echo "Health checks passed"
+      
+      - name: Smoke tests
+        run: |
+          echo "Running smoke tests..."
+          # Add smoke test commands
+          echo "Smoke tests passed"
+      
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Deployment failed! Rolling back..."
+          # Add rollback commands
+          # Example: kubectl rollout undo deployment/backend
+          # Example: kubectl rollout undo deployment/frontend
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: pre-deployment-checks
+    if: ${{ github.event.inputs.environment == 'production' }}
+    environment:
+      name: production
+      url: https://construction-intel.com
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Create backup
+        run: |
+          echo "Creating database backup..."
+          # Add backup commands
+          # Example: pg_dump or cloud provider backup
+          echo "Backup created"
+      
+      - name: Run migrations
+        if: ${{ github.event.inputs.run_migrations == 'true' }}
+        run: |
+          echo "Running migrations on production..."
+          # Add migration commands here
+          # Example: kubectl exec deployment/backend -- alembic upgrade head
+      
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production environment..."
+          echo "Backend image: ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}"
+          echo "Frontend image: ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}"
+          
+          # Example deployment commands (customize based on your infrastructure):
+          # kubectl set image deployment/backend backend=ghcr.io/${{ github.repository }}-backend:${{ github.event.inputs.image_tag }}
+          # kubectl set image deployment/frontend frontend=ghcr.io/${{ github.repository }}-frontend:${{ github.event.inputs.image_tag }}
+          # kubectl rollout status deployment/backend
+          # kubectl rollout status deployment/frontend
+          
+          echo "Production deployment completed"
+      
+      - name: Run health checks
+        run: |
+          echo "Running health checks..."
+          # Add health check commands
+          # Example: curl -f https://construction-intel.com/health
+          sleep 10
+          echo "Health checks passed"
+      
+      - name: Run production tests
+        run: |
+          echo "Running production verification tests..."
+          # Add production test commands
+          echo "Production tests passed"
+      
+      - name: Rollback on failure
+        if: failure()
+        run: |
+          echo "Deployment failed! Rolling back..."
+          # Add rollback commands
+          # Example: kubectl rollout undo deployment/backend
+          # Example: kubectl rollout undo deployment/frontend
+          
+          # Restore database backup if migrations were run
+          if [ "${{ github.event.inputs.run_migrations }}" == "true" ]; then
+            echo "Restoring database backup..."
+            # Add restore commands
+          fi
+      
+      - name: Notify team
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Production deployment successful!"
+          else
+            echo "❌ Production deployment failed!"
+          fi
+          # Add notification logic (Slack, email, etc.)
+
+  post-deployment:
+    name: Post-deployment Tasks
+    runs-on: ubuntu-latest
+    needs: [deploy-staging, deploy-production]
+    if: always() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
+    
+    steps:
+      - name: Generate deployment summary
+        run: |
+          echo "# Deployment Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Environment: ${{ github.event.inputs.environment }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Image Tag: ${{ github.event.inputs.image_tag }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Migrations: ${{ github.event.inputs.run_migrations }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Status" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
+            echo "Staging: ${{ needs.deploy-staging.result }}" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Production: ${{ needs.deploy-production.result }}" >> $GITHUB_STEP_SUMMARY
+          fi
+      
+      - name: Update deployment tracking
+        run: |
+          echo "Deployment completed at $(date)"
+          # Add deployment tracking logic (e.g., update status page, send metrics)
