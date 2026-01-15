@@ -42,3 +42,4 @@ class OpportunityScore(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
     # Relationships
+    project = relationship("Project", back_populates="opportunity_scores")
