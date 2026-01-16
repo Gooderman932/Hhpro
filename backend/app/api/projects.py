@@ -9,7 +9,7 @@ from ..models.project import Project
 from ..models.user import User
 from ..utils.auth_utils import get_current_active_user
 
-router = APIRouter(prefix="/api/projects", tags=["Projects"])
+router = APIRouter(prefix="/projects", tags=["Projects"])
 
 
 class ProjectCreate(BaseModel):

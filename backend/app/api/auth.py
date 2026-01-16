@@ -15,7 +15,7 @@ from ..utils.auth_utils import (
 )
 from ..config import settings
 
-router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 
 class Token(BaseModel):

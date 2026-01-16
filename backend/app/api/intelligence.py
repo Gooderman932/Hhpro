@@ -9,7 +9,7 @@ from ..models.company import Company
 from ..models.user import User
 from ..utils.auth_utils import get_current_active_user
 
-router = APIRouter(prefix="/api/intelligence", tags=["Intelligence"])
+router = APIRouter(prefix="/intelligence", tags=["Intelligence"])
 
 
 @router.get("/competitors")
