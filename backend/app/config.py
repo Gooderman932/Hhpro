@@ -167,7 +167,7 @@ class Settings(BaseSettings):
     SUPPORT_PHONE: Optional[str] = None
     
     class Config:
-        env_file = ".env"
+        env_file = os.path.join(os.path.dirname(__file__), "..", ".env")
         case_sensitive = True
     
     def __init__(self, **kwargs):
