@@ -9,7 +9,7 @@ from ..models.project import Project
 from ..models.user import User
 from ..utils.auth_utils import get_current_active_user
 
-router = APIRouter(prefix="/analytics", tags=["Analytics"])
+router = APIRouter(prefix="", tags=["Analytics"])
 
 
 @router.get("/summary")
