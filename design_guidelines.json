@@ -1,0 +1,127 @@
+{
+  "identity": {
+    "name": "hdrywall repair.com",
+    "archetype": "The Performance Pro",
+    "vibe": "Industrial, Trustworthy, Precision, Pride",
+    "emotional_tone": "Reliability, Efficiency, Professionalism"
+  },
+  "typography": {
+    "primary_font": "Inter",
+    "secondary_font": "Oswald",
+    "mono_font": "JetBrains Mono",
+    "scale": {
+      "h1": "text-5xl md:text-6xl font-bold tracking-tight uppercase",
+      "h2": "text-4xl md:text-5xl font-bold tracking-tight uppercase",
+      "h3": "text-2xl md:text-3xl font-semibold tracking-tight",
+      "body": "text-base md:text-lg leading-relaxed text-slate-600",
+      "caption": "text-sm font-medium text-slate-500 uppercase tracking-wider"
+    },
+    "usage": {
+      "headings": "Oswald",
+      "body": "Inter",
+      "ui_elements": "Inter",
+      "code": "JetBrains Mono"
+    }
+  },
+  "colors": {
+    "primary": {
+      "name": "Deep Navy",
+      "hex": "#0F172A",
+      "tailwind": "bg-slate-900",
+      "text": "text-slate-900"
+    },
+    "secondary": {
+      "name": "Safety Orange",
+      "hex": "#F97316",
+      "tailwind": "bg-orange-500",
+      "text": "text-orange-500"
+    },
+    "accent": {
+      "name": "Concrete Grey",
+      "hex": "#64748B",
+      "tailwind": "bg-slate-500",
+      "text": "text-slate-500"
+    },
+    "background": {
+      "main": "#F8FAFC",
+      "card": "#FFFFFF",
+      "sidebar": "#F1F5F9"
+    },
+    "status": {
+      "success": "#22C55E",
+      "warning": "#EAB308",
+      "error": "#EF4444",
+      "info": "#3B82F6"
+    }
+  },
+  "visual_enhancers": {
+    "borders": "border border-slate-200",
+    "radius": "rounded-sm",
+    "shadows": "shadow-sm hover:shadow-md transition-shadow duration-200",
+    "gradients": "bg-gradient-to-br from-slate-900 to-slate-800",
+    "textures": "bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"
+  },
+  "layout": {
+    "container": "max-w-7xl mx-auto px-4 sm:px-6 lg:px-8",
+    "section_spacing": "py-16 md:py-24",
+    "grid_gap": "gap-6 md:gap-8",
+    "sidebar_width": "w-64"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-slate-900 text-white hover:bg-slate-800 rounded-sm px-6 py-3 font-medium uppercase tracking-wide transition-all",
+      "secondary": "bg-white text-slate-900 border-2 border-slate-900 hover:bg-slate-50 rounded-sm px-6 py-3 font-medium uppercase tracking-wide transition-all",
+      "accent": "bg-orange-500 text-white hover:bg-orange-600 rounded-sm px-6 py-3 font-medium uppercase tracking-wide transition-all"
+    },
+    "cards": {
+      "base": "bg-white border border-slate-200 rounded-sm p-6 shadow-sm hover:border-orange-500 transition-colors duration-200",
+      "feature": "bg-slate-50 border border-slate-200 rounded-sm p-8 hover:shadow-md transition-all"
+    },
+    "inputs": {
+      "base": "flex h-10 w-full rounded-sm border border-slate-300 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    }
+  },
+  "image_urls": {
+    "hero": {
+      "url": "https://images.unsplash.com/photo-1702392183172-17fdef8002b4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDJ8MHwxfHNlYXJjaHwxfHxwcm9mZXNzaW9uYWwlMjBkcnl3YWxsJTIwY29udHJhY3RvciUyMHdvcmtpbmd8ZW58MHx8fHwxNzY4NjM4OTg2fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Professional drywall contractor working on scaffolding",
+      "category": "hero"
+    },
+    "tools": {
+      "url": "https://images.unsplash.com/photo-1628002580365-f3c0a322d577?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwyfHxjb25zdHJ1Y3Rpb24lMjB0b29scyUyMGRyaWxsJTIwc2FuZGVyJTIwdGFwZXxlbnwwfHx8fDE3Njg2Mzg5ODh8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Construction tools layout",
+      "category": "store"
+    },
+    "worker_profile": {
+      "url": "https://images.pexels.com/photos/6196233/pexels-photo-6196233.jpeg",
+      "alt": "Professional construction worker portrait",
+      "category": "profile"
+    },
+    "worker_action": {
+      "url": "https://images.unsplash.com/photo-1607631623698-8d54695923c4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzF8MHwxfHNlYXJjaHwzfHxjb25zdHJ1Y3Rpb24lMjB0b29scyUyMGRyaWxsJTIwc2FuZGVyJTIwdGFwZXxlbnwwfHx8fDE3Njg2Mzg5ODh8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Worker using power tool",
+      "category": "action"
+    }
+  },
+  "instructions_to_main_agent": [
+    "Use 'Oswald' font for all headings to give a strong, industrial feel.",
+    "Use 'Inter' for body text for maximum readability.",
+    "Primary buttons should be 'Deep Navy' (Slate 900) with sharp corners (rounded-sm).",
+    "Use 'Safety Orange' (Orange 500) sparingly for high-priority CTAs and alerts.",
+    "Layouts should be dense and grid-based, reflecting precision and engineering.",
+    "For the Job Board, use a clean list view with clear trade code badges.",
+    "For the Store, use a clean grid with white backgrounds for product images.",
+    "Ensure all interactive elements have hover states that increase contrast.",
+    "Use 'sonner' for all toast notifications.",
+    "Implement 'lucide-react' for icons.",
+    "Follow the 'Performance Pro' archetype: minimal shadows, strong borders, high contrast."
+  ],
+  "universal_guidelines": [
+    "Do not use generic centered layouts; prefer left-aligned text for readability.",
+    "Use 2-3x more spacing than typical designs for breathing room.",
+    "Every interaction needs micro-animations (hover, focus, active).",
+    "Ensure text contrast meets WCAG AA standards.",
+    "Mobile-first responsive design is mandatory.",
+    "Use 'data-testid' attributes for all interactive elements."
+  ]
+}
