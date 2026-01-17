@@ -511,7 +511,7 @@ async def delete_job(job_id: str, request: Request):
 
 # ================== WORKER PROFILES ROUTES ==================
 
-@api_router.post("/profiles", response_model=WorkerProfileResponse)
+@api_router.post("/profiles", response_model=WorkerProfileResponse, status_code=201)
 async def create_profile(data: WorkerProfileCreate, request: Request):
     user = await require_subcontractor(request)
     
