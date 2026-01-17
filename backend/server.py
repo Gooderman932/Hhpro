@@ -437,7 +437,7 @@ async def update_user_type(request: Request, body: dict):
 async def get_trade_codes():
     return TRADE_CODES
 
-@api_router.post("/jobs", response_model=JobResponse)
+@api_router.post("/jobs", response_model=JobResponse, status_code=201)
 async def create_job(data: JobCreate, request: Request):
     user = await require_contractor(request)
     
