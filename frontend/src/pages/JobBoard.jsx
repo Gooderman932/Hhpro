@@ -28,7 +28,7 @@ export default function JobBoard() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (filters.trade_code) params.append("trade_code", filters.trade_code);
+      if (filters.trade_code && filters.trade_code !== "all") params.append("trade_code", filters.trade_code);
       if (filters.state) params.append("state", filters.state);
       if (filters.city) params.append("city", filters.city);
       
@@ -79,7 +79,7 @@ export default function JobBoard() {
                   <SelectValue placeholder="All Trade Codes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Trade Codes</SelectItem>
+                  <SelectItem value="all">All Trade Codes</SelectItem>
                   {Object.entries(TRADE_CODES).map(([code, name]) => (
                     <SelectItem key={code} value={code}>{code} - {name}</SelectItem>
                   ))}

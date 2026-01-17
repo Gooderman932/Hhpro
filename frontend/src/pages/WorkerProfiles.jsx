@@ -36,10 +36,10 @@ export default function WorkerProfiles() {
     try {
       setLoading(true);
       const params = new URLSearchParams();
-      if (filters.trade_code) params.append("trade_code", filters.trade_code);
+      if (filters.trade_code && filters.trade_code !== "all") params.append("trade_code", filters.trade_code);
       if (filters.state) params.append("state", filters.state);
       if (filters.city) params.append("city", filters.city);
-      if (filters.availability) params.append("availability", filters.availability);
+      if (filters.availability && filters.availability !== "all") params.append("availability", filters.availability);
       
       const response = await api.get(`/profiles?${params.toString()}`);
       setProfiles(response.data);
@@ -88,7 +88,7 @@ export default function WorkerProfiles() {
                   <SelectValue placeholder="All Trade Codes" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Trade Codes</SelectItem>
+                  <SelectItem value="all">All Trade Codes</SelectItem>
                   {Object.entries(TRADE_CODES).map(([code, name]) => (
                     <SelectItem key={code} value={code}>{code} - {name}</SelectItem>
                   ))}
@@ -117,7 +117,7 @@ export default function WorkerProfiles() {
                 <SelectValue placeholder="Availability" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Any Availability</SelectItem>
+                <SelectItem value="all">Any Availability</SelectItem>
                 {Object.entries(AVAILABILITY_OPTIONS).map(([value, label]) => (
                   <SelectItem key={value} value={value}>{label}</SelectItem>
                 ))}

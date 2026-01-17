@@ -25,7 +25,7 @@ export default function Shop() {
   const fetchProducts = async () => {
     try {
       setLoading(true);
-      const params = selectedCategory ? `?category=${selectedCategory}` : "";
+      const params = (selectedCategory && selectedCategory !== "all") ? `?category=${selectedCategory}` : "";
       const response = await api.get(`/products${params}`);
       setProducts(response.data);
     } catch (error) {
@@ -85,7 +85,7 @@ export default function Shop() {
                 <SelectValue placeholder="All Categories" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">All Categories</SelectItem>
+                <SelectItem value="all">All Categories</SelectItem>
                 {categories.map((cat) => (
                   <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                 ))}
