@@ -626,10 +626,18 @@ async def get_cart(request: Request):
     if not cart:
         return CartResponse(items=[], subtotal=0.0, item_count=0)
     
+    # Batch fetch all products to avoid N+1 queries
+    product_ids = [item["product_id"] for item in cart.get("items", [])]
+    if not product_ids:
+        return CartResponse(items=[], subtotal=0.0, item_count=0)
+    
+    products = await db.products.find({"product_id": {"$in": product_ids}}, {"_id": 0}).to_list(None)
+    products_map = {p["product_id"]: p for p in products}
+    
     items = []
     subtotal = 0.0
     for item in cart.get("items", []):
-        product = await db.products.find_one({"product_id": item["product_id"]}, {"_id": 0})
+        product = products_map.get(item["product_id"])
         if product:
             items.append(CartItemResponse(
                 product_id=item["product_id"],
