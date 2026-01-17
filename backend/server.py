@@ -451,7 +451,7 @@ async def create_job(data: JobCreate, request: Request):
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.jobs.insert_one(job_doc)
-    del job_doc["_id"] if "_id" in job_doc else None
+    job_doc.pop("_id", None)
     return JobResponse(**job_doc)
 
 @api_router.get("/jobs", response_model=List[JobResponse])
