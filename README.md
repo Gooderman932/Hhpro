@@ -1,7 +1,9 @@
 # HDrywall Repair Pro Platform
 ## Complete Implementation, Administration & Maintenance Guide
 
-Professional contractor/subcontractor job matching platform with e-commerce for hdrywallrepair.com
+**Professional contractor/subcontractor job matching platform with e-commerce for hdrywallrepair.com**
+
+**Integrated with:** [Construction Intelligence Platform](https://github.com/Gooderman932/market-data) by Poor Dude Holdings LLC
 
 ---
 
@@ -9,9 +11,9 @@ Professional contractor/subcontractor job matching platform with e-commerce for 
 
 | Environment | URL |
 |-------------|-----|
-| **Preview** | https://job-trade-match.preview.emergentagent.com |
-| **Production** | https://pro.hdrywallrepair.com (after subdomain setup) |
-| **Market Data Repo** | https://github.com/Gooderman932/market-data.git |
+| **HDrywall Pro Platform** | https://pro.hdrywallrepair.com |
+| **Preview URL** | https://job-trade-match.preview.emergentagent.com |
+| **Market Data Repo** | https://github.com/Gooderman932/market-data |
 
 ---
 
@@ -37,7 +39,7 @@ Professional contractor/subcontractor job matching platform with e-commerce for 
 
 # PLATFORM OVERVIEW
 
-## Features Summary
+## HDrywall Pro Features
 
 ### For Contractors
 - Post jobs with trade codes (09-Drywall, 03-Concrete, etc.)
@@ -57,21 +59,22 @@ Professional contractor/subcontractor job matching platform with e-commerce for 
 - Shopping cart with Stripe checkout
 
 ### Market Data Analytics (3 Tiers)
-| Tier | Price | Target |
-|------|-------|--------|
-| Basic | $299/mo | Small contractors |
-| Professional | $799/mo | Established businesses |
-| Enterprise | $1999/mo | Large construction firms |
+
+| Tier | Price | Projects Limit | Features |
+|------|-------|----------------|----------|
+| **Basic** | $299/mo | 100 projects | Regional trends, basic analytics, monthly reports |
+| **Professional** | $799/mo | 1,000 projects | National data, real-time tracking, competitor analysis |
+| **Enterprise** | $1,999/mo | Unlimited | API access, custom integrations, predictive analytics, dedicated support |
 
 ---
 
 # DOMAIN IMPLEMENTATION
 
-## Option A: Subdomain Setup (Recommended)
+## Subdomain Setup (pro.hdrywallrepair.com)
 
 ### Step 1: Add DNS Record
 
-Go to your domain provider (GoDaddy, Namecheap, Cloudflare, etc.):
+Go to your domain provider (GoDaddy, Namecheap, Cloudflare):
 
 ```
 Type:   CNAME
@@ -80,15 +83,7 @@ Value:  job-trade-match.preview.emergentagent.com
 TTL:    Auto (or 3600)
 ```
 
-**Provider-Specific:**
-
-| Provider | Path |
-|----------|------|
-| GoDaddy | My Products → DNS → Add Record → CNAME |
-| Namecheap | Domain List → Manage → Advanced DNS → Add New Record |
-| Cloudflare | DNS → Add Record (Proxy: OFF initially) |
-
-### Step 2: Connect in Emergent
+### Step 2: Connect in Emergent Dashboard
 
 1. Go to **Home** in Emergent
 2. Click **HDrywall Repair** project
@@ -100,34 +95,6 @@ TTL:    Auto (or 3600)
 ### Step 3: Verify
 
 Visit `https://pro.hdrywallrepair.com`
-
-**Troubleshooting:**
-- Check: https://dnschecker.org
-- Remove conflicting A records
-- Re-link domain if needed
-
----
-
-## Option B: Path-Based Redirects
-
-Add to your server config on hdrywallrepair.com:
-
-**Apache (.htaccess):**
-```apache
-RewriteEngine On
-RewriteRule ^jobs/?$ https://pro.hdrywallrepair.com/jobs [R=301,L]
-RewriteRule ^workers/?$ https://pro.hdrywallrepair.com/workers [R=301,L]
-RewriteRule ^shop/?$ https://pro.hdrywallrepair.com/shop [R=301,L]
-RewriteRule ^market-data/?$ https://pro.hdrywallrepair.com/market-data [R=301,L]
-```
-
-**Nginx:**
-```nginx
-location /jobs { return 301 https://pro.hdrywallrepair.com/jobs; }
-location /workers { return 301 https://pro.hdrywallrepair.com/workers; }
-location /shop { return 301 https://pro.hdrywallrepair.com/shop; }
-location /market-data { return 301 https://pro.hdrywallrepair.com/market-data; }
-```
 
 ---
 
@@ -159,22 +126,6 @@ location /market-data { return 301 https://pro.hdrywallrepair.com/market-data; }
           padding:14px 28px; text-decoration:none; font-weight:600; 
           text-transform:uppercase; border-radius:2px;">
    Browse Jobs
-</a>
-
-<!-- Dark "Find Workers" Button -->
-<a href="https://pro.hdrywallrepair.com/workers" 
-   style="display:inline-block; background:#0f172a; color:white; 
-          padding:14px 28px; text-decoration:none; font-weight:600; 
-          text-transform:uppercase; border-radius:2px;">
-   Find Workers
-</a>
-
-<!-- Orange "Shop Tools" Button -->
-<a href="https://pro.hdrywallrepair.com/shop" 
-   style="display:inline-block; background:#f97316; color:white; 
-          padding:14px 28px; text-decoration:none; font-weight:600; 
-          text-transform:uppercase; border-radius:2px;">
-   Shop Tools
 </a>
 
 <!-- Market Data Button -->
@@ -241,112 +192,205 @@ location /market-data { return 301 https://pro.hdrywallrepair.com/market-data; }
 </section>
 ```
 
-## Hero Banner
-
-```html
-<section style="background:linear-gradient(to bottom right,#0f172a,#1e293b); 
-                color:white; padding:80px 20px; text-align:center;">
-  <div style="max-width:800px; margin:0 auto;">
-    <span style="display:inline-block; background:rgba(249,115,22,0.2); 
-                 color:#fb923c; padding:6px 16px; font-size:12px; 
-                 text-transform:uppercase; letter-spacing:1px; 
-                 border-radius:2px; margin-bottom:20px;">
-      The Pro's Network
-    </span>
-    <h1 style="font-size:48px; text-transform:uppercase; margin-bottom:20px; line-height:1.1;">
-      Connect With Skilled <span style="color:#f97316;">Tradespeople</span>
-    </h1>
-    <p style="font-size:18px; color:#94a3b8; margin-bottom:32px;">
-      The premier platform for contractors seeking subcontractors and skilled workers.
-    </p>
-    <div style="display:flex; gap:16px; justify-content:center; flex-wrap:wrap;">
-      <a href="https://pro.hdrywallrepair.com/register" 
-         style="display:inline-block; background:#f97316; color:white; 
-                padding:16px 32px; text-decoration:none; font-weight:600; 
-                text-transform:uppercase; border-radius:2px;">
-        Get Started →
-      </a>
-      <a href="https://pro.hdrywallrepair.com/jobs" 
-         style="display:inline-block; background:transparent; border:2px solid white; 
-                color:white; padding:16px 32px; text-decoration:none; font-weight:600; 
-                text-transform:uppercase; border-radius:2px;">
-        Browse Jobs
-      </a>
-    </div>
-  </div>
-</section>
-```
-
-## Footer Links
-
-```html
-<div style="display:flex; gap:24px; flex-wrap:wrap;">
-  <a href="https://pro.hdrywallrepair.com/jobs" style="color:#94a3b8; text-decoration:none;">Job Board</a>
-  <a href="https://pro.hdrywallrepair.com/workers" style="color:#94a3b8; text-decoration:none;">Find Workers</a>
-  <a href="https://pro.hdrywallrepair.com/shop" style="color:#94a3b8; text-decoration:none;">Pro Shop</a>
-  <a href="https://pro.hdrywallrepair.com/market-data" style="color:#94a3b8; text-decoration:none;">Market Data</a>
-</div>
-```
-
 ---
 
 # MARKET DATA REPOSITORY INTEGRATION
 
-## Repository: Gooderman932/market-data
+## Repository Overview
 
-### Step 1: Clone the Repository
+**Repository:** https://github.com/Gooderman932/market-data  
+**Copyright:** Poor Dude Holdings LLC  
+**Description:** Enterprise SaaS platform for construction market intelligence
+
+### Features from Market Data Platform
+
+| Feature | Description |
+|---------|-------------|
+| **Project Discovery** | Track opportunities, permits, and tenders |
+| **Competitive Intelligence** | Analyze competitor activity and market share |
+| **Predictive Analytics** | Win probability models and demand forecasting |
+| **Market Insights** | Regional analysis and trend visualization |
+
+### Tech Stack
+
+- **Backend:** Python 3.11+ with FastAPI, PostgreSQL 16, SQLAlchemy 2.0
+- **Frontend:** React 18 with TypeScript, Vite, Tailwind CSS, Recharts
+- **ML/AI:** scikit-learn, OpenAI API
+- **Infrastructure:** Docker, Redis 7, Nginx
+
+---
+
+## Step 1: Clone the Repository
 
 ```bash
-# Clone to your local machine or server
+# Clone to your server
 git clone https://github.com/Gooderman932/market-data.git
+cd market-data
 
-# Or if private, use SSH
-git clone git@github.com:Gooderman932/market-data.git
-
-# Or with token
-git clone https://<your-token>@github.com/Gooderman932/market-data.git
+# Or clone to specific directory
+git clone https://github.com/Gooderman932/market-data.git /opt/market-data
 ```
 
-### Step 2: If Repository is Private
+## Step 2: Environment Configuration
 
-**Generate Personal Access Token:**
-1. Go to GitHub → Settings → Developer Settings → Personal Access Tokens
-2. Generate new token with `repo` scope
-3. Use token in clone URL:
 ```bash
-git clone https://YOUR_TOKEN@github.com/Gooderman932/market-data.git
+# Copy example environment file
+cp .env.example .env
+
+# Edit with your configuration
+nano .env
 ```
 
-### Step 3: Link to Platform
+**Required Environment Variables:**
 
-**Option A: Submodule Integration**
+```env
+# Application
+APP_NAME="BuildIntel Pro"
+ENVIRONMENT=production
+DEBUG=False
+
+# Database (PostgreSQL)
+DATABASE_URL="postgresql://user:password@localhost:5432/construction_intel"
+
+# Authentication
+SECRET_KEY="your-secure-secret-key-change-this"
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+# Redis Cache
+REDIS_URL="redis://localhost:6379/0"
+
+# OpenAI (for AI features)
+OPENAI_API_KEY="sk-your-openai-key"
+OPENAI_MODEL="gpt-4o"
+
+# Multi-tenancy Limits
+MAX_PROJECTS_PER_TENANT_FREE=100
+MAX_PROJECTS_PER_TENANT_PRO=1000
+MAX_PROJECTS_PER_TENANT_ENTERPRISE=0  # 0 = unlimited
+```
+
+## Step 3: Docker Deployment (Recommended)
+
 ```bash
-cd /app
-git submodule add https://github.com/Gooderman932/market-data.git market-data
-git commit -m "Add market-data submodule"
+# Development
+make quickstart
+# or
+docker compose up --build
+
+# Production
+docker-compose -f docker-compose.prod.yml up -d
 ```
 
-**Option B: Direct Integration**
+**Access Points:**
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+
+## Step 4: Manual Installation (Alternative)
+
+### Backend Setup
+
 ```bash
-# Copy market data files into platform
-cp -r /path/to/market-data/src/* /app/backend/market_data/
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Set environment variables
+export DATABASE_URL="postgresql://user:password@localhost:5432/construction_intel"
+export SECRET_KEY="your-secret-key"
+
+# Setup database
+python ../scripts/setup_db.py
+python ../scripts/seed_data.py
+
+# Run backend
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### Step 4: Update Backend to Use Market Data
+### Frontend Setup
 
-Edit `/app/backend/server.py` to import market data:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+## Step 5: Database Initialization
+
+```bash
+# Initialize database schema
+make db-init
+
+# Seed sample data (optional)
+make db-seed
+
+# Run migrations
+cd backend
+alembic upgrade head
+```
+
+## Step 6: Default Login Credentials
+
+After seeding:
+- **Email:** demo@example.com
+- **Password:** demo123
+
+---
+
+## Market Data API Endpoints
+
+### Authentication
+```
+POST /api/auth/token        → Login
+POST /api/auth/register     → Register new user
+GET  /api/auth/me           → Get current user
+```
+
+### Projects
+```
+GET    /api/projects/       → List projects (with filters)
+GET    /api/projects/{id}   → Get project details
+POST   /api/projects/       → Create project
+PUT    /api/projects/{id}   → Update project
+DELETE /api/projects/{id}   → Delete project
+```
+
+### Analytics
+```
+GET /api/analytics/summary  → Dashboard summary
+GET /api/analytics/trends   → Project trends
+GET /api/analytics/regions  → Regional analysis
+```
+
+### Intelligence
+```
+GET /api/intelligence/competitors    → Competitor data
+GET /api/intelligence/market-share   → Market share analysis
+GET /api/intelligence/relationships  → Relationship graph
+```
+
+---
+
+## Linking Market Data to HDrywall Platform
+
+### Option A: API Integration
+
+Add to HDrywall backend (`/app/backend/server.py`):
 
 ```python
-# Add at top of file
-from market_data import analytics, reports, trends
+import httpx
 
-# Add new endpoints
+MARKET_DATA_API_URL = os.environ.get("MARKET_DATA_API_URL", "http://localhost:8000")
+MARKET_DATA_API_KEY = os.environ.get("MARKET_DATA_API_KEY")
+
 @api_router.get("/market-data/analytics/{tier_id}")
 async def get_market_analytics(tier_id: str, request: Request):
-    """Get analytics data based on subscription tier"""
+    """Proxy to market data analytics API"""
     user = await require_user(request)
     
-    # Verify user has subscription
+    # Verify subscription
     subscription = await db.subscriptions.find_one({
         "user_id": user["user_id"],
         "tier_id": tier_id,
@@ -354,47 +398,113 @@ async def get_market_analytics(tier_id: str, request: Request):
     }, {"_id": 0})
     
     if not subscription:
-        raise HTTPException(status_code=403, detail="Subscription required")
+        raise HTTPException(status_code=403, detail="Active subscription required")
     
-    # Return data based on tier
-    if tier_id == "basic":
-        return analytics.get_basic_data()
-    elif tier_id == "professional":
-        return analytics.get_professional_data()
-    elif tier_id == "enterprise":
-        return analytics.get_enterprise_data()
+    # Call market data API
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            f"{MARKET_DATA_API_URL}/api/analytics/summary",
+            headers={"Authorization": f"Bearer {MARKET_DATA_API_KEY}"}
+        )
+        return response.json()
 ```
 
-### Step 5: Update Market Data from Repository
+### Option B: Subdomain Setup
+
+Deploy market-data platform to a subdomain:
+
+1. Add DNS record:
+```
+Type: A or CNAME
+Name: intel
+Value: your-server-ip or target
+```
+
+2. Configure Nginx:
+```nginx
+server {
+    listen 80;
+    server_name intel.hdrywallrepair.com;
+    
+    location / {
+        proxy_pass http://localhost:5173;  # Market data frontend
+    }
+    
+    location /api {
+        proxy_pass http://localhost:8000;  # Market data backend
+    }
+}
+```
+
+3. Access at: `https://intel.hdrywallrepair.com`
+
+### Option C: Embed in HDrywall Platform
+
+Create iframe integration on market data page:
+
+```html
+<iframe 
+    src="https://intel.hdrywallrepair.com/dashboard" 
+    width="100%" 
+    height="800px" 
+    frameborder="0">
+</iframe>
+```
+
+---
+
+## Market Data Maintenance
+
+### Daily Tasks
 
 ```bash
-# If using submodule
-cd /app
-git submodule update --remote market-data
-
-# If direct integration
-cd /path/to/market-data
+# Update market data
+cd /opt/market-data
 git pull origin main
-cp -r src/* /app/backend/market_data/
+docker-compose restart
+
+# Check health
+./scripts/deployment/health-check.sh
 ```
 
-### Step 6: Configure Market Data Environment
+### Weekly Tasks
 
-Add to `/app/backend/.env`:
-```env
-MARKET_DATA_API_KEY=your_api_key_if_needed
-MARKET_DATA_UPDATE_INTERVAL=3600
-MARKET_DATA_CACHE_TTL=300
+```bash
+# Run platform automation
+make run-automation
+
+# Security scan
+make security-scan
+
+# Backup database
+make backup
 ```
 
-### Market Data Maintenance Schedule
+### Database Migrations
 
-| Task | Frequency | Command |
-|------|-----------|---------|
-| Update data | Daily | `git submodule update --remote` |
-| Clear cache | Weekly | `db.market_cache.drop()` |
-| Verify data | Monthly | Run validation scripts |
-| Full refresh | Quarterly | Re-clone and rebuild |
+```bash
+# Create new migration
+cd backend
+alembic revision --autogenerate -m "description"
+
+# Apply migrations
+alembic upgrade head
+
+# Rollback
+alembic downgrade -1
+```
+
+### Update Dependencies
+
+```bash
+# Backend
+cd backend
+pip install -r requirements.txt --upgrade
+
+# Frontend
+cd frontend
+npm update
+```
 
 ---
 
@@ -408,25 +518,17 @@ use test_database
 db.products.find().pretty()
 ```
 
-**API:**
-```bash
-curl https://pro.hdrywallrepair.com/api/products
-```
-
 ## Add New Product
 
 ```javascript
-mongosh
-use test_database
-
 db.products.insertOne({
   "product_id": "prod_" + Math.random().toString(36).substr(2, 12),
-  "name": "Product Name Here",
-  "description": "Product description",
+  "name": "Product Name",
+  "description": "Description",
   "category": "Drywall Tools",
   "price": 29.99,
   "compare_price": 39.99,
-  "image_url": "https://your-image-url.com/image.jpg",
+  "image_url": "https://example.com/image.jpg",
   "stock": 100,
   "sku": "SKU-001",
   "active": true,
@@ -434,27 +536,14 @@ db.products.insertOne({
 })
 ```
 
-**Categories Available:**
-- Drywall Tools
-- Materials
-- Power Tools
-- Safety Gear
-- Blades & Accessories
-- Storage & Organization
+**Categories:** Drywall Tools, Materials, Power Tools, Safety Gear, Blades & Accessories, Storage & Organization
 
 ## Update Product Price
 
 ```javascript
-// By name
 db.products.updateOne(
   { "name": "Product Name" },
   { $set: { "price": 49.99, "compare_price": 69.99 } }
-)
-
-// By ID
-db.products.updateOne(
-  { "product_id": "prod_abc123" },
-  { $set: { "price": 49.99 } }
 )
 ```
 
@@ -467,131 +556,55 @@ db.products.updateOne(
   { $set: { "stock": 100 } }
 )
 
-// Decrease (after sale)
+// Decrease after sale
 db.products.updateOne(
   { "product_id": "prod_abc123" },
   { $inc: { "stock": -5 } }
 )
 
-// Increase (after restock)
+// Increase after restock
 db.products.updateOne(
   { "product_id": "prod_abc123" },
   { $inc: { "stock": 50 } }
 )
 ```
 
-## Deactivate/Activate Product
+## Deactivate/Delete Product
 
 ```javascript
-// Hide from shop
+// Deactivate (hide from shop)
 db.products.updateOne(
   { "name": "Product Name" },
   { $set: { "active": false } }
 )
 
-// Show again
-db.products.updateOne(
-  { "name": "Product Name" },
-  { $set: { "active": true } }
-)
-```
-
-## Delete Product
-
-```javascript
+// Delete permanently
 db.products.deleteOne({ "product_id": "prod_abc123" })
-```
-
-## Change Category
-
-```javascript
-db.products.updateOne(
-  { "name": "Product Name" },
-  { $set: { "category": "Power Tools" } }
-)
-```
-
-## Add New Category
-
-Use any new category name - it appears automatically:
-```javascript
-db.products.insertOne({
-  ...
-  "category": "New Category Name",
-  ...
-})
 ```
 
 ## Bulk Price Update
 
 ```javascript
-// Increase all prices by 10%
+// Increase all by 10%
 db.products.updateMany(
   {},
   [{ $set: { "price": { $multiply: ["$price", 1.10] } } }]
 )
 
-// Decrease all prices by 15%
+// Decrease all by 15%
 db.products.updateMany(
   {},
   [{ $set: { "price": { $multiply: ["$price", 0.85] } } }]
 )
-
-// Update specific category
-db.products.updateMany(
-  { "category": "Drywall Tools" },
-  [{ $set: { "price": { $multiply: ["$price", 1.05] } } }]
-)
-```
-
-## Bulk Stock Update
-
-```javascript
-// Set all products to specific stock
-db.products.updateMany(
-  {},
-  { $set: { "stock": 100 } }
-)
-
-// Mark low stock items
-db.products.find({ "stock": { $lt: 10 } }).pretty()
-```
-
-## Import Products from CSV/JSON
-
-```bash
-# JSON import
-mongoimport --db test_database --collection products --file products.json --jsonArray
-
-# CSV import
-mongoimport --db test_database --collection products --type csv --headerline --file products.csv
-```
-
-**JSON format:**
-```json
-[
-  {
-    "product_id": "prod_001",
-    "name": "Product 1",
-    "description": "Description",
-    "category": "Drywall Tools",
-    "price": 29.99,
-    "compare_price": null,
-    "image_url": "https://example.com/img.jpg",
-    "stock": 100,
-    "sku": "SKU-001",
-    "active": true
-  }
-]
 ```
 
 ---
 
 # MARKET DATA TIER ADMINISTRATION
 
-## Current Tier Configuration
+## Current Configuration
 
-Located in `/app/backend/server.py` (search for `MARKET_DATA_TIERS`):
+Located in `/app/backend/server.py`:
 
 ```python
 MARKET_DATA_TIERS = [
@@ -605,7 +618,8 @@ MARKET_DATA_TIERS = [
             "Regional labor market trends",
             "Basic wage analytics",
             "Monthly industry reports",
-            "Email support"
+            "Email support",
+            "Up to 100 projects"
         ]
     },
     {
@@ -620,7 +634,8 @@ MARKET_DATA_TIERS = [
             "Real-time wage tracking",
             "Competitor analysis",
             "Custom report generation",
-            "Priority support"
+            "Priority support",
+            "Up to 1,000 projects"
         ]
     },
     {
@@ -634,9 +649,12 @@ MARKET_DATA_TIERS = [
             "API access",
             "Custom data integrations",
             "Predictive analytics",
+            "Win probability models",
+            "Demand forecasting",
             "Dedicated account manager",
             "White-label reports",
-            "24/7 phone support"
+            "24/7 phone support",
+            "Unlimited projects"
         ]
     }
 ]
@@ -644,133 +662,39 @@ MARKET_DATA_TIERS = [
 
 ## Change Tier Pricing
 
-**Step 1:** Edit `/app/backend/server.py`
-
+1. Edit `/app/backend/server.py`
+2. Find `MARKET_DATA_TIERS`
+3. Change price values:
 ```python
-# Change Basic from $299 to $349
-"price": 349.00,
-
-# Change Professional from $799 to $899
-"price": 899.00,
-
-# Change Enterprise from $1999 to $2499
-"price": 2499.00,
+"price": 349.00,  # Changed from 299.00
 ```
-
-**Step 2:** Restart backend
+4. Restart backend:
 ```bash
 sudo supervisorctl restart backend
 ```
 
-## Add Tier Features
+## Add/Remove Features
+
+Edit the `features` array for each tier:
 
 ```python
-{
-    "tier_id": "professional",
-    "features": [
-        "All Basic features",
-        "National market data",
-        "Real-time wage tracking",
-        "Competitor analysis",
-        "Custom report generation",
-        "Priority support",
-        "NEW: Quarterly business reviews",  # Add new feature
-        "NEW: Market forecasting"           # Add another
-    ]
-}
-```
-
-## Remove Tier Features
-
-Simply delete the line from the features array.
-
-## Change Tier Name/Description
-
-```python
-{
-    "tier_id": "basic",
-    "name": "Starter Plan",  # Changed
-    "description": "Perfect for small contractors getting started",  # Changed
-    ...
-}
-```
-
-## Add New Tier
-
-```python
-MARKET_DATA_TIERS = [
-    # ... existing tiers ...
-    {
-        "tier_id": "premium",
-        "name": "Premium Plus",
-        "price": 1299.00,
-        "billing_period": "monthly",
-        "description": "Enhanced features for mid-size firms",
-        "features": [
-            "All Professional features",
-            "Quarterly strategy sessions",
-            "Custom dashboards",
-            "Phone support"
-        ]
-    }
+"features": [
+    "Existing feature",
+    "NEW: Added feature",  # Add
+    # Remove by deleting the line
 ]
-```
-
-## Change Billing Period
-
-```python
-{
-    "tier_id": "basic",
-    "price": 2999.00,
-    "billing_period": "yearly",  # Changed from monthly
-    ...
-}
-```
-
-## Tier Pricing History (Track Changes)
-
-Create `/app/backend/tier_pricing_history.md`:
-```markdown
-# Tier Pricing History
-
-| Date | Tier | Old Price | New Price | Reason |
-|------|------|-----------|-----------|--------|
-| 2025-01-17 | Basic | $299 | $299 | Initial |
-| 2025-01-17 | Professional | $799 | $799 | Initial |
-| 2025-01-17 | Enterprise | $1999 | $1999 | Initial |
 ```
 
 ---
 
 # USER MANAGEMENT
 
-## View All Users
+## View Users
 
 ```javascript
-mongosh
-use test_database
-
 db.users.find().pretty()
-```
-
-## View by Type
-
-```javascript
-// Contractors only
 db.users.find({ "user_type": "contractor" }).pretty()
-
-// Subcontractors only
 db.users.find({ "user_type": "subcontractor" }).pretty()
-```
-
-## Search Users
-
-```javascript
-// By email
-db.users.findOne({ "email": "user@example.com" })
-
-// By name (partial match)
-db.users.find({ "name": { $regex: "John", $options: "i" } }).pretty()
 ```
 
 ## Change User Type
@@ -782,239 +706,74 @@ db.users.updateOne(
 )
 ```
 
-## Update User Info
-
-```javascript
-db.users.updateOne(
-  { "email": "user@example.com" },
-  { $set: { "name": "New Name", "picture": "https://new-picture.jpg" } }
-)
-```
-
 ## Delete User
 
 ```javascript
-// Delete user
 db.users.deleteOne({ "email": "user@example.com" })
-
-// Also delete their sessions
 db.user_sessions.deleteMany({ "user_id": "user_abc123" })
-
-// Delete their profile if subcontractor
-db.worker_profiles.deleteOne({ "user_id": "user_abc123" })
-
-// Delete their jobs if contractor
-db.jobs.deleteMany({ "contractor_id": "user_abc123" })
-```
-
-## User Statistics
-
-```javascript
-// Total users
-db.users.countDocuments()
-
-// By type
-db.users.countDocuments({ "user_type": "contractor" })
-db.users.countDocuments({ "user_type": "subcontractor" })
-
-// Recent signups (last 7 days)
-db.users.countDocuments({
-  "created_at": { $gte: new Date(Date.now() - 7*24*60*60*1000).toISOString() }
-})
 ```
 
 ---
 
 # JOB LISTINGS MANAGEMENT
 
-## View All Jobs
+## View/Search Jobs
 
 ```javascript
 db.jobs.find().pretty()
-```
-
-## View Active Jobs
-
-```javascript
 db.jobs.find({ "status": "active" }).pretty()
-```
-
-## Search Jobs
-
-```javascript
-// By trade code
 db.jobs.find({ "trade_codes": "09" }).pretty()
-
-// By location
-db.jobs.find({ "state": "TX" }).pretty()
-
-// By contractor
-db.jobs.find({ "contractor_id": "user_abc123" }).pretty()
 ```
 
-## Close a Job
+## Close/Reopen Job
 
 ```javascript
+// Close
 db.jobs.updateOne(
   { "job_id": "job_abc123" },
   { $set: { "status": "closed" } }
 )
-```
 
-## Reopen a Job
-
-```javascript
+// Reopen
 db.jobs.updateOne(
   { "job_id": "job_abc123" },
   { $set: { "status": "active" } }
 )
-```
-
-## Update Job Details
-
-```javascript
-db.jobs.updateOne(
-  { "job_id": "job_abc123" },
-  { $set: { 
-    "pay_rate": "30",
-    "duration": "3 weeks"
-  }}
-)
-```
-
-## Delete a Job
-
-```javascript
-db.jobs.deleteOne({ "job_id": "job_abc123" })
-```
-
-## Job Statistics
-
-```javascript
-// Total jobs
-db.jobs.countDocuments()
-
-// Active jobs
-db.jobs.countDocuments({ "status": "active" })
-
-// Jobs by trade code
-db.jobs.aggregate([
-  { $unwind: "$trade_codes" },
-  { $group: { _id: "$trade_codes", count: { $sum: 1 } } },
-  { $sort: { count: -1 } }
-])
-
-// Jobs by state
-db.jobs.aggregate([
-  { $group: { _id: "$state", count: { $sum: 1 } } },
-  { $sort: { count: -1 } }
-])
 ```
 
 ---
 
 # WORKER PROFILES MANAGEMENT
 
-## View All Profiles
+## View/Search Profiles
 
 ```javascript
 db.worker_profiles.find().pretty()
-```
-
-## View Active Profiles
-
-```javascript
-db.worker_profiles.find({ "status": "active" }).pretty()
-```
-
-## Search Profiles
-
-```javascript
-// By trade code
 db.worker_profiles.find({ "trade_codes": "09" }).pretty()
-
-// By location
-db.worker_profiles.find({ "state": "TX" }).pretty()
-
-// By availability
 db.worker_profiles.find({ "availability": "immediate" }).pretty()
-
-// By experience (5+ years)
-db.worker_profiles.find({ "experience_years": { $gte: 5 } }).pretty()
 ```
 
-## Deactivate Profile
+## Deactivate/Delete Profile
 
 ```javascript
 db.worker_profiles.updateOne(
   { "profile_id": "profile_abc123" },
   { $set: { "status": "inactive" } }
 )
-```
 
-## Reactivate Profile
-
-```javascript
-db.worker_profiles.updateOne(
-  { "profile_id": "profile_abc123" },
-  { $set: { "status": "active" } }
-)
-```
-
-## Delete Profile
-
-```javascript
 db.worker_profiles.deleteOne({ "profile_id": "profile_abc123" })
-```
-
-## Profile Statistics
-
-```javascript
-// Total profiles
-db.worker_profiles.countDocuments()
-
-// Active profiles
-db.worker_profiles.countDocuments({ "status": "active" })
-
-// By trade code
-db.worker_profiles.aggregate([
-  { $unwind: "$trade_codes" },
-  { $group: { _id: "$trade_codes", count: { $sum: 1 } } },
-  { $sort: { count: -1 } }
-])
-
-// Average experience
-db.worker_profiles.aggregate([
-  { $group: { _id: null, avgExp: { $avg: "$experience_years" } } }
-])
 ```
 
 ---
 
 # ORDERS & PAYMENTS
 
-## View All Orders
+## View Transactions
 
 ```javascript
 db.orders.find().pretty()
-```
-
-## View Payment Transactions
-
-```javascript
 db.payment_transactions.find().pretty()
-```
-
-## View Paid Only
-
-```javascript
 db.payment_transactions.find({ "payment_status": "paid" }).pretty()
-```
-
-## View Market Data Subscriptions
-
-```javascript
-db.payment_transactions.find({ "type": "market_data_subscription" }).pretty()
 ```
 
 ## Revenue Statistics
@@ -1025,74 +784,20 @@ db.payment_transactions.aggregate([
   { $match: { "payment_status": "paid" } },
   { $group: { _id: null, total: { $sum: "$amount" } } }
 ])
-
-// Revenue by type
-db.payment_transactions.aggregate([
-  { $match: { "payment_status": "paid" } },
-  { $group: { _id: "$type", total: { $sum: "$amount" } } }
-])
-
-// Revenue by month
-db.payment_transactions.aggregate([
-  { $match: { "payment_status": "paid" } },
-  { $group: { 
-    _id: { $substr: ["$created_at", 0, 7] },
-    total: { $sum: "$amount" },
-    count: { $sum: 1 }
-  }},
-  { $sort: { _id: -1 } }
-])
-```
-
-## Refund a Transaction
-
-```javascript
-db.payment_transactions.updateOne(
-  { "transaction_id": "txn_abc123" },
-  { $set: { "status": "refunded", "payment_status": "refunded" } }
-)
 ```
 
 ---
 
 # STRIPE CONFIGURATION
 
-## Current Setup (Test Mode)
-
-Located in `/app/backend/.env`:
-```env
-STRIPE_API_KEY=sk_test_emergent
-```
-
 ## Switch to Live Mode
 
-**Step 1:** Get live keys from https://dashboard.stripe.com/apikeys
-
-**Step 2:** Update `/app/backend/.env`:
+1. Get keys from https://dashboard.stripe.com/apikeys
+2. Update `/app/backend/.env`:
 ```env
-STRIPE_API_KEY=sk_live_your_live_key_here
+STRIPE_API_KEY=sk_live_your_live_key
 ```
-
-**Step 3:** Restart backend:
-```bash
-sudo supervisorctl restart backend
-```
-
-## Stripe Dashboard Links
-
-| Task | URL |
-|------|-----|
-| View Payments | https://dashboard.stripe.com/payments |
-| View Customers | https://dashboard.stripe.com/customers |
-| API Keys | https://dashboard.stripe.com/apikeys |
-| Webhooks | https://dashboard.stripe.com/webhooks |
-| Test Mode | https://dashboard.stripe.com/test/payments |
-
-## Configure Webhooks (Optional)
-
-1. Go to https://dashboard.stripe.com/webhooks
-2. Add endpoint: `https://pro.hdrywallrepair.com/api/webhook/stripe`
-3. Select events: `checkout.session.completed`, `payment_intent.succeeded`
+3. Restart: `sudo supervisorctl restart backend`
 
 ---
 
@@ -1101,65 +806,17 @@ sudo supervisorctl restart backend
 ## Service Commands
 
 ```bash
-# Check status
 sudo supervisorctl status
-
-# Restart backend
 sudo supervisorctl restart backend
-
-# Restart frontend
 sudo supervisorctl restart frontend
-
-# Restart both
 sudo supervisorctl restart all
-
-# Stop service
-sudo supervisorctl stop backend
-
-# Start service
-sudo supervisorctl start backend
 ```
 
 ## View Logs
 
 ```bash
-# Backend errors
 tail -f /var/log/supervisor/backend.err.log
-
-# Backend output
-tail -f /var/log/supervisor/backend.out.log
-
-# Frontend errors
 tail -f /var/log/supervisor/frontend.err.log
-
-# Last 100 lines
-tail -n 100 /var/log/supervisor/backend.err.log
-```
-
-## Clear Logs
-
-```bash
-# Truncate logs
-> /var/log/supervisor/backend.err.log
-> /var/log/supervisor/backend.out.log
-> /var/log/supervisor/frontend.err.log
-> /var/log/supervisor/frontend.out.log
-```
-
-## Update Dependencies
-
-**Backend:**
-```bash
-cd /app/backend
-pip install -r requirements.txt
-sudo supervisorctl restart backend
-```
-
-**Frontend:**
-```bash
-cd /app/frontend
-yarn install
-sudo supervisorctl restart frontend
 ```
 
 ## Environment Variables
@@ -1168,180 +825,46 @@ sudo supervisorctl restart frontend
 ```env
 MONGO_URL="mongodb://localhost:27017"
 DB_NAME="test_database"
-CORS_ORIGINS="*"
 JWT_SECRET="your-secret-key"
 STRIPE_API_KEY=sk_test_emergent
-```
-
-**Frontend** (`/app/frontend/.env`):
-```env
-REACT_APP_BACKEND_URL=https://pro.hdrywallrepair.com
-```
-
-After changing `.env`, restart the service:
-```bash
-sudo supervisorctl restart backend
-sudo supervisorctl restart frontend
+MARKET_DATA_API_URL="http://localhost:8000"
 ```
 
 ---
 
 # DATABASE OPERATIONS
 
-## Connect to MongoDB
+## Backup
 
 ```bash
-mongosh
-use test_database
-```
-
-## Backup Database
-
-```bash
-# Full backup
 mongodump --db test_database --out /app/backup/$(date +%Y%m%d)
-
-# Specific collection
-mongodump --db test_database --collection products --out /app/backup/
-
-# Compressed
-mongodump --db test_database --archive=/app/backup/db_$(date +%Y%m%d).gz --gzip
 ```
 
-## Restore Database
+## Restore
 
 ```bash
-# Full restore
 mongorestore --db test_database /app/backup/20250117/test_database/
-
-# Specific collection
-mongorestore --db test_database --collection products /app/backup/test_database/products.bson
-
-# From compressed
-mongorestore --archive=/app/backup/db_20250117.gz --gzip
 ```
 
-## Export to JSON
-
-```bash
-mongoexport --db test_database --collection products --out products.json
-mongoexport --db test_database --collection users --out users.json
-mongoexport --db test_database --collection jobs --out jobs.json
-```
-
-## Import from JSON
-
-```bash
-mongoimport --db test_database --collection products --file products.json
-```
-
-## Database Statistics
+## Create Indexes
 
 ```javascript
-mongosh
-use test_database
-
-// Collection stats
-db.stats()
-
-// Collection sizes
-db.products.countDocuments()
-db.users.countDocuments()
-db.jobs.countDocuments()
-db.worker_profiles.countDocuments()
-db.orders.countDocuments()
-db.payment_transactions.countDocuments()
-```
-
-## Create Indexes (Performance)
-
-```javascript
-// Users
 db.users.createIndex({ "email": 1 }, { unique: true })
-db.users.createIndex({ "user_id": 1 }, { unique: true })
-
-// Jobs
-db.jobs.createIndex({ "job_id": 1 }, { unique: true })
 db.jobs.createIndex({ "trade_codes": 1 })
-db.jobs.createIndex({ "state": 1 })
-db.jobs.createIndex({ "status": 1 })
-
-// Profiles
-db.worker_profiles.createIndex({ "profile_id": 1 }, { unique: true })
-db.worker_profiles.createIndex({ "trade_codes": 1 })
-db.worker_profiles.createIndex({ "status": 1 })
-
-// Products
-db.products.createIndex({ "product_id": 1 }, { unique: true })
 db.products.createIndex({ "category": 1 })
-db.products.createIndex({ "active": 1 })
 ```
 
 ---
 
 # TROUBLESHOOTING
 
-## Common Issues
-
-### Backend Not Starting
-
-```bash
-# Check logs
-tail -n 50 /var/log/supervisor/backend.err.log
-
-# Common fixes
-cd /app/backend
-pip install -r requirements.txt
-sudo supervisorctl restart backend
-```
-
-### Frontend Not Loading
-
-```bash
-# Check logs
-tail -n 50 /var/log/supervisor/frontend.err.log
-
-# Common fixes
-cd /app/frontend
-yarn install
-sudo supervisorctl restart frontend
-```
-
-### Database Connection Failed
-
-```bash
-# Check MongoDB status
-sudo systemctl status mongod
-
-# Restart MongoDB
-sudo systemctl restart mongod
-
-# Verify connection
-mongosh --eval "db.adminCommand('ping')"
-```
-
-### API Returns 500 Error
-
-```bash
-# Check backend logs
-tail -n 100 /var/log/supervisor/backend.err.log
-
-# Look for Python errors
-grep -i "error\|exception" /var/log/supervisor/backend.err.log
-```
-
-### Stripe Checkout Not Working
-
-1. Verify API key in `/app/backend/.env`
-2. Check Stripe dashboard for errors
-3. Ensure webhook URL is correct
-
-### DNS/Domain Not Working
-
-1. Check propagation: https://dnschecker.org
-2. Remove conflicting A records
-3. Re-link in Emergent dashboard
-4. Wait up to 48 hours for full propagation
+| Issue | Solution |
+|-------|----------|
+| Backend not starting | Check logs: `tail -n 50 /var/log/supervisor/backend.err.log` |
+| Frontend not loading | Check logs: `tail -n 50 /var/log/supervisor/frontend.err.log` |
+| Database connection failed | `sudo systemctl restart mongod` |
+| API returns 500 | Check backend logs for Python errors |
+| DNS not working | Wait 24-48 hours, check dnschecker.org |
 
 ---
 
@@ -1351,12 +874,10 @@ grep -i "error\|exception" /var/log/supervisor/backend.err.log
 
 | Resource | URL |
 |----------|-----|
-| Platform | https://pro.hdrywallrepair.com |
-| API Health | https://pro.hdrywallrepair.com/api/health |
-| Products API | https://pro.hdrywallrepair.com/api/products |
-| Jobs API | https://pro.hdrywallrepair.com/api/jobs |
-| Profiles API | https://pro.hdrywallrepair.com/api/profiles |
-| Tiers API | https://pro.hdrywallrepair.com/api/market-data/tiers |
+| HDrywall Platform | https://pro.hdrywallrepair.com |
+| Market Data Platform | https://intel.hdrywallrepair.com |
+| API Health | /api/health |
+| API Docs (Market Data) | /api/docs |
 
 ## Platform Pages
 
@@ -1364,14 +885,9 @@ grep -i "error\|exception" /var/log/supervisor/backend.err.log
 |------|------|
 | Home | `/` |
 | Jobs | `/jobs` |
-| Post Job | `/post-job` |
 | Workers | `/workers` |
-| Create Profile | `/create-profile` |
 | Shop | `/shop` |
-| Cart | `/cart` |
 | Market Data | `/market-data` |
-| Login | `/login` |
-| Register | `/register` |
 | Dashboard | `/dashboard` |
 
 ## Trade Codes
@@ -1381,16 +897,13 @@ grep -i "error\|exception" /var/log/supervisor/backend.err.log
 | 03 | Concrete |
 | 04 | Masonry |
 | 05 | Metals |
-| 06 | Wood, Plastics, Composites |
-| 07 | Thermal & Moisture Protection |
-| 08 | Openings (Doors/Windows) |
+| 06 | Wood, Plastics |
+| 07 | Thermal/Moisture |
+| 08 | Openings |
 | 09 | Finishes (Drywall/Paint) |
-| 10 | Specialties |
 | 22 | Plumbing |
 | 23 | HVAC |
 | 26 | Electrical |
-| 31 | Earthwork |
-| 32 | Exterior Improvements |
 
 ## Quick Commands
 
@@ -1398,29 +911,24 @@ grep -i "error\|exception" /var/log/supervisor/backend.err.log
 |------|---------|
 | Restart Backend | `sudo supervisorctl restart backend` |
 | Restart Frontend | `sudo supervisorctl restart frontend` |
-| View Backend Logs | `tail -f /var/log/supervisor/backend.err.log` |
-| Access MongoDB | `mongosh` → `use test_database` |
-| Check Services | `sudo supervisorctl status` |
-| Backup Database | `mongodump --db test_database --out /app/backup/` |
-
-## File Locations
-
-| File | Path |
-|------|------|
-| Backend Code | `/app/backend/server.py` |
-| Backend Env | `/app/backend/.env` |
-| Frontend App | `/app/frontend/src/App.js` |
-| Frontend Env | `/app/frontend/.env` |
-| This README | `/app/README.md` |
+| View Logs | `tail -f /var/log/supervisor/backend.err.log` |
+| MongoDB Shell | `mongosh` → `use test_database` |
+| Backup DB | `mongodump --db test_database --out /app/backup/` |
 
 ---
 
 ## Contact
 
-**Email:** info@hdrywallrepair.com  
-**Phone:** (555) 123-4567
+**HDrywall Repair**  
+Email: info@hdrywallrepair.com  
+Phone: (555) 123-4567
+
+**Market Data Platform**  
+Copyright © 2025 Poor Dude Holdings LLC  
+Email: legal@poorduceholdings.com
 
 ---
 
-*Built with FastAPI + React + MongoDB on Emergent Platform*
+*Built with FastAPI + React + MongoDB on Emergent Platform*  
+*Market Data powered by Construction Intelligence Platform*  
 *Last Updated: January 2025*
