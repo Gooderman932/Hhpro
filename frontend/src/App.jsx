@@ -3,13 +3,12 @@ import "@/App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import axios from "axios";
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const Home = () => {
   const helloWorldApi = async () => {
     try {
-      const response = await axios.get(`${API}/`);
+      const response = await axios.get(`${API_BASE_URL}/`);
       console.log(response.data.message);
     } catch (e) {
       console.error(e, `errored out requesting / api`);
