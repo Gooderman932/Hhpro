@@ -337,7 +337,21 @@ async def list_jobs(
     if status:
         query["status"] = status
     
-    jobs_cursor = db.jobs.find(query).limit(limit)
+    # Projection to fetch only required fields for better performance
+    projection = {
+        "job_id": 1,
+        "title": 1,
+        "description": 1,
+        "trade_codes": 1,
+        "location": 1,
+        "budget": 1,
+        "status": 1,
+        "customer_id": 1,
+        "created_at": 1,
+        "updated_at": 1,
+        "_id": 0,
+    }
+    jobs_cursor = db.jobs.find(query, projection).limit(limit)
     jobs = await jobs_cursor.to_list(length=limit)
     
     return [
@@ -436,7 +450,21 @@ async def list_workers(
     if trade_code:
         query["trade_codes"] = trade_code
     
-    workers_cursor = db.worker_profiles.find(query).limit(limit)
+    # Projection to fetch only required fields for better performance
+    projection = {
+        "profile_id": 1,
+        "user_id": 1,
+        "trade_codes": 1,
+        "hourly_rate": 1,
+        "years_experience": 1,
+        "bio": 1,
+        "location": 1,
+        "rating": 1,
+        "is_active": 1,
+        "created_at": 1,
+        "_id": 0,
+    }
+    workers_cursor = db.worker_profiles.find(query, projection).limit(limit)
     workers = await workers_cursor.to_list(length=limit)
     
     return [
@@ -542,7 +570,18 @@ async def list_products(
     if category:
         query["category"] = category
     
-    products_cursor = db.products.find(query).limit(limit)
+    # Projection to fetch only required fields for better performance
+    projection = {
+        "product_id": 1,
+        "name": 1,
+        "description": 1,
+        "category": 1,
+        "price": 1,
+        "stock": 1,
+        "created_at": 1,
+        "_id": 0,
+    }
+    products_cursor = db.products.find(query, projection).limit(limit)
     products = await products_cursor.to_list(length=limit)
     
     return [
@@ -618,7 +657,18 @@ async def list_orders(
     if current_user.role == "admin":
         query = {}  # Admin sees all orders
     
-    orders_cursor = db.orders.find(query).limit(limit)
+    # Projection to fetch only required fields for better performance
+    projection = {
+        "order_id": 1,
+        "user_id": 1,
+        "product_id": 1,
+        "quantity": 1,
+        "total_amount": 1,
+        "status": 1,
+        "created_at": 1,
+        "_id": 0,
+    }
+    orders_cursor = db.orders.find(query, projection).limit(limit)
     orders = await orders_cursor.to_list(length=limit)
     
     return [
