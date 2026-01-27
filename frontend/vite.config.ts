@@ -13,19 +13,11 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
-    allowedHosts: [
-      'market-insights-159.preview.emergentagent.com',
-    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8001',
         changeOrigin: true,
       },
     },
-  },
-  preview: {
-    allowedHosts: [
-      'market-insights-159.preview.emergentagent.com',
-    ],
   },
 })
