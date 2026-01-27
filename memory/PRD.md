@@ -11,13 +11,6 @@ A full-stack construction intelligence platform with:
 - **Payments**: Stripe integration for subscriptions
 - **Process Management**: Supervisor
 
-## Core Requirements
-1. ✅ Database Migration: PostgreSQL/SQLAlchemy → MongoDB/Motor (async)
-2. ✅ Dependency Cleanup: Remove all local ML libraries, Redis
-3. ✅ Configuration: Environment-driven (.env files)
-4. ✅ Deployment: Frontend port 3000, Backend port 8001
-5. ✅ Market Data pricing tiers with Stripe payments
-
 ## Current Architecture (v2.0.0 - Modular)
 ```
 /app/
@@ -41,10 +34,17 @@ A full-stack construction intelligence platform with:
 │   └── .env
 ├── frontend/
 │   ├── src/
-│   │   ├── components/     # Dashboard, Intelligence components
-│   │   ├── App.tsx
-│   │   ├── main.tsx
-│   │   └── vite-env.d.ts
+│   │   ├── components/
+│   │   │   ├── auth/AuthPage.tsx        # Login/Register page
+│   │   │   ├── pricing/PricingPage.tsx  # Pricing tiers page
+│   │   │   ├── pricing/SubscriptionSuccess.tsx # Post-payment page
+│   │   │   ├── dashboard/
+│   │   │   ├── intelligence/
+│   │   │   └── ui/                      # Shadcn components
+│   │   ├── services/api.ts              # API service layer
+│   │   ├── types/                       # TypeScript types
+│   │   ├── App.tsx                      # Main app with routing
+│   │   └── main.tsx
 │   ├── dist/               # Built production assets
 │   ├── vite.config.ts
 │   ├── package.json
@@ -52,53 +52,43 @@ A full-stack construction intelligence platform with:
 └── scripts/                # Deployment and maintenance scripts
 ```
 
-## Key API Endpoints
-### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/token` - Login and get JWT
-- `GET /api/auth/me` - Get current user
+## Key Pages & Routes
 
-### Jobs
-- `GET /api/jobs` - List jobs (with projections)
-- `POST /api/jobs` - Create job
-- `PUT /api/jobs/{job_id}` - Update job
-- `DELETE /api/jobs/{job_id}` - Close job
+### Frontend Routes
+- `/` - Homepage with hero section and features
+- `/pricing` - Subscription tiers page (Basic $299, Professional $799, Enterprise $1999)
+- `/login` - Login/Register page with tabs
+- `/subscription/success` - Post-payment confirmation page
 
-### Workers
-- `GET /api/workers` - List workers (with projections)
-- `POST /api/workers` - Create worker profile
-- `PUT /api/workers/{profile_id}` - Update profile
-- `DELETE /api/workers/{profile_id}` - Deactivate profile
+### API Endpoints
+See full list in backend routes documentation.
 
-### Products & Orders
-- `GET /api/products` - List products (with projections)
-- `POST /api/products` - Create product (admin)
-- `PUT /api/products/{product_id}/stock` - Update stock
-- `GET /api/orders` - List orders (with projections)
-- `POST /api/orders` - Create order
-- `POST /api/payments` - Process payment
+## What's Been Implemented ✅
 
-### Subscriptions (Stripe Integration)
-- `GET /api/pricing/tiers` - Get pricing tiers
-- `POST /api/subscriptions/checkout` - Create Stripe checkout session
-- `GET /api/subscriptions/status/{session_id}` - Check payment status
-- `GET /api/subscriptions/current` - Get active subscription
-- `POST /api/webhook/stripe` - Stripe webhook handler
+### P0 - Deployment Readiness (COMPLETE)
+- [x] Database Migration: PostgreSQL → MongoDB
+- [x] Backend modularized into separate files
+- [x] Frontend builds successfully
+- [x] All deployment blockers resolved
 
-### Health
-- `GET /health` - Health check
-- `GET /` - API info
+### P1 - MongoDB Query Optimizations (COMPLETE)
+- [x] Added projections to all list queries
 
-## Database Schema (MongoDB)
-- **Database**: `construction_intel_db`
-- **Collections**: 
-  - `users` - User accounts
-  - `jobs` - Job listings
-  - `worker_profiles` - Worker profiles
-  - `products` - Shop products
-  - `orders` - Product orders
-  - `payment_transactions` - Payment records (Stripe sessions)
-  - `subscriptions` - Active subscriptions
+### P2 - Stripe Integration (COMPLETE)
+- [x] Backend subscription endpoints
+- [x] payment_transactions collection
+- [x] subscriptions collection
+
+### P3 - Code Refactoring (COMPLETE)
+- [x] Modular backend structure
+
+### P4 - Frontend Pricing UI (COMPLETE)
+- [x] Homepage with hero, features, CTA
+- [x] Pricing page with 3 tiers
+- [x] Login/Register page with tabs
+- [x] Subscription success page with polling
+- [x] Navigation with login state
+- [x] Stripe checkout flow integration
 
 ## Environment Variables
 
@@ -119,74 +109,23 @@ STRIPE_WEBHOOK_SECRET=
 VITE_API_URL=/api
 ```
 
-## What's Been Implemented ✅
-
-### P0 - Deployment Readiness (COMPLETE)
-- [x] Database Migration: PostgreSQL → MongoDB (Motor async driver)
-- [x] Removed all SQLAlchemy, PostgreSQL, Redis dependencies
-- [x] Backend consolidated into server.py with FastAPI
-- [x] Configuration externalized to .env files
-- [x] Frontend build errors fixed (TypeScript issues)
-- [x] Supervisor configurations for production
-- [x] Frontend builds successfully (dist/ folder exists)
-- [x] Deployment blockers resolved
-
-### P1 - MongoDB Query Optimizations (COMPLETE)
-- [x] Added projections to Jobs list query
-- [x] Added projections to Workers list query
-- [x] Added projections to Products list query
-- [x] Added projections to Orders list query
-
-### P2 - Stripe Integration (COMPLETE)
-- [x] Installed emergentintegrations library
-- [x] Added Stripe configuration to .env
-- [x] Created `/api/subscriptions/checkout` endpoint
-- [x] Created `/api/subscriptions/status/{session_id}` endpoint
-- [x] Created `/api/subscriptions/current` endpoint
-- [x] Created `/api/webhook/stripe` endpoint
-- [x] Created payment_transactions collection for tracking
-- [x] Created subscriptions collection for active subs
-
-### P3 - Code Refactoring (COMPLETE)
-- [x] Created modular directory structure (db/, models/, auth/, routes/)
-- [x] Moved MongoDB client to `db/mongo.py`
-- [x] Moved Pydantic models to `models/schemas.py`
-- [x] Moved auth helpers to `auth/deps.py`
-- [x] Split routes into separate files:
-  - `routes/auth.py`
-  - `routes/jobs.py`
-  - `routes/workers.py`
-  - `routes/products.py`
-  - `routes/orders.py`
-  - `routes/payments.py`
-  - `routes/market_data.py`
-- [x] Reduced server.py to minimal router inclusion
-
 ## Deployment Status: READY ✅
-- Frontend: Running on port 3000 (200 OK)
-- Backend: Running on port 8001 (healthy, v2.0.0)
+- Frontend: Running on port 3000
+- Backend: Running on port 8001
 - MongoDB: Connected
 - Stripe: Configured and working
+
+## Test Credentials
+- **Test User**: test@example.com / test123
 
 ## Pending Tasks
 
 ### Backlog (Future)
-- [ ] Subscription usage tracking (per-tenant limits, project counts)
+- [ ] Subscription usage tracking (per-tenant limits)
 - [ ] Admin billing/usage dashboard
-- [ ] Remove outdated SQLAlchemy scripts
-- [ ] Add frontend UI for subscription flow
-
-## Test Credentials
-- **Demo User**: demo@example.com / demo123
-- **Test User**: test@example.com / test123
-
-## Tech Stack
-- Frontend: React, Vite, TypeScript, TailwindCSS, TanStack Query
-- Backend: FastAPI, Python, Motor (async MongoDB)
-- Database: MongoDB
-- Payments: Stripe (via emergentintegrations)
-- DevOps: Supervisor, Docker
+- [ ] Email notifications for subscription events
+- [ ] Subscription cancellation/renewal flow
 
 ---
 *Last Updated: January 27, 2026*
-*Version: 2.0.0 (Modular Architecture)*
+*Version: 2.0.0 (Full Monetization)*
