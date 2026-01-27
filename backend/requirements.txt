@@ -20,4 +20,4 @@ python-dotenv>=1.0.1
 requests>=2.31.0
 
 # Optional: External ML API integration
-openai>=1.0.0
+openai==1.99.9
