@@ -96,5 +96,27 @@ const OpportunityList = () => {
     },
   ]
 
-  // Handle error state in UI
-  if (isError &&
+  if (isLoading) {
+    return <div className="text-center py-8">Loading opportunities...</div>
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center py-8 text-red-600">
+        {error || 'Failed to load opportunities'}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <h2 className="text-2xl font-bold">Opportunities</h2>
+      <DataTable 
+        data={projects || []} 
+        columns={columns}
+      />
+    </div>
+  )
+}
+
+export default OpportunityList
