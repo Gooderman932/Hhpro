@@ -277,19 +277,4 @@ uploads/
 models/*.pkl
 models/*.joblib
 models/*.h5
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
--e 
-# Environment files
-*.env
-*.env.*
+# Removed duplicate .env blocking entries
