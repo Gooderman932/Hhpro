@@ -98,7 +98,7 @@ export const AuthPage = () => {
                     type="email"
                     placeholder="you@example.com"
                     value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoginEmail(e.target.value)}
                     required
                     className="bg-slate-800 border-slate-600 text-white"
                   />
@@ -111,7 +111,7 @@ export const AuthPage = () => {
                     type="password"
                     placeholder="••••••••"
                     value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLoginPassword(e.target.value)}
                     required
                     className="bg-slate-800 border-slate-600 text-white"
                   />
@@ -144,7 +144,7 @@ export const AuthPage = () => {
                     type="text"
                     placeholder="John Doe"
                     value={registerName}
-                    onChange={(e) => setRegisterName(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRegisterName(e.target.value)}
                     required
                     className="bg-slate-800 border-slate-600 text-white"
                   />
@@ -157,7 +157,7 @@ export const AuthPage = () => {
                     type="email"
                     placeholder="you@example.com"
                     value={registerEmail}
-                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRegisterEmail(e.target.value)}
                     required
                     className="bg-slate-800 border-slate-600 text-white"
                   />
@@ -170,7 +170,7 @@ export const AuthPage = () => {
                     type="password"
                     placeholder="••••••••"
                     value={registerPassword}
-                    onChange={(e) => setRegisterPassword(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRegisterPassword(e.target.value)}
                     required
                     minLength={6}
                     className="bg-slate-800 border-slate-600 text-white"
