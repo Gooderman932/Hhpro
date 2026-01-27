@@ -25,7 +25,7 @@ export const AuthPage = () => {
   const [registerPassword, setRegisterPassword] = useState('')
   const [registerName, setRegisterName] = useState('')
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
@@ -41,7 +41,7 @@ export const AuthPage = () => {
     }
   }
 
-  const handleRegister = async (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setIsLoading(true)
     setError(null)
