@@ -275,6 +275,12 @@ async def startup_db():
     # Payment transactions indexes
     await db.payment_transactions.create_index("transaction_id")
     await db.payment_transactions.create_index("order_id")
+    await db.payment_transactions.create_index("session_id")
+    
+    # Subscriptions indexes
+    await db.subscriptions.create_index("subscription_id")
+    await db.subscriptions.create_index("user_id")
+    await db.subscriptions.create_index("session_id", unique=True)
     
     print("Database indexes created")
 
