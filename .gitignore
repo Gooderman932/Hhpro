@@ -135,7 +135,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+# .env files are tracked for deployment
 .envrc
 .venv
 env/
