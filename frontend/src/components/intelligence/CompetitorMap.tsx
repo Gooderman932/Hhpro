@@ -2,29 +2,19 @@ import { useQuery } from '@tanstack/react-query'
 import { getCompetitors } from '../../services/api'
 import DataTable from '../common/DataTable'
 import type { Competitor } from '../../types'
-import { useState } from 'react'
 
 const CompetitorMap = () => {
-  // Add error state tracking
-  const [error, setError] = useState<string | null>(null)
-  
   const { 
     data: competitors, 
     isLoading, 
     isError, 
-    error: queryError 
-  } = useQuery({
+    error 
+  } = useQuery<Competitor[]>({
     queryKey: ['competitors'],
     queryFn: () => getCompetitors(20),
-    // Add error handling
-    onError: (error) => {
-      console.error('Failed to fetch competitors:', error)
-      setError('Failed to load competitor data. Please try again later.')
-    }
   })
 
-  // Handle error state in UI
-  if (isError && error) {
+  if (isError) {
     return (
       <div className="space-y-6">
         <div>
@@ -42,7 +32,7 @@ const CompetitorMap = () => {
               </svg>
             </div>
             <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">{error}</h3>
+              <h3 className="text-sm font-medium text-red-800">{error?.message || 'Failed to load competitor data'}</h3>
               <div className="mt-2 text-sm text-red-700">
                 <p>Please check your connection and try again.</p>
               </div>

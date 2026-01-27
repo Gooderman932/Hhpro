@@ -2,24 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import { getProjects } from '../../services/api'
 import DataTable from '../common/DataTable'
 import type { Project } from '../../types'
-import { useState } from 'react'
 
 const OpportunityList = () => {
-  // Add error state tracking
-  const [error, setError] = useState<string | null>(null)
-  
   const { 
     data: projects, 
     isLoading, 
     isError, 
-    error: queryError 
-  } = useQuery({
+    error 
+  } = useQuery<Project[]>({
     queryKey: ['opportunities'],
     queryFn: () => getProjects({ limit: 50 }),
-    onError: (error) => {
-      console.error('Failed to fetch projects:', error)
-      setError('Failed to load project data. Please try again later.')
-    }
   })
 
   const formatCurrency = (value: number | null | undefined) => {
@@ -103,7 +95,7 @@ const OpportunityList = () => {
   if (isError) {
     return (
       <div className="text-center py-8 text-red-600">
-        {error || 'Failed to load opportunities'}
+        {error?.message || 'Failed to load opportunities'}
       </div>
     )
   }

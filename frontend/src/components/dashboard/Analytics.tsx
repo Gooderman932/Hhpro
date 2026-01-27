@@ -8,48 +8,47 @@
 import { useQuery } from '@tanstack/react-query'
 import { getAnalyticsSummary, getRegionalAnalysis } from '../../services/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { useState } from 'react'
+
+interface AnalyticsSummary {
+  sector_distribution?: Record<string, number>
+}
+
+interface RegionalData {
+  regions?: Array<{
+    state?: string
+    project_count?: number
+    total_value?: number
+  }>
+}
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899']
 
 const Analytics = () => {
-  // Add error state management
-  const [summaryError, setSummaryError] = useState<string | null>(null)
-  const [regionalError, setRegionalError] = useState<string | null>(null)
-
   const { 
     data: summary, 
     isLoading: summaryLoading, 
     isError: isSummaryError,
-    error: summaryQueryError 
-  } = useQuery({
+    error: summaryError 
+  } = useQuery<AnalyticsSummary>({
     queryKey: ['analytics-summary'],
     queryFn: getAnalyticsSummary,
-    onError: (error) => {
-      console.error('Failed to fetch analytics summary:', error)
-      setSummaryError('Failed to load summary data')
-    }
   })
 
   const { 
     data: regionalData, 
     isLoading: regionalLoading, 
     isError: isRegionalError,
-    error: regionalQueryError 
-  } = useQuery({
+    error: regionalError 
+  } = useQuery<RegionalData>({
     queryKey: ['regional-analysis'],
     queryFn: getRegionalAnalysis,
-    onError: (error) => {
-      console.error('Failed to fetch regional analysis:', error)
-      setRegionalError('Failed to load regional data')
-    }
   })
 
   // Safely extract sector data with fallbacks
   const sectorData = summary?.sector_distribution
     ? Object.entries(summary.sector_distribution).map(([name, value]) => ({
         name,
-        value: Number(value), // Ensure value is a number
+        value: Number(value),
       }))
     : []
 
@@ -103,9 +102,9 @@ const Analytics = () => {
               <h3 className="text-sm font-medium text-red-800">Data Loading Error</h3>
               <div className="mt-2 text-sm text-red-700">
                 <p>
-                  {summaryError || 'Failed to load summary data'} 
+                  {summaryError?.message || 'Failed to load summary data'} 
                   {regionalError && ' and '} 
-                  {regionalError || 'Failed to load regional data'}
+                  {regionalError?.message || 'Failed to load regional data'}
                 </p>
                 <p className="mt-1">Please check your connection and try again.</p>
               </div>
@@ -141,7 +140,7 @@ const Analytics = () => {
                 fill="#8884d8"
                 dataKey="value"
               >
-                {sectorData.map((entry, index) => (
+                {sectorData.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
