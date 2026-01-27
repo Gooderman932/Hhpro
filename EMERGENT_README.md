@@ -20,9 +20,9 @@ This script will:
 - **Password**: demo123
 
 ### Access Your App
-🌐 **Frontend**: https://market-insights-159.preview.emergentagent.com
+🌐 **Frontend**: https://market-data-migrate.preview.emergentagent.com
 
-📡 **API Docs**: https://market-insights-159.preview.emergentagent.com/api/docs
+📡 **API Docs**: https://market-data-migrate.preview.emergentagent.com/api/docs
 
 ## 📋 Manual Commands
 

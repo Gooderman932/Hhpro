@@ -278,3 +278,11 @@ models/*.pkl
 models/*.joblib
 models/*.h5
 # Removed duplicate .env blocking entries
+-e 
+# Environment files
+*.env
+*.env.*
+-e 
+# Environment files
+*.env
+*.env.*
