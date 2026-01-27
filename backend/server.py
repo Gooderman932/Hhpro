@@ -1,11 +1,12 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, List
+from typing import Optional, List, Dict
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
+from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionRequest
 import jwt
 import os
 import uuid
