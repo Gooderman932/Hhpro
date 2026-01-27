@@ -18,7 +18,7 @@ load_dotenv(ROOT_DIR / '.env')
 
 # Configuration
 MONGO_URL = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
-DB_NAME = os.environ.get('DB_NAME', 'test_database')
+DB_NAME = os.environ.get('DB_NAME', 'construction_intel_db')
 SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
 ALGORITHM = os.environ.get('ALGORITHM', 'HS256')
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES', '30'))
@@ -26,6 +26,58 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES', 
 # Parse CORS origins from comma-separated string
 cors_origins_str = os.environ.get('CORS_ORIGINS', 'http://localhost:3000')
 CORS_ORIGINS = [origin.strip() for origin in cors_origins_str.split(',')]
+
+# Market Data Pricing Tiers
+MARKET_DATA_TIERS = [
+    {
+        "tier_id": "basic",
+        "name": "Basic Analytics",
+        "price": 299.00,
+        "billing_period": "monthly",
+        "description": "Essential market insights for growing contractors",
+        "features": [
+            "Regional labor and project trends",
+            "Basic wage analytics",
+            "Monthly industry reports",
+            "Email support",
+            "Up to 100 projects"
+        ]
+    },
+    {
+        "tier_id": "professional",
+        "name": "Professional Suite",
+        "price": 799.00,
+        "billing_period": "monthly",
+        "description": "Comprehensive analytics for established contractors",
+        "features": [
+            "All Basic features",
+            "National market data coverage",
+            "Real-time wage and demand tracking",
+            "Competitor analysis and market share",
+            "Custom report generation",
+            "Priority support",
+            "Up to 1,000 projects"
+        ]
+    },
+    {
+        "tier_id": "enterprise",
+        "name": "Enterprise Platform",
+        "price": 1999.00,
+        "billing_period": "monthly",
+        "description": "Full-scale intelligence for large construction firms",
+        "features": [
+            "All Professional features",
+            "API access for custom integrations",
+            "Custom data pipelines and ETL",
+            "Predictive analytics and win probability models",
+            "Demand forecasting by region and trade",
+            "Dedicated account manager",
+            "White-label branded reports",
+            "24/7 phone support",
+            "Unlimited projects"
+        ]
+    }
+]
 
 # MongoDB connection
 client = AsyncIOMotorClient(MONGO_URL)
