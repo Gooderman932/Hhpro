@@ -107,4 +107,29 @@ export const getRelationshipGraph = async (companyId: number) => {
   return response.data
 }
 
+// Pricing & Subscriptions
+export const getPricingTiers = async (): Promise<PricingTier[]> => {
+  const response = await api.get<PricingTier[]>('/pricing/tiers')
+  return response.data
+}
+
+export const createCheckoutSession = async (tierId: string): Promise<CheckoutResponse> => {
+  const originUrl = window.location.origin
+  const response = await api.post<CheckoutResponse>('/subscriptions/checkout', {
+    tier_id: tierId,
+    origin_url: originUrl
+  })
+  return response.data
+}
+
+export const getPaymentStatus = async (sessionId: string): Promise<PaymentStatus> => {
+  const response = await api.get<PaymentStatus>(`/subscriptions/status/${sessionId}`)
+  return response.data
+}
+
+export const getCurrentSubscription = async (): Promise<Subscription | null> => {
+  const response = await api.get<Subscription | null>('/subscriptions/current')
+  return response.data
+}
+
 export default api
