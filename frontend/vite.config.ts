@@ -13,11 +13,19 @@ export default defineConfig({
   server: {
     host: true,
     port: 3000,
+    allowedHosts: [
+      '.preview.emergentagent.com',
+    ],
     proxy: {
       '/api': {
         target: 'http://localhost:8001',
         changeOrigin: true,
       },
     },
+  },
+  preview: {
+    allowedHosts: [
+      '.preview.emergentagent.com',
+    ],
   },
 })
