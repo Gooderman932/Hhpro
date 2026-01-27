@@ -788,3 +788,247 @@ async def root():
 async def get_pricing_tiers():
     """Get available subscription tiers"""
     return MARKET_DATA_TIERS
+
+
+# ============================================
+# Subscription Models
+# ============================================
+
+class SubscriptionCreate(BaseModel):
+    tier_id: str
+    origin_url: str
+
+
+class SubscriptionResponse(BaseModel):
+    subscription_id: str
+    user_id: str
+    tier_id: str
+    tier_name: str
+    status: str
+    price: float
+    created_at: datetime
+    expires_at: Optional[datetime] = None
+
+
+class CheckoutResponse(BaseModel):
+    url: str
+    session_id: str
+
+
+# ============================================
+# Subscription Endpoints (Stripe Integration)
+# ============================================
+
+# Pricing tiers as backend-defined packages (security: never accept amounts from frontend)
+TIER_PRICES = {
+    "basic": 299.00,
+    "professional": 799.00,
+    "enterprise": 1999.00
+}
+
+
+@app.post("/api/subscriptions/checkout", response_model=CheckoutResponse)
+async def create_subscription_checkout(
+    request: Request,
+    data: SubscriptionCreate,
+    current_user: User = Depends(get_current_user)
+):
+    """Create a Stripe checkout session for a subscription tier"""
+    # Validate tier
+    if data.tier_id not in TIER_PRICES:
+        raise HTTPException(status_code=400, detail="Invalid tier selected")
+    
+    # Get amount from server-side definition (security)
+    amount = TIER_PRICES[data.tier_id]
+    tier_info = next((t for t in MARKET_DATA_TIERS if t["tier_id"] == data.tier_id), None)
+    
+    if not tier_info:
+        raise HTTPException(status_code=400, detail="Tier not found")
+    
+    # Build URLs from provided origin
+    origin_url = data.origin_url.rstrip('/')
+    success_url = f"{origin_url}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = f"{origin_url}/pricing"
+    
+    # Initialize Stripe checkout
+    host_url = str(request.base_url).rstrip('/')
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    # Create checkout session
+    checkout_request = CheckoutSessionRequest(
+        amount=amount,
+        currency="usd",
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata={
+            "user_id": current_user.user_id,
+            "user_email": current_user.email,
+            "tier_id": data.tier_id,
+            "tier_name": tier_info["name"],
+            "subscription_type": "market_data"
+        }
+    )
+    
+    session = await stripe_checkout.create_checkout_session(checkout_request)
+    
+    # Create pending payment transaction record BEFORE redirect
+    transaction_doc = {
+        "transaction_id": str(uuid.uuid4()),
+        "session_id": session.session_id,
+        "user_id": current_user.user_id,
+        "user_email": current_user.email,
+        "tier_id": data.tier_id,
+        "tier_name": tier_info["name"],
+        "amount": amount,
+        "currency": "usd",
+        "payment_status": "pending",
+        "subscription_type": "market_data",
+        "created_at": datetime.utcnow()
+    }
+    await db.payment_transactions.insert_one(transaction_doc)
+    
+    return CheckoutResponse(url=session.url, session_id=session.session_id)
+
+
+@app.get("/api/subscriptions/status/{session_id}")
+async def get_payment_status(
+    request: Request,
+    session_id: str,
+    current_user: User = Depends(get_current_user)
+):
+    """Check payment status and update subscription if paid"""
+    # Initialize Stripe checkout
+    host_url = str(request.base_url).rstrip('/')
+    webhook_url = f"{host_url}/api/webhook/stripe"
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+    
+    # Get checkout status from Stripe
+    checkout_status = await stripe_checkout.get_checkout_status(session_id)
+    
+    # Find the payment transaction
+    transaction = await db.payment_transactions.find_one({"session_id": session_id})
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+    
+    # If already processed, return current status
+    if transaction.get("payment_status") == "paid":
+        subscription = await db.subscriptions.find_one({"session_id": session_id})
+        return {
+            "status": checkout_status.status,
+            "payment_status": "paid",
+            "subscription": subscription
+        }
+    
+    # Update transaction status
+    new_status = checkout_status.payment_status
+    await db.payment_transactions.update_one(
+        {"session_id": session_id},
+        {"$set": {"payment_status": new_status, "updated_at": datetime.utcnow()}}
+    )
+    
+    # If payment successful and not already processed, create subscription
+    if checkout_status.payment_status == "paid":
+        # Check if subscription already exists (prevent duplicate processing)
+        existing_sub = await db.subscriptions.find_one({"session_id": session_id})
+        if not existing_sub:
+            subscription_doc = {
+                "subscription_id": str(uuid.uuid4()),
+                "session_id": session_id,
+                "user_id": transaction["user_id"],
+                "user_email": transaction["user_email"],
+                "tier_id": transaction["tier_id"],
+                "tier_name": transaction["tier_name"],
+                "status": "active",
+                "price": transaction["amount"],
+                "created_at": datetime.utcnow(),
+                "expires_at": datetime.utcnow() + timedelta(days=30)
+            }
+            await db.subscriptions.insert_one(subscription_doc)
+            
+            return {
+                "status": checkout_status.status,
+                "payment_status": "paid",
+                "subscription": subscription_doc
+            }
+    
+    return {
+        "status": checkout_status.status,
+        "payment_status": new_status,
+        "subscription": None
+    }
+
+
+@app.get("/api/subscriptions/current", response_model=Optional[SubscriptionResponse])
+async def get_current_subscription(current_user: User = Depends(get_current_user)):
+    """Get user's current active subscription"""
+    subscription = await db.subscriptions.find_one({
+        "user_id": current_user.user_id,
+        "status": "active",
+        "expires_at": {"$gt": datetime.utcnow()}
+    })
+    
+    if not subscription:
+        return None
+    
+    return SubscriptionResponse(
+        subscription_id=subscription["subscription_id"],
+        user_id=subscription["user_id"],
+        tier_id=subscription["tier_id"],
+        tier_name=subscription["tier_name"],
+        status=subscription["status"],
+        price=subscription["price"],
+        created_at=subscription["created_at"],
+        expires_at=subscription.get("expires_at")
+    )
+
+
+@app.post("/api/webhook/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhook events"""
+    try:
+        body = await request.body()
+        signature = request.headers.get("Stripe-Signature", "")
+        
+        # Initialize Stripe checkout
+        host_url = str(request.base_url).rstrip('/')
+        webhook_url = f"{host_url}/api/webhook/stripe"
+        stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=webhook_url)
+        
+        # Handle webhook
+        webhook_response = await stripe_checkout.handle_webhook(body, signature)
+        
+        # Process the event
+        if webhook_response.payment_status == "paid":
+            session_id = webhook_response.session_id
+            
+            # Update transaction
+            await db.payment_transactions.update_one(
+                {"session_id": session_id},
+                {"$set": {"payment_status": "paid", "updated_at": datetime.utcnow()}}
+            )
+            
+            # Create subscription if not exists
+            existing_sub = await db.subscriptions.find_one({"session_id": session_id})
+            if not existing_sub:
+                transaction = await db.payment_transactions.find_one({"session_id": session_id})
+                if transaction:
+                    subscription_doc = {
+                        "subscription_id": str(uuid.uuid4()),
+                        "session_id": session_id,
+                        "user_id": transaction["user_id"],
+                        "user_email": transaction["user_email"],
+                        "tier_id": transaction["tier_id"],
+                        "tier_name": transaction["tier_name"],
+                        "status": "active",
+                        "price": transaction["amount"],
+                        "created_at": datetime.utcnow(),
+                        "expires_at": datetime.utcnow() + timedelta(days=30)
+                    }
+                    await db.subscriptions.insert_one(subscription_doc)
+        
+        return {"status": "received", "event_id": webhook_response.event_id}
+    
+    except Exception as e:
+        print(f"Webhook error: {e}")
+        return {"status": "error", "message": str(e)}
