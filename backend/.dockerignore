@@ -11,10 +11,7 @@ docs/
 # CI/CD
 .github/
 
-# Development
-.env
-.env.local
-.env.*.local
+# Development (.env files needed for deployment)
 .vscode/
 .idea/
 *.swp
