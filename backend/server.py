@@ -724,3 +724,12 @@ async def root():
         "version": "1.0.0",
         "docs": "/docs"
     }
+
+# ============================================
+# Pricing Tiers Endpoint
+# ============================================
+
+@app.get("/api/pricing/tiers")
+async def get_pricing_tiers():
+    """Get available subscription tiers"""
+    return MARKET_DATA_TIERS
