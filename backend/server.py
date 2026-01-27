@@ -28,6 +28,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES', 
 cors_origins_str = os.environ.get('CORS_ORIGINS', 'http://localhost:3000')
 CORS_ORIGINS = [origin.strip() for origin in cors_origins_str.split(',')]
 
+# Stripe Configuration
+STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+
 # Market Data Pricing Tiers
 MARKET_DATA_TIERS = [
     {
