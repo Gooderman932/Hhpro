@@ -7,6 +7,7 @@
 
 import axios from 'axios'
 import type { Project, AnalyticsSummary, Competitor, AuthToken, User } from '../types'
+import type { PricingTier, CheckoutResponse, PaymentStatus, Subscription } from '../types/subscription'
 
 const api = axios.create({
   baseURL: '/api',
@@ -26,14 +27,18 @@ api.interceptors.request.use((config) => {
 
 // Authentication
 export const login = async (email: string, password: string): Promise<AuthToken> => {
-  const formData = new FormData()
-  formData.append('username', email)
-  formData.append('password', password)
-  
-  const response = await api.post<AuthToken>('/auth/token', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
+  const response = await api.post<AuthToken>('/auth/token', {
+    username: email,
+    password: password
+  })
+  return response.data
+}
+
+export const register = async (email: string, password: string, fullName: string): Promise<User> => {
+  const response = await api.post<User>('/auth/register', {
+    email,
+    password,
+    full_name: fullName
   })
   return response.data
 }
