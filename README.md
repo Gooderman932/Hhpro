@@ -39,7 +39,7 @@
 
 # PLATFORM OVERVIEW
 
-## HDrywall Pro Features
+## HhDrywall Pro Features
 
 ### For Contractors
 - Post jobs with trade codes (09-Drywall, 03-Concrete, etc.)
@@ -70,7 +70,7 @@
 
 # DOMAIN IMPLEMENTATION
 
-## Subdomain Setup (pro.hdrywallrepair.com)
+## Subdomain Setup (pro.hhdrywallrepair.com)
 
 ### Step 1: Add DNS Record
 
@@ -86,15 +86,15 @@ TTL:    Auto (or 3600)
 ### Step 2: Connect in Emergent Dashboard
 
 1. Go to **Home** in Emergent
-2. Click **HDrywall Repair** project
+2. Click **HhDrywall Repair** project
 3. Click **"Link domain"**
-4. Enter: `pro.hdrywallrepair.com`
+4. Enter: `pro.hhdrywallrepair.com`
 5. Click **"Entri"** → follow prompts
 6. Wait 5-15 minutes for SSL
 
 ### Step 3: Verify
 
-Visit `https://pro.hdrywallrepair.com`
+Visit `https://pro.hhdrywallrepair.com`
 
 ---
 
@@ -103,17 +103,17 @@ Visit `https://pro.hdrywallrepair.com`
 ## Navigation Links
 
 ```html
-<a href="https://pro.hdrywallrepair.com/jobs">Find Jobs</a>
-<a href="https://pro.hdrywallrepair.com/workers">Find Workers</a>
-<a href="https://pro.hdrywallrepair.com/shop">Pro Shop</a>
-<a href="https://pro.hdrywallrepair.com/market-data">Market Data</a>
+<a href="https://pro.hhdrywallrepair.com/jobs">Find Jobs</a>
+<a href="https://pro.hhdrywallrepair.com/workers">Find Workers</a>
+<a href="https://pro.hhdrywallrepair.com/shop">Pro Shop</a>
+<a href="https://pro.hhdrywallrepair.com/market-data">Market Data</a>
 ```
 
 ## Call-to-Action Buttons
 
 ```html
 <!-- Orange "Get Started" Button -->
-<a href="https://pro.hdrywallrepair.com/register" 
+<a href="https://pro.hhdrywallrepair.com/register" 
    style="display:inline-block; background:#f97316; color:white; 
           padding:14px 28px; text-decoration:none; font-weight:600; 
           text-transform:uppercase; border-radius:2px;">
@@ -121,7 +121,7 @@ Visit `https://pro.hdrywallrepair.com`
 </a>
 
 <!-- Dark "Browse Jobs" Button -->
-<a href="https://pro.hdrywallrepair.com/jobs" 
+<a href="https://pro.hhdrywallrepair.com/jobs" 
    style="display:inline-block; background:#0f172a; color:white; 
           padding:14px 28px; text-decoration:none; font-weight:600; 
           text-transform:uppercase; border-radius:2px;">
@@ -129,7 +129,7 @@ Visit `https://pro.hdrywallrepair.com`
 </a>
 
 <!-- Market Data Button -->
-<a href="https://pro.hdrywallrepair.com/market-data" 
+<a href="https://pro.hhdrywallrepair.com/market-data" 
    style="display:inline-block; background:#0f172a; color:white; 
           padding:14px 28px; text-decoration:none; font-weight:600; 
           text-transform:uppercase; border-radius:2px;">
@@ -147,7 +147,7 @@ Visit `https://pro.hdrywallrepair.com`
     </h2>
     <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:20px;">
       
-      <a href="https://pro.hdrywallrepair.com/jobs" 
+      <a href="https://pro.hhdrywallrepair.com/jobs" 
          style="display:block; background:white; border:1px solid #e2e8f0; 
                 padding:30px; text-decoration:none; text-align:center;">
         <h3 style="color:#0f172a; margin-bottom:10px;">Job Board</h3>
@@ -157,7 +157,7 @@ Visit `https://pro.hdrywallrepair.com`
         <span style="color:#f97316; font-weight:500;">Browse Jobs →</span>
       </a>
       
-      <a href="https://pro.hdrywallrepair.com/workers" 
+      <a href="https://pro.hhdrywallrepair.com/workers" 
          style="display:block; background:white; border:1px solid #e2e8f0; 
                 padding:30px; text-decoration:none; text-align:center;">
         <h3 style="color:#0f172a; margin-bottom:10px;">Find Workers</h3>
@@ -167,7 +167,7 @@ Visit `https://pro.hdrywallrepair.com`
         <span style="color:#f97316; font-weight:500;">View Profiles →</span>
       </a>
       
-      <a href="https://pro.hdrywallrepair.com/shop" 
+      <a href="https://pro.hhdrywallrepair.com/shop" 
          style="display:block; background:white; border:1px solid #e2e8f0; 
                 padding:30px; text-decoration:none; text-align:center;">
         <h3 style="color:#0f172a; margin-bottom:10px;">Pro Shop</h3>
@@ -177,7 +177,7 @@ Visit `https://pro.hdrywallrepair.com`
         <span style="color:#f97316; font-weight:500;">Shop Now →</span>
       </a>
       
-      <a href="https://pro.hdrywallrepair.com/market-data" 
+      <a href="https://pro.hhdrywallrepair.com/market-data" 
          style="display:block; background:white; border:1px solid #e2e8f0; 
                 padding:30px; text-decoration:none; text-align:center;">
         <h3 style="color:#0f172a; margin-bottom:10px;">Market Data</h3>
