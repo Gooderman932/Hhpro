@@ -1,4 +1,4 @@
-# HDrywall Repair Pro Platform
+# HHDrywall Repair Pro Platform
 ## Complete Implementation, Administration & Maintenance Guide
 
 **Professional contractor/subcontractor job matching platform with e-commerce for hdrywallrepair.com**
@@ -11,7 +11,7 @@
 
 | Environment | URL |
 |-------------|-----|
-| **HDrywall Pro Platform** | https://pro.hdrywallrepair.com |
+| **HDrywall Pro Platform** | https://pro.hhdrywallrepair.com |
 | **Preview URL** | https://job-trade-match.preview.emergentagent.com |
 | **Market Data Repo** | https://github.com/Gooderman932/market-data |
 
