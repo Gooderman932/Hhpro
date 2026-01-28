@@ -874,8 +874,8 @@ db.products.createIndex({ "category": 1 })
 
 | Resource | URL |
 |----------|-----|
-| HDrywall Platform | https://pro.hdrywallrepair.com |
-| Market Data Platform | https://intel.hdrywallrepair.com |
+| HhDrywall Platform | https://pro.hhdrywallrepair.com |
+| Market Data Platform | https://intel.hhdrywallrepair.com |
 | API Health | /api/health |
 | API Docs (Market Data) | /api/docs |
 
