@@ -1,5 +1,5 @@
 """
-HDrywall Pro API - Main Server
+HHDrywall Pro API - Main Server
 Construction Intelligence Platform
 """
 from fastapi import FastAPI
@@ -21,7 +21,7 @@ cors_origins_str = os.environ.get('CORS_ORIGINS', 'http://localhost:3000')
 CORS_ORIGINS = [origin.strip() for origin in cors_origins_str.split(',')]
 
 # FastAPI app
-app = FastAPI(title="HDrywall Pro API", version="2.0.0")
+app = FastAPI(title="HHDrywall Pro API", version="2.0.0")
 
 # CORS middleware
 app.add_middleware(
@@ -50,13 +50,13 @@ async def startup_db():
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "HDrywall Pro API"}
+    return {"status": "healthy", "service": "HHDrywall Pro API"}
 
 
 @app.get("/")
 async def root():
     return {
-        "message": "HDrywall Pro API",
+        "message": "HHDrywall Pro API",
         "version": "2.0.0",
         "docs": "/docs"
     }

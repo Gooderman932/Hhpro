@@ -38,7 +38,7 @@ const Navigation = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <BarChart3 className="h-8 w-8 text-blue-500" />
-            <span className="text-xl font-bold text-white">HDrywall Pro</span>
+            <span className="text-xl font-bold text-white">HHDrywall Pro</span>
           </Link>
 
           {/* Desktop Nav */}
@@ -173,7 +173,7 @@ const Home = () => {
       <div className="py-20 px-4 bg-slate-900/50">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-3xl font-bold text-white text-center mb-12">
-            Why Choose HDrywall Pro?
+            Why Choose HHDrywall Pro?
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             {[
@@ -213,7 +213,7 @@ const Home = () => {
             Ready to gain your competitive edge?
           </h2>
           <p className="text-slate-400 mb-8">
-            Join hundreds of construction professionals using HDrywall Pro to win more projects.
+            Join hundreds of construction professionals using HHDrywall Pro to win more projects.
           </p>
           <Button
             data-testid="cta-pricing-btn"
@@ -229,7 +229,7 @@ const Home = () => {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-slate-800">
         <div className="max-w-6xl mx-auto text-center text-slate-500 text-sm">
-          <p>© 2025 HDrywall Pro. All rights reserved.</p>
+          <p>© 2025 HHDrywall Pro. All rights reserved.</p>
         </div>
       </footer>
     </div>

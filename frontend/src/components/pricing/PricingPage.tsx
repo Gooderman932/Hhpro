@@ -193,7 +193,7 @@ export const PricingPage = () => {
         {/* Footer */}
         <div className="mt-16 text-center text-slate-500">
           <p>All plans include a 30-day money-back guarantee</p>
-          <p className="mt-2">Need custom features? <a href="mailto:sales@hdrywall.pro" className="text-blue-400 hover:underline">Contact sales</a></p>
+          <p className="mt-2">Need custom features? <a href="mailto:sales@hhdrywall.pro" className="text-blue-400 hover:underline">Contact sales</a></p>
         </div>
       </div>
     </div>
