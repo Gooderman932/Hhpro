@@ -377,7 +377,7 @@ GET /api/intelligence/relationships  → Relationship graph
 
 ### Option A: API Integration
 
-Add to HDrywall backend (`/app/backend/server.py`):
+Add to HhDrywall backend (`/app/backend/server.py`):
 
 ```python
 import httpx
@@ -438,13 +438,13 @@ server {
 
 3. Access at: `https://intel.hdrywallrepair.com`
 
-### Option C: Embed in HDrywall Platform
+### Option C: Embed in Hhdrywall Platform
 
 Create iframe integration on market data page:
 
 ```html
 <iframe 
-    src="https://intel.hdrywallrepair.com/dashboard" 
+    src="https://intel.hhdrywallrepair.com/dashboard" 
     width="100%" 
     height="800px" 
     frameborder="0">
