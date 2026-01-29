@@ -13,7 +13,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 3000,
-    allowedHosts: 'all',
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: 'http://localhost:8001',
@@ -24,6 +24,6 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 3000,
-    allowedHosts: 'all',
+    allowedHosts: true,
   },
 })
