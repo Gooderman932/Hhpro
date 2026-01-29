@@ -1,7 +1,7 @@
 # HHDrywall Repair Pro Platform
 ## Complete Implementation, Administration & Maintenance Guide
 
-**Professional contractor/subcontractor job matching platform with e-commerce for hdrywallrepair.com**
+**Professional contractor/subcontractor job matching platform with e-commerce for hhdrywallrepair.com**
 
 **Integrated with:** [Construction Intelligence Platform](https://github.com/Gooderman932/market-data) by Poor Dude Holdings LLC
 
@@ -11,7 +11,7 @@
 
 | Environment | URL |
 |-------------|-----|
-| **HDrywall Pro Platform** | https://pro.hhdrywallrepair.com |
+| **HhDrywall Pro Platform** | https://pro.hhdrywallrepair.com |
 | **Preview URL** | https://job-trade-match.preview.emergentagent.com |
 | **Market Data Repo** | https://github.com/Gooderman932/market-data |
 
