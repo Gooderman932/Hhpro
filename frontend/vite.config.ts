@@ -24,6 +24,6 @@ export default defineConfig({
   preview: {
     host: '0.0.0.0',
     port: 3000,
-    allowedHosts: ['market-data-migrate.preview.emergentagent.com'],
+    allowedHosts: 'all',
   },
 })
