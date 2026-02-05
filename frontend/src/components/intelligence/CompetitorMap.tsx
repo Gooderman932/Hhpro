@@ -12,15 +12,27 @@ interface Competitor {
   wins?: number
 }
 
+interface CompetitorResponse {
+  competitors: Competitor[]
+  subscription_tier?: string
+}
+
 const CompetitorMap = () => {
   const { 
     data: competitorData, 
     isLoading, 
     isError, 
     error 
-  } = useQuery<{ competitors: Competitor[] }>({
+  } = useQuery<CompetitorResponse>({
     queryKey: ['competitors'],
-    queryFn: () => getCompetitors(20),
+    queryFn: async () => {
+      const response = await getCompetitors(20)
+      // Handle both array and object responses
+      if (Array.isArray(response)) {
+        return { competitors: response }
+      }
+      return response as CompetitorResponse
+    },
   })
 
   if (isLoading) {
