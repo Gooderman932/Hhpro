@@ -86,7 +86,7 @@ const CompetitorMap = () => {
           <CardContent>
             {competitors.length > 0 ? (
               <div className="space-y-4">
-                {competitors.map((competitor, index) => (
+                {competitors.map((competitor: Competitor, index: number) => (
                   <div 
                     key={index}
                     className="flex items-center justify-between p-4 bg-slate-800 rounded-lg"
