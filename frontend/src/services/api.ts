@@ -167,4 +167,40 @@ export const getProjectsList = async (limit: number = 50) => {
   return response.data
 }
 
+// Notifications
+export interface NotificationPreferences {
+  email_enabled: boolean
+  frequency: string
+  min_project_value: number
+  preferred_sectors: string[]
+  preferred_regions: string[]
+  match_type: string
+  last_notified_at?: string | null
+}
+
+export const getNotificationPreferences = async (): Promise<NotificationPreferences> => {
+  const response = await api.get<NotificationPreferences>('/notifications/preferences')
+  return response.data
+}
+
+export const updateNotificationPreferences = async (prefs: Partial<NotificationPreferences>) => {
+  const response = await api.put('/notifications/preferences', prefs)
+  return response.data
+}
+
+export const getNotificationOptions = async () => {
+  const response = await api.get('/notifications/options')
+  return response.data
+}
+
+export const sendTestNotification = async () => {
+  const response = await api.post('/notifications/test')
+  return response.data
+}
+
+export const getNotificationHistory = async (limit: number = 20) => {
+  const response = await api.get('/notifications/history', { params: { limit } })
+  return response.data
+}
+
 export default api
