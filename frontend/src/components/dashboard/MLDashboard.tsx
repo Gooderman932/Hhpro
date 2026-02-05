@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, Target, MapPin, BarChart3, Loader2, AlertCircle } from 'lucide-react'
+import { TrendingUp, Target, MapPin, Loader2, AlertCircle } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import { 
