@@ -124,7 +124,7 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 - [x] Frontend with pricing/auth pages
 
 ## Preview URL
-`https://market-data-migrate.preview.emergentagent.com`
+`https://mlmarketapp.preview.emergentagent.com`
 
 ---
 *Last Updated: February 5, 2026*
