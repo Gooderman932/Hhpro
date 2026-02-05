@@ -29,10 +29,12 @@ from app.models.project import Project, ProjectParticipation
 from app.models.company import Company
 from app.models.prediction import Prediction, OpportunityScore
 from app.models.subscription import Subscription, PaymentTransaction
+from app.models.notification import NotificationPreference, NotificationLog
 
 # Import services
 from app.services.prediction import PredictionService
 from app.services.scoring import ScoringService
+from app.services.notification import NotificationService
 
 # Create all tables
 Base.metadata.create_all(bind=engine)
