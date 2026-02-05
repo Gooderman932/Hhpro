@@ -49,6 +49,19 @@ const Navigation = () => {
               Pricing
             </Link>
             
+            {isLoggedIn && subscription && (
+              <>
+                <Link to="/dashboard" className="text-slate-300 hover:text-white transition flex items-center">
+                  <TrendingUp className="h-4 w-4 mr-1" />
+                  Market Insights
+                </Link>
+                <Link to="/competitors" className="text-slate-300 hover:text-white transition flex items-center">
+                  <Users className="h-4 w-4 mr-1" />
+                  Competitors
+                </Link>
+              </>
+            )}
+            
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 {subscription && (
