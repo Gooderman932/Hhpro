@@ -6,10 +6,14 @@ from datetime import datetime, timedelta
 from passlib.context import CryptContext
 import uuid
 
-from app.database import SessionLocal
+from app.database import SessionLocal, Base, engine
 from app.models.user import User, Tenant
 from app.models.project import Project
 from app.models.subscription import Subscription
+from app.models.notification import NotificationPreference, NotificationLog
+
+# Ensure all tables are created
+Base.metadata.create_all(bind=engine)
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
