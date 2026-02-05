@@ -314,6 +314,7 @@ function App() {
         <Route path="/predictions" element={<MLDashboard />} />
         <Route path="/batch-scoring" element={<BatchScoring />} />
         <Route path="/competitors" element={<CompetitorMap />} />
+        <Route path="/notifications" element={<NotificationSettings />} />
       </Routes>
     </BrowserRouter>
   )
