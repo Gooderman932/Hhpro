@@ -72,10 +72,10 @@ class ScoringService:
     ) -> List[Dict]:
         """Score and rank multiple projects for a tenant."""
         
-        # Get active projects
+        # Get active projects (bidding, planning, or active status)
         projects = self.db.query(Project).filter(
             Project.tenant_id == tenant_id,
-            Project.status == 'active'
+            Project.status.in_(['active', 'bidding', 'planning'])
         ).limit(limit).all()
         
         # Build project data list
