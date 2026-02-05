@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import "@/App.css"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
-import { Menu, X, LogOut, User, BarChart3, TrendingUp, Users, Target } from "lucide-react"
+import { Menu, X, LogOut, User, BarChart3, TrendingUp, Users, Target, Bell } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { PricingPage } from "./components/pricing/PricingPage"
 import { SubscriptionSuccess } from "./components/pricing/SubscriptionSuccess"
@@ -12,6 +12,7 @@ import Analytics from "./components/dashboard/Analytics"
 import CompetitorMap from "./components/intelligence/CompetitorMap"
 import { MLDashboard } from "./components/dashboard/MLDashboard"
 import { BatchScoring } from "./components/dashboard/BatchScoring"
+import { NotificationSettings } from "./components/settings/NotificationSettings"
 
 // Navigation component
 const Navigation = () => {
