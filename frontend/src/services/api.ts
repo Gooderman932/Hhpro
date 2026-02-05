@@ -132,4 +132,39 @@ export const getCurrentSubscription = async (): Promise<Subscription | null> => 
   return response.data
 }
 
+// ML Predictions
+export const getWinProbability = async (projectId: number) => {
+  const response = await api.get(`/predictions/win-probability/${projectId}`)
+  return response.data
+}
+
+export const getDemandForecast = async (sector: string, region: string, months: number = 6) => {
+  const response = await api.get('/predictions/demand-forecast', {
+    params: { sector, region, months }
+  })
+  return response.data
+}
+
+export const getRegionalOutlook = async () => {
+  const response = await api.get('/predictions/regional-outlook')
+  return response.data
+}
+
+// Opportunity Scoring (Enterprise)
+export const scoreProject = async (projectId: number) => {
+  const response = await api.get(`/scoring/project/${projectId}`)
+  return response.data
+}
+
+export const batchScoreProjects = async (limit: number = 20) => {
+  const response = await api.get('/scoring/batch', { params: { limit } })
+  return response.data
+}
+
+// Projects list
+export const getProjectsList = async (limit: number = 50) => {
+  const response = await api.get('/projects', { params: { limit } })
+  return response.data
+}
+
 export default api
