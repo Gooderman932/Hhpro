@@ -54,13 +54,23 @@ const Navigation = () => {
             {isLoggedIn && subscription && (
               <>
                 <Link to="/dashboard" className="text-slate-300 hover:text-white transition flex items-center">
+                  <BarChart3 className="h-4 w-4 mr-1" />
+                  Analytics
+                </Link>
+                <Link to="/predictions" className="text-slate-300 hover:text-white transition flex items-center">
                   <TrendingUp className="h-4 w-4 mr-1" />
-                  Market Insights
+                  ML Predictions
                 </Link>
                 <Link to="/competitors" className="text-slate-300 hover:text-white transition flex items-center">
                   <Users className="h-4 w-4 mr-1" />
                   Competitors
                 </Link>
+                {subscription.tier_id === 'enterprise' && (
+                  <Link to="/batch-scoring" className="text-slate-300 hover:text-white transition flex items-center">
+                    <Target className="h-4 w-4 mr-1" />
+                    Batch Scoring
+                  </Link>
+                )}
               </>
             )}
             
