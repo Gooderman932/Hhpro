@@ -1,108 +1,132 @@
 import { useQuery } from '@tanstack/react-query'
 import { getCompetitors } from '../../services/api'
-import DataTable from '../common/DataTable'
-import type { Competitor } from '../../types'
+import { Loader2, AlertCircle, Users } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+
+interface Competitor {
+  name: string
+  company_type?: string
+  market_share?: number
+  win_rate?: number
+  project_count?: number
+  wins?: number
+}
 
 const CompetitorMap = () => {
   const { 
-    data: competitors, 
+    data: competitorData, 
     isLoading, 
     isError, 
     error 
-  } = useQuery<Competitor[]>({
+  } = useQuery<{ competitors: Competitor[] }>({
     queryKey: ['competitors'],
     queryFn: () => getCompetitors(20),
   })
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-slate-950 pt-20 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+      </div>
+    )
+  }
+
   if (isError) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Competitor Intelligence</h1>
-          <p className="mt-2 text-gray-600">
-            Track and analyze competitor activity in the market
-          </p>
-        </div>
-        
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-red-800">{error?.message || 'Failed to load competitor data'}</h3>
-              <div className="mt-2 text-sm text-red-700">
-                <p>Please check your connection and try again.</p>
-              </div>
-            </div>
-          </div>
+      <div className="min-h-screen bg-slate-950 pt-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <Card className="bg-slate-900 border-slate-700">
+            <CardHeader className="text-center">
+              <AlertCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+              <CardTitle className="text-white">Error Loading Data</CardTitle>
+              <CardDescription className="text-slate-400">
+                {error?.message || 'Failed to load competitor data. Professional subscription may be required.'}
+              </CardDescription>
+            </CardHeader>
+          </Card>
         </div>
       </div>
     )
   }
 
-  const columns = [
-    {
-      key: 'name',
-      header: 'Company',
-      render: (value: string) => (
-        <div className="font-medium text-gray-900">{value}</div>
-      ),
-    },
-    {
-      key: 'company_type',
-      header: 'Type',
-      render: (value: string) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-          {value}
-        </span>
-      ),
-    },
-    {
-      key: 'project_count',
-      header: 'Projects',
-    },
-    {
-      key: 'wins',
-      header: 'Wins',
-    },
-    {
-      key: 'win_rate',
-      header: 'Win Rate',
-      render: (value: number) => (
-        <div className="flex items-center">
-          <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
-            <div
-              className="bg-green-500 h-2 rounded-full"
-              style={{ width: `${value * 100}%` }}
-            />
-          </div>
-          <span className="text-sm font-medium">{(value * 100).toFixed(0)}%</span>
-        </div>
-      ),
-    },
-  ]
+  const competitors = competitorData?.competitors || []
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900">Competitor Intelligence</h1>
-        <p className="mt-2 text-gray-600">
-          Track and analyze competitor activity in the market
-        </p>
-      </div>
-
-      <div className="bg-white rounded-lg shadow">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Top Competitors</h2>
+    <div className="min-h-screen bg-slate-950 pt-20 px-4 pb-12">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-white">Competitor Intelligence</h1>
+          <p className="mt-2 text-slate-400">
+            Track and analyze competitor activity in the market
+          </p>
         </div>
-        <DataTable
-          data={competitors || []} // Safely fallback to empty array
-          columns={columns}
-          loading={isLoading}
-        />
+
+        <Card className="bg-slate-900 border-slate-700" data-testid="competitors-card">
+          <CardHeader>
+            <CardTitle className="text-white flex items-center gap-2">
+              <Users className="h-5 w-5 text-purple-500" />
+              Top Competitors
+            </CardTitle>
+            <CardDescription className="text-slate-400">
+              Market share and win rate analysis
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {competitors.length > 0 ? (
+              <div className="space-y-4">
+                {competitors.map((competitor, index) => (
+                  <div 
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-slate-800 rounded-lg"
+                    data-testid={`competitor-${index}`}
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 rounded-full bg-purple-600/20 flex items-center justify-center text-purple-400 font-bold">
+                        {index + 1}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">{competitor.name}</div>
+                        <div className="text-sm text-slate-400">
+                          {competitor.company_type || 'Contractor'}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-6">
+                      {competitor.market_share !== undefined && (
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-blue-400">
+                            {competitor.market_share.toFixed(1)}%
+                          </div>
+                          <div className="text-xs text-slate-400">Market Share</div>
+                        </div>
+                      )}
+                      {competitor.win_rate !== undefined && (
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-green-400">
+                            {(competitor.win_rate * 100).toFixed(0)}%
+                          </div>
+                          <div className="text-xs text-slate-400">Win Rate</div>
+                        </div>
+                      )}
+                      {competitor.project_count !== undefined && (
+                        <div className="text-center">
+                          <div className="text-lg font-semibold text-amber-400">
+                            {competitor.project_count}
+                          </div>
+                          <div className="text-xs text-slate-400">Projects</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-500">
+                No competitor data available
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
