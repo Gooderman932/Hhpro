@@ -36,3 +36,4 @@ class User(Base):
     
     tenant = relationship("Tenant", back_populates="users")
     subscriptions = relationship("Subscription", back_populates="user")
+    notification_preferences = relationship("NotificationPreference", back_populates="user", uselist=False)
