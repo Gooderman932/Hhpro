@@ -10,6 +10,8 @@ import { getCurrentSubscription } from "./services/api"
 import type { Subscription } from "./types/subscription"
 import Analytics from "./components/dashboard/Analytics"
 import CompetitorMap from "./components/intelligence/CompetitorMap"
+import { MLDashboard } from "./components/dashboard/MLDashboard"
+import { BatchScoring } from "./components/dashboard/BatchScoring"
 
 // Navigation component
 const Navigation = () => {
