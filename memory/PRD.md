@@ -87,7 +87,7 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 
 ## Test Accounts
 - **Enterprise**: `malcolmgoodmen@gmail.com` / `Test123!`
-- **Test**: `test@example.com` / `test123`
+- **Professional**: `test@example.com` / `test123`
 
 ## File Structure
 ```
@@ -109,11 +109,26 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 │       ├── prediction.py
 │       └── scoring.py
 └── requirements.txt
+
+/app/frontend/
+├── src/
+│   ├── App.tsx                  # Main router
+│   ├── components/
+│   │   ├── dashboard/
+│   │   │   ├── Analytics.tsx    # Analytics Dashboard
+│   │   │   ├── MLDashboard.tsx  # ML Predictions
+│   │   │   └── BatchScoring.tsx # Enterprise Scoring
+│   │   ├── intelligence/
+│   │   │   └── CompetitorMap.tsx
+│   │   ├── pricing/
+│   │   └── auth/
+│   └── services/
+│       └── api.ts               # API client
+└── package.json
 ```
 
-## Completed
-- [x] PostgreSQL migration from MongoDB
-- [x] SQLAlchemy ORM setup
+## Completed Features
+- [x] PostgreSQL with SQLAlchemy ORM
 - [x] User authentication with JWT
 - [x] Stripe subscription integration
 - [x] Win Probability ML model
@@ -121,10 +136,16 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 - [x] Opportunity Scoring engine
 - [x] Tier-based access control
 - [x] Sample data seeding
-- [x] Frontend with pricing/auth pages
+- [x] Frontend with dark theme
+- [x] Analytics Dashboard with charts
+- [x] ML Predictions Dashboard
+- [x] Batch Scoring (Enterprise)
+- [x] Competitor Intelligence
 
-## Preview URL
-`https://mlmarketapp.preview.emergentagent.com`
+## Testing Status
+- Backend: 100% (15/15 tests passed)
+- Frontend: 100% (all features working)
+- Last tested: February 5, 2026
 
 ---
 *Last Updated: February 5, 2026*
