@@ -273,6 +273,8 @@ function App() {
         <Route path="/subscription/success" element={<SubscriptionSuccess />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/dashboard" element={<Analytics />} />
+        <Route path="/predictions" element={<MLDashboard />} />
+        <Route path="/batch-scoring" element={<BatchScoring />} />
         <Route path="/competitors" element={<CompetitorMap />} />
       </Routes>
     </BrowserRouter>
