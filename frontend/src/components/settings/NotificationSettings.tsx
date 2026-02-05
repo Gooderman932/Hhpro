@@ -176,7 +176,7 @@ export const NotificationSettings = () => {
                 </div>
                 <Switch
                   checked={preferences.email_enabled}
-                  onCheckedChange={(checked) => setPreferences(prev => ({ ...prev, email_enabled: checked }))}
+                  onCheckedChange={(checked: boolean) => setPreferences(prev => ({ ...prev, email_enabled: checked }))}
                 />
               </div>
             </CardContent>
