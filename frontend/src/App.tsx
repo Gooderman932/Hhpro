@@ -260,6 +260,8 @@ function App() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/subscription/success" element={<SubscriptionSuccess />} />
         <Route path="/login" element={<AuthPage />} />
+        <Route path="/dashboard" element={<Analytics />} />
+        <Route path="/competitors" element={<CompetitorMap />} />
       </Routes>
     </BrowserRouter>
   )
