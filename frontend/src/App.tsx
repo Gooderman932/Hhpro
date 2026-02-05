@@ -1,13 +1,15 @@
 import { useEffect, useState } from "react"
 import "@/App.css"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
-import { Menu, X, LogOut, User, BarChart3 } from "lucide-react"
+import { Menu, X, LogOut, User, BarChart3, TrendingUp, Users } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { PricingPage } from "./components/pricing/PricingPage"
 import { SubscriptionSuccess } from "./components/pricing/SubscriptionSuccess"
 import { AuthPage } from "./components/auth/AuthPage"
 import { getCurrentSubscription } from "./services/api"
 import type { Subscription } from "./types/subscription"
+import Analytics from "./components/dashboard/Analytics"
+import CompetitorMap from "./components/intelligence/CompetitorMap"
 
 // Navigation component
 const Navigation = () => {
