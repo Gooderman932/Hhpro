@@ -78,9 +78,14 @@ const Navigation = () => {
             {isLoggedIn ? (
               <div className="flex items-center space-x-4">
                 {subscription && (
-                  <span className="text-sm text-green-400 bg-green-400/10 px-3 py-1 rounded-full">
-                    {subscription.tier_name}
-                  </span>
+                  <>
+                    <Link to="/notifications" className="text-slate-300 hover:text-white transition" title="Notification Settings">
+                      <Bell className="h-5 w-5" />
+                    </Link>
+                    <span className="text-sm text-green-400 bg-green-400/10 px-3 py-1 rounded-full">
+                      {subscription.tier_name}
+                    </span>
+                  </>
                 )}
                 <Button
                   variant="ghost"
