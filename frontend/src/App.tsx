@@ -124,9 +124,41 @@ const Navigation = () => {
               {isLoggedIn ? (
                 <>
                   {subscription && (
-                    <span className="text-sm text-green-400">
-                      Plan: {subscription.tier_name}
-                    </span>
+                    <>
+                      <span className="text-sm text-green-400">
+                        Plan: {subscription.tier_name}
+                      </span>
+                      <Link
+                        to="/dashboard"
+                        className="text-slate-300 hover:text-white"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Analytics
+                      </Link>
+                      <Link
+                        to="/predictions"
+                        className="text-slate-300 hover:text-white"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        ML Predictions
+                      </Link>
+                      <Link
+                        to="/competitors"
+                        className="text-slate-300 hover:text-white"
+                        onClick={() => setIsOpen(false)}
+                      >
+                        Competitors
+                      </Link>
+                      {subscription.tier_id === 'enterprise' && (
+                        <Link
+                          to="/batch-scoring"
+                          className="text-slate-300 hover:text-white"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Batch Scoring
+                        </Link>
+                      )}
+                    </>
                   )}
                   <button
                     onClick={handleLogout}
