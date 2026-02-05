@@ -648,6 +648,150 @@ async def get_competitors(
     }
 
 # ============================================
+# Notification Endpoints
+# ============================================
+
+class NotificationPreferencesUpdate(BaseModel):
+    email_enabled: bool = True
+    frequency: str = 'daily'  # realtime, daily, weekly
+    min_project_value: float = 1000000
+    preferred_sectors: List[str] = []
+    preferred_regions: List[str] = []
+    match_type: str = 'any'  # any, all
+
+@app.get("/api/notifications/preferences")
+async def get_notification_preferences(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get user's notification preferences."""
+    service = NotificationService(db)
+    prefs = service.get_user_preferences(current_user.id)
+    
+    if not prefs:
+        # Return default preferences
+        return {
+            "email_enabled": False,
+            "frequency": "daily",
+            "min_project_value": 1000000,
+            "preferred_sectors": [],
+            "preferred_regions": [],
+            "match_type": "any",
+            "last_notified_at": None
+        }
+    
+    return {
+        "email_enabled": prefs.email_enabled,
+        "frequency": prefs.frequency,
+        "min_project_value": prefs.min_project_value,
+        "preferred_sectors": prefs.preferred_sectors or [],
+        "preferred_regions": prefs.preferred_regions or [],
+        "match_type": prefs.match_type,
+        "last_notified_at": prefs.last_notified_at.isoformat() if prefs.last_notified_at else None
+    }
+
+@app.put("/api/notifications/preferences")
+async def update_notification_preferences(
+    data: NotificationPreferencesUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update user's notification preferences."""
+    service = NotificationService(db)
+    prefs = service.create_or_update_preferences(
+        user_id=current_user.id,
+        email_enabled=data.email_enabled,
+        frequency=data.frequency,
+        min_project_value=data.min_project_value,
+        preferred_sectors=data.preferred_sectors,
+        preferred_regions=data.preferred_regions,
+        match_type=data.match_type
+    )
+    
+    return {
+        "status": "success",
+        "message": "Notification preferences updated",
+        "preferences": {
+            "email_enabled": prefs.email_enabled,
+            "frequency": prefs.frequency,
+            "min_project_value": prefs.min_project_value,
+            "preferred_sectors": prefs.preferred_sectors,
+            "preferred_regions": prefs.preferred_regions,
+            "match_type": prefs.match_type
+        }
+    }
+
+@app.post("/api/notifications/test")
+async def send_test_notification(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Send a test notification to the current user."""
+    service = NotificationService(db)
+    prefs = service.get_user_preferences(current_user.id)
+    
+    if not prefs:
+        raise HTTPException(status_code=400, detail="Please configure notification preferences first")
+    
+    # Get some matching projects
+    matching = service.get_matching_projects(current_user, prefs)[:5]
+    
+    if not matching:
+        # Get any recent projects for the test
+        matching = db.query(Project).filter(
+            Project.tenant_id == current_user.tenant_id
+        ).limit(3).all()
+    
+    result = await service.send_notification(current_user, matching, 'realtime')
+    return result
+
+@app.get("/api/notifications/history")
+async def get_notification_history(
+    limit: int = 20,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get notification history for the user."""
+    logs = db.query(NotificationLog).filter(
+        NotificationLog.user_id == current_user.id
+    ).order_by(NotificationLog.created_at.desc()).limit(limit).all()
+    
+    return [
+        {
+            "id": log.id,
+            "type": log.notification_type,
+            "subject": log.subject,
+            "status": log.status,
+            "projects_count": len(log.project_ids) if log.project_ids else 0,
+            "sent_at": log.sent_at.isoformat() if log.sent_at else None,
+            "created_at": log.created_at.isoformat() if log.created_at else None
+        }
+        for log in logs
+    ]
+
+# Available options for frontend
+AVAILABLE_SECTORS = ["Commercial", "Residential", "Healthcare", "Industrial", "Retail", "Education", "Infrastructure", "Public"]
+AVAILABLE_REGIONS = ["AZ", "CA", "CO", "FL", "GA", "NV", "OH", "TN", "TX", "WA"]
+
+@app.get("/api/notifications/options")
+async def get_notification_options():
+    """Get available sectors and regions for notification preferences."""
+    return {
+        "sectors": AVAILABLE_SECTORS,
+        "regions": AVAILABLE_REGIONS,
+        "frequencies": [
+            {"id": "realtime", "name": "Real-time", "description": "Get notified immediately when a matching project is added"},
+            {"id": "daily", "name": "Daily Digest", "description": "Receive a daily summary of matching projects"},
+            {"id": "weekly", "name": "Weekly Digest", "description": "Receive a weekly summary of matching projects"}
+        ],
+        "match_types": [
+            {"id": "any", "name": "Any Match", "description": "Notify if ANY criteria matches (OR logic)"},
+            {"id": "all", "name": "All Match", "description": "Notify only if ALL criteria match (AND logic)"}
+        ]
+    }
+
+# ============================================
 # Health Check
 # ============================================
 
