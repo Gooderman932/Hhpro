@@ -12,10 +12,11 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 - **Frontend**: React 18 + TypeScript + Vite + Tailwind CSS
 - **ML**: scikit-learn (Win Probability, Demand Forecast, Opportunity Scoring)
 - **Payments**: Stripe via emergentintegrations
+- **Email**: Resend (for notifications)
 - **Infrastructure**: Supervisor process management
 
 ### Database: PostgreSQL
-- **Tables**: tenants, users, projects, companies, project_participations, predictions, opportunity_scores, subscriptions, payment_transactions
+- **Tables**: tenants, users, projects, companies, project_participations, predictions, opportunity_scores, subscriptions, payment_transactions, notification_preferences, notification_logs
 
 ## Key Features
 
@@ -39,6 +40,12 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 - Market share analysis
 - Win rate calculations
 
+### 5. Email Notifications (NEW)
+- **User-configurable preferences**: sectors, regions, value threshold
+- **Frequency options**: Real-time, Daily Digest, Weekly Digest
+- **Match logic**: ANY (OR) or ALL (AND)
+- **Test notifications**: Send test emails to verify setup
+
 ## Subscription Tiers
 
 | Feature | Basic ($299) | Professional ($799) | Enterprise ($1999) |
@@ -50,6 +57,7 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 | Demand Forecasting | ❌ | ✅ | ✅ |
 | Competitor Intel | ❌ | ✅ | ✅ |
 | Opportunity Scoring | ❌ | ❌ | ✅ |
+| Email Notifications | ✅ | ✅ | ✅ |
 | API Access | ❌ | ❌ | ✅ |
 
 ## API Endpoints
@@ -85,6 +93,13 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 ### Intelligence (Professional+)
 - `GET /api/intelligence/competitors` - Competitor data
 
+### Notifications (NEW)
+- `GET /api/notifications/preferences` - Get preferences
+- `PUT /api/notifications/preferences` - Update preferences
+- `GET /api/notifications/options` - Get available sectors/regions
+- `POST /api/notifications/test` - Send test notification
+- `GET /api/notifications/history` - Get notification history
+
 ## Test Accounts
 - **Enterprise**: `malcolmgoodmen@gmail.com` / `Test123!`
 - **Professional**: `test@example.com` / `test123`
@@ -100,14 +115,16 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 │   │   ├── project.py
 │   │   ├── company.py
 │   │   ├── prediction.py
-│   │   └── subscription.py
+│   │   ├── subscription.py
+│   │   └── notification.py      # NEW
 │   ├── ml/                      # ML models
 │   │   ├── win_probability.py
 │   │   ├── demand_forecast.py
 │   │   └── opportunity_scoring.py
 │   └── services/                # Business logic
 │       ├── prediction.py
-│       └── scoring.py
+│       ├── scoring.py
+│       └── notification.py      # NEW
 └── requirements.txt
 
 /app/frontend/
@@ -115,11 +132,13 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 │   ├── App.tsx                  # Main router
 │   ├── components/
 │   │   ├── dashboard/
-│   │   │   ├── Analytics.tsx    # Analytics Dashboard
-│   │   │   ├── MLDashboard.tsx  # ML Predictions
-│   │   │   └── BatchScoring.tsx # Enterprise Scoring
+│   │   │   ├── Analytics.tsx
+│   │   │   ├── MLDashboard.tsx
+│   │   │   └── BatchScoring.tsx
 │   │   ├── intelligence/
 │   │   │   └── CompetitorMap.tsx
+│   │   ├── settings/
+│   │   │   └── NotificationSettings.tsx  # NEW
 │   │   ├── pricing/
 │   │   └── auth/
 │   └── services/
@@ -141,6 +160,12 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 - [x] ML Predictions Dashboard
 - [x] Batch Scoring (Enterprise)
 - [x] Competitor Intelligence
+- [x] Email Notification System (NEW)
+  - [x] User preferences management
+  - [x] Sector/Region/Value filters
+  - [x] Frequency options (realtime/daily/weekly)
+  - [x] Test notification sending
+  - [x] Notification history
 
 ## Testing Status
 - Backend: 100% (15/15 tests passed)
@@ -149,4 +174,4 @@ Enterprise SaaS platform for construction market intelligence, combining AI/ML c
 
 ---
 *Last Updated: February 5, 2026*
-*Version: 2.0.0 (Full ML Port)*
+*Version: 2.1.0 (Added Email Notifications)*
