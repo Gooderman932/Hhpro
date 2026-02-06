@@ -875,13 +875,797 @@ async def get_notification_options():
     }
 
 # ============================================
+# USER PROFILE & ONBOARDING
+# ============================================
+
+class UserProfileUpdate(BaseModel):
+    business_type: Optional[str] = None
+    trade_specialty: Optional[str] = None
+    company_size: Optional[str] = None
+    service_states: Optional[List[str]] = None
+    service_cities: Optional[List[str]] = None
+    service_radius_miles: Optional[int] = None
+    min_project_value: Optional[float] = None
+    max_project_value: Optional[float] = None
+    preferred_sectors: Optional[List[str]] = None
+
+@app.get("/api/profile")
+async def get_user_profile(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get user profile."""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    
+    if not profile:
+        return {
+            "onboarding_completed": False,
+            "business_type": None,
+            "trade_specialty": None,
+            "company_size": None,
+            "service_states": [],
+            "service_cities": [],
+            "service_radius_miles": 50,
+            "min_project_value": 100000,
+            "max_project_value": 50000000,
+            "preferred_sectors": [],
+            "saved_searches": []
+        }
+    
+    return {
+        "onboarding_completed": profile.onboarding_completed,
+        "business_type": profile.business_type,
+        "trade_specialty": profile.trade_specialty,
+        "company_size": profile.company_size,
+        "service_states": profile.service_states or [],
+        "service_cities": profile.service_cities or [],
+        "service_radius_miles": profile.service_radius_miles,
+        "min_project_value": profile.min_project_value,
+        "max_project_value": profile.max_project_value,
+        "preferred_sectors": profile.preferred_sectors or [],
+        "saved_searches": profile.saved_searches or []
+    }
+
+@app.put("/api/profile")
+async def update_user_profile(
+    data: UserProfileUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update user profile."""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    
+    if not profile:
+        profile = UserProfile(user_id=current_user.id)
+        db.add(profile)
+    
+    if data.business_type is not None:
+        profile.business_type = data.business_type
+    if data.trade_specialty is not None:
+        profile.trade_specialty = data.trade_specialty
+    if data.company_size is not None:
+        profile.company_size = data.company_size
+    if data.service_states is not None:
+        profile.service_states = data.service_states
+    if data.service_cities is not None:
+        profile.service_cities = data.service_cities
+    if data.service_radius_miles is not None:
+        profile.service_radius_miles = data.service_radius_miles
+    if data.min_project_value is not None:
+        profile.min_project_value = data.min_project_value
+    if data.max_project_value is not None:
+        profile.max_project_value = data.max_project_value
+    if data.preferred_sectors is not None:
+        profile.preferred_sectors = data.preferred_sectors
+    
+    profile.onboarding_completed = True
+    db.commit()
+    
+    return {"status": "success", "message": "Profile updated"}
+
+@app.post("/api/profile/saved-search")
+async def save_search(
+    search: Dict[str, Any],
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Save a search filter."""
+    # Tier limits
+    limits = {"basic": 5, "professional": 50, "enterprise": 1000}
+    max_searches = limits.get(subscription.tier_id, 5)
+    
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    if not profile:
+        profile = UserProfile(user_id=current_user.id, saved_searches=[])
+        db.add(profile)
+    
+    if len(profile.saved_searches or []) >= max_searches:
+        raise HTTPException(status_code=400, detail=f"Maximum {max_searches} saved searches for your tier")
+    
+    saved = profile.saved_searches or []
+    saved.append({**search, "created_at": datetime.utcnow().isoformat()})
+    profile.saved_searches = saved
+    db.commit()
+    
+    return {"status": "success", "saved_searches": len(saved)}
+
+# ============================================
+# USER PROJECTS
+# ============================================
+
+class UserProjectCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    value: Optional[float] = None
+    sector: Optional[str] = None
+    status: str = "bidding"
+    address: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    zip_code: Optional[str] = None
+    bid_date: Optional[str] = None
+    bidding_competitors: Optional[List[str]] = None
+
+@app.get("/api/my-projects")
+async def list_my_projects(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """List user's own projects."""
+    projects = db.query(UserProject).filter(
+        UserProject.user_id == current_user.id
+    ).order_by(UserProject.created_at.desc()).all()
+    
+    return [
+        {
+            "id": p.id,
+            "name": p.name,
+            "description": p.description,
+            "value": p.value,
+            "sector": p.sector,
+            "status": p.status,
+            "city": p.city,
+            "state": p.state,
+            "bid_date": p.bid_date.isoformat() if p.bid_date else None,
+            "bidding_competitors": p.bidding_competitors or [],
+            "ai_insights": p.ai_insights,
+            "ai_category": p.ai_category,
+            "created_at": p.created_at.isoformat()
+        }
+        for p in projects
+    ]
+
+@app.post("/api/my-projects")
+async def create_my_project(
+    data: UserProjectCreate,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Add a user's own project."""
+    project = UserProject(
+        user_id=current_user.id,
+        name=data.name,
+        description=data.description,
+        value=data.value,
+        sector=data.sector,
+        status=data.status,
+        address=data.address,
+        city=data.city,
+        state=data.state,
+        zip_code=data.zip_code,
+        bid_date=datetime.fromisoformat(data.bid_date) if data.bid_date else None,
+        bidding_competitors=data.bidding_competitors
+    )
+    
+    # AI enrichment
+    ai_service = AIEnrichmentService()
+    insights = ai_service.generate_project_insights({
+        "name": data.name,
+        "description": data.description,
+        "value": data.value,
+        "sector": data.sector
+    })
+    
+    project.ai_category = insights.get("detected_sector")
+    project.ai_insights = "; ".join(insights.get("insights", []))
+    project.ai_enriched = True
+    
+    db.add(project)
+    db.commit()
+    db.refresh(project)
+    
+    return {
+        "id": project.id,
+        "name": project.name,
+        "ai_insights": project.ai_insights,
+        "status": "created"
+    }
+
+@app.put("/api/my-projects/{project_id}")
+async def update_my_project(
+    project_id: int,
+    data: UserProjectCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update a user's project."""
+    project = db.query(UserProject).filter(
+        UserProject.id == project_id,
+        UserProject.user_id == current_user.id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    for field, value in data.dict(exclude_unset=True).items():
+        if field == "bid_date" and value:
+            setattr(project, field, datetime.fromisoformat(value))
+        elif value is not None:
+            setattr(project, field, value)
+    
+    db.commit()
+    return {"status": "updated"}
+
+@app.delete("/api/my-projects/{project_id}")
+async def delete_my_project(
+    project_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Delete a user's project."""
+    project = db.query(UserProject).filter(
+        UserProject.id == project_id,
+        UserProject.user_id == current_user.id
+    ).first()
+    
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    
+    db.delete(project)
+    db.commit()
+    return {"status": "deleted"}
+
+# ============================================
+# TRACKED COMPETITORS
+# ============================================
+
+class CompetitorCreate(BaseModel):
+    company_name: str
+    company_type: Optional[str] = None
+    specialties: Optional[List[str]] = None
+    notes: Optional[str] = None
+    threat_level: str = "medium"
+
+@app.get("/api/my-competitors")
+async def list_tracked_competitors(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """List tracked competitors."""
+    # Tier check
+    if subscription.tier_id == "basic":
+        raise HTTPException(status_code=403, detail="Competitor tracking requires Professional or higher")
+    
+    competitors = db.query(TrackedCompetitor).filter(
+        TrackedCompetitor.user_id == current_user.id
+    ).order_by(TrackedCompetitor.created_at.desc()).all()
+    
+    return [
+        {
+            "id": c.id,
+            "company_name": c.company_name,
+            "company_type": c.company_type,
+            "specialties": c.specialties or [],
+            "notes": c.notes,
+            "threat_level": c.threat_level,
+            "recent_wins": c.recent_wins,
+            "recent_bids": c.recent_bids,
+            "last_activity_date": c.last_activity_date.isoformat() if c.last_activity_date else None
+        }
+        for c in competitors
+    ]
+
+@app.post("/api/my-competitors")
+async def add_tracked_competitor(
+    data: CompetitorCreate,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Add competitor to track."""
+    if subscription.tier_id == "basic":
+        raise HTTPException(status_code=403, detail="Competitor tracking requires Professional or higher")
+    
+    competitor = TrackedCompetitor(
+        user_id=current_user.id,
+        company_name=data.company_name,
+        company_type=data.company_type,
+        specialties=data.specialties,
+        notes=data.notes,
+        threat_level=data.threat_level
+    )
+    
+    db.add(competitor)
+    db.commit()
+    db.refresh(competitor)
+    
+    return {"id": competitor.id, "status": "created"}
+
+@app.delete("/api/my-competitors/{competitor_id}")
+async def remove_tracked_competitor(
+    competitor_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Remove tracked competitor."""
+    competitor = db.query(TrackedCompetitor).filter(
+        TrackedCompetitor.id == competitor_id,
+        TrackedCompetitor.user_id == current_user.id
+    ).first()
+    
+    if not competitor:
+        raise HTTPException(status_code=404, detail="Competitor not found")
+    
+    db.delete(competitor)
+    db.commit()
+    return {"status": "deleted"}
+
+# ============================================
+# USER CLIENTS
+# ============================================
+
+class ClientCreate(BaseModel):
+    company_name: str
+    contact_name: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_phone: Optional[str] = None
+    relationship_strength: int = 5
+    notes: Optional[str] = None
+
+@app.get("/api/my-clients")
+async def list_clients(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """List user's clients."""
+    clients = db.query(UserClient).filter(
+        UserClient.user_id == current_user.id
+    ).order_by(UserClient.relationship_strength.desc()).all()
+    
+    return [
+        {
+            "id": c.id,
+            "company_name": c.company_name,
+            "contact_name": c.contact_name,
+            "contact_email": c.contact_email,
+            "contact_phone": c.contact_phone,
+            "relationship_strength": c.relationship_strength,
+            "total_projects": c.total_projects,
+            "total_revenue": c.total_revenue,
+            "notes": c.notes,
+            "last_contact_date": c.last_contact_date.isoformat() if c.last_contact_date else None
+        }
+        for c in clients
+    ]
+
+@app.post("/api/my-clients")
+async def add_client(
+    data: ClientCreate,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Add a client."""
+    client = UserClient(
+        user_id=current_user.id,
+        company_name=data.company_name,
+        contact_name=data.contact_name,
+        contact_email=data.contact_email,
+        contact_phone=data.contact_phone,
+        relationship_strength=data.relationship_strength,
+        notes=data.notes
+    )
+    
+    db.add(client)
+    db.commit()
+    db.refresh(client)
+    
+    return {"id": client.id, "status": "created"}
+
+# ============================================
+# CONSTRUCTION PERMITS
+# ============================================
+
+@app.get("/api/permits")
+async def get_permits(
+    state: Optional[str] = None,
+    city: Optional[str] = None,
+    permit_type: Optional[str] = None,
+    min_value: Optional[float] = None,
+    max_value: Optional[float] = None,
+    limit: int = 25,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Get construction permits based on filters."""
+    # Tier-based limits
+    tier_limits = {"basic": 25, "professional": 500, "enterprise": 5000}
+    max_limit = tier_limits.get(subscription.tier_id, 25)
+    limit = min(limit, max_limit)
+    
+    # Get user profile for auto-filtering
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    
+    states = [state] if state else (profile.service_states if profile else None)
+    cities_filter = [city] if city else None
+    
+    # Fetch permits
+    permit_service = PermitDataService()
+    permits = await permit_service.fetch_permits(
+        states=states,
+        cities=cities_filter,
+        permit_type=permit_type,
+        min_value=min_value or (profile.min_project_value if profile else None),
+        max_value=max_value or (profile.max_project_value if profile else None),
+        limit=limit
+    )
+    
+    # AI match scoring if profile exists
+    if profile:
+        ai_service = AIEnrichmentService()
+        profile_dict = {
+            "trade_specialty": profile.trade_specialty,
+            "preferred_sectors": profile.preferred_sectors or [],
+            "service_states": profile.service_states or [],
+            "min_project_value": profile.min_project_value,
+            "max_project_value": profile.max_project_value
+        }
+        permits = ai_service.match_projects_to_profile(permits, profile_dict)
+    
+    return {
+        "permits": permits,
+        "count": len(permits),
+        "tier_limit": max_limit
+    }
+
+@app.get("/api/permits/stats")
+async def get_permit_stats(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Get permit statistics for user's service area."""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    
+    # Get recent permits
+    permit_service = PermitDataService()
+    permits = await permit_service.fetch_permits(
+        states=profile.service_states if profile else None,
+        limit=100
+    )
+    
+    # Calculate stats
+    total_value = sum(p.get("estimated_value", 0) for p in permits)
+    by_type = {}
+    by_sector = {}
+    
+    for p in permits:
+        ptype = p.get("permit_type", "unknown")
+        sector = p.get("sector", "unknown")
+        by_type[ptype] = by_type.get(ptype, 0) + 1
+        by_sector[sector] = by_sector.get(sector, 0) + 1
+    
+    return {
+        "total_permits": len(permits),
+        "total_value": total_value,
+        "average_value": total_value / len(permits) if permits else 0,
+        "by_type": by_type,
+        "by_sector": by_sector
+    }
+
+# ============================================
+# ECONOMIC INDICATORS
+# ============================================
+
+@app.get("/api/economic-indicators")
+async def get_economic_indicators(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional),
+    db: Session = Depends(get_db)
+):
+    """Get economic indicators (Pro+ only)."""
+    fred_service = FREDService()
+    indicators = await fred_service.get_all_indicators()
+    
+    # Group by category
+    by_category = {}
+    for ind in indicators:
+        cat = ind.get("category", "other")
+        if cat not in by_category:
+            by_category[cat] = []
+        by_category[cat].append(ind)
+    
+    return {
+        "indicators": indicators,
+        "by_category": by_category,
+        "summary": {
+            "construction_trend": next((i for i in indicators if i["code"] == "TTLCONS"), {}),
+            "housing_trend": next((i for i in indicators if i["code"] == "HOUST"), {}),
+            "employment_trend": next((i for i in indicators if i["code"] == "CES2000000001"), {})
+        }
+    }
+
+# ============================================
+# INDUSTRY BENCHMARKS
+# ============================================
+
+@app.get("/api/benchmarks")
+async def get_industry_benchmarks(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional),
+    db: Session = Depends(get_db)
+):
+    """Get industry benchmarks (Pro+ only)."""
+    # First, ensure we have some permit data
+    permit_service = PermitDataService()
+    permits = await permit_service.fetch_permits(limit=200)
+    permit_service.cache_permits(db, permits)
+    
+    # Calculate benchmarks
+    benchmark_service = IndustryBenchmarkService()
+    benchmarks = benchmark_service.calculate_benchmarks(db)
+    
+    return benchmarks
+
+# ============================================
+# SMART ALERTS
+# ============================================
+
+@app.get("/api/alerts")
+async def get_alerts(
+    unread_only: bool = False,
+    limit: int = 50,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Get user's smart alerts."""
+    query = db.query(SmartAlert).filter(SmartAlert.user_id == current_user.id)
+    
+    if unread_only:
+        query = query.filter(SmartAlert.is_read == False)
+    
+    alerts = query.order_by(SmartAlert.created_at.desc()).limit(limit).all()
+    
+    return [
+        {
+            "id": a.id,
+            "type": a.alert_type,
+            "title": a.title,
+            "message": a.message,
+            "priority": a.priority,
+            "is_read": a.is_read,
+            "data": a.data,
+            "created_at": a.created_at.isoformat()
+        }
+        for a in alerts
+    ]
+
+@app.post("/api/alerts/{alert_id}/read")
+async def mark_alert_read(
+    alert_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Mark alert as read."""
+    alert = db.query(SmartAlert).filter(
+        SmartAlert.id == alert_id,
+        SmartAlert.user_id == current_user.id
+    ).first()
+    
+    if not alert:
+        raise HTTPException(status_code=404, detail="Alert not found")
+    
+    alert.is_read = True
+    alert.read_at = datetime.utcnow()
+    db.commit()
+    
+    return {"status": "read"}
+
+@app.post("/api/alerts/generate")
+async def generate_smart_alerts(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional),
+    db: Session = Depends(get_db)
+):
+    """Generate smart alerts based on user profile and market data."""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    
+    if not profile:
+        return {"alerts_generated": 0, "message": "Complete your profile first"}
+    
+    alerts_created = []
+    
+    # Get recent permits in user's area
+    permit_service = PermitDataService()
+    permits = await permit_service.fetch_permits(
+        states=profile.service_states,
+        min_value=profile.min_project_value,
+        limit=10
+    )
+    
+    # Generate alerts for high-value matching permits
+    for permit in permits[:3]:
+        value = permit.get("estimated_value", 0)
+        if value >= profile.min_project_value:
+            alert = SmartAlert(
+                user_id=current_user.id,
+                alert_type="new_permit",
+                title=f"New ${value/1000000:.1f}M Project in {permit.get('city', 'your area')}",
+                message=f"{permit.get('project_name', 'New project')} - {permit.get('sector', 'Commercial')}",
+                priority="high" if value > 5000000 else "normal",
+                data=permit
+            )
+            db.add(alert)
+            alerts_created.append(alert.title)
+    
+    # Market trend alert
+    fred_service = FREDService()
+    indicators = await fred_service.get_all_indicators()
+    construction_ind = next((i for i in indicators if i["code"] == "TTLCONS"), None)
+    
+    if construction_ind and construction_ind.get("percent_change"):
+        change = construction_ind["percent_change"]
+        if abs(change) > 5:
+            trend_alert = SmartAlert(
+                user_id=current_user.id,
+                alert_type="market_trend",
+                title=f"Construction Spending {'Up' if change > 0 else 'Down'} {abs(change):.1f}%",
+                message=f"National construction spending has changed significantly this month",
+                priority="normal",
+                data=construction_ind
+            )
+            db.add(trend_alert)
+            alerts_created.append(trend_alert.title)
+    
+    db.commit()
+    
+    return {
+        "alerts_generated": len(alerts_created),
+        "alerts": alerts_created
+    }
+
+# ============================================
+# AI ENRICHMENT
+# ============================================
+
+@app.post("/api/ai/enrich-project")
+async def ai_enrich_project(
+    project_data: Dict[str, Any],
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """AI-enrich a project with insights."""
+    ai_service = AIEnrichmentService()
+    
+    if subscription.tier_id == "enterprise":
+        # Use LLM for enterprise
+        insights = await ai_service.enrich_with_llm(project_data)
+    else:
+        # Rule-based for others
+        insights = ai_service.generate_project_insights(project_data)
+    
+    return insights
+
+@app.get("/api/ai/match-opportunities")
+async def match_opportunities(
+    limit: int = 20,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Get AI-matched opportunities based on user profile."""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    
+    if not profile:
+        raise HTTPException(status_code=400, detail="Complete your profile first")
+    
+    # Get permits
+    permit_service = PermitDataService()
+    permits = await permit_service.fetch_permits(
+        states=profile.service_states,
+        limit=limit * 2
+    )
+    
+    # AI matching
+    ai_service = AIEnrichmentService()
+    profile_dict = {
+        "trade_specialty": profile.trade_specialty,
+        "preferred_sectors": profile.preferred_sectors or [],
+        "service_states": profile.service_states or [],
+        "min_project_value": profile.min_project_value,
+        "max_project_value": profile.max_project_value
+    }
+    
+    matched = ai_service.match_projects_to_profile(permits, profile_dict)
+    
+    return {
+        "opportunities": matched[:limit],
+        "total_matched": len([m for m in matched if m.get("match_score", 0) > 50])
+    }
+
+# ============================================
+# TIER INFO ENDPOINT
+# ============================================
+
+@app.get("/api/tier-features")
+async def get_tier_features():
+    """Get detailed tier features."""
+    return {
+        "basic": {
+            "price": 49,
+            "projects": "User data input",
+            "radius": "50-mile radius",
+            "permits": "25/month",
+            "digest": "Weekly email",
+            "saved_searches": 5,
+            "features": [
+                "Add & track your projects",
+                "Local permit data (25/month)",
+                "Basic filters & search",
+                "Weekly email digest",
+                "5 saved searches"
+            ]
+        },
+        "professional": {
+            "price": 149,
+            "coverage": "State-wide",
+            "permits": "Unlimited + real-time",
+            "features": [
+                "Everything in Basic",
+                "State-wide coverage",
+                "Unlimited permit access",
+                "Real-time alerts",
+                "Economic indicators dashboard",
+                "Industry benchmarks",
+                "Competitor tracking (unlimited)",
+                "CSV export",
+                "Unlimited saved searches"
+            ]
+        },
+        "enterprise": {
+            "price": 399,
+            "coverage": "Multi-state (5 states)",
+            "features": [
+                "Everything in Pro",
+                "Multi-state coverage",
+                "ML win probability predictions",
+                "Demand forecasting",
+                "Advanced competitor intelligence",
+                "API access",
+                "Priority support",
+                "White-label reports",
+                "Custom data feeds",
+                "LLM-powered insights"
+            ]
+        }
+    }
+
+# ============================================
 # Health Check
 # ============================================
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "HHDrywall Pro API", "version": "2.0.0"}
+    return {"status": "healthy", "service": "HHDrywall Pro API", "version": "3.0.0"}
 
 @app.get("/")
 async def root():
-    return {"message": "HHDrywall Pro API", "version": "2.0.0", "docs": "/docs"}
+    return {"message": "HHDrywall Pro API", "version": "3.0.0", "docs": "/docs"}
