@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, Target, MapPin, Loader2, AlertCircle, Shield, Zap, Brain, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, Lock } from 'lucide-react'
+import { TrendingUp, Target, MapPin, Loader2, AlertCircle, Shield, Zap, Brain, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, Lock, Database, ExternalLink, Plus } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import {
@@ -12,16 +12,25 @@ import {
   getMLProjectMatching
 } from '../../services/api'
 
+const API_BASE = import.meta.env.VITE_API_URL || '/api'
+
 export const MLDashboard = () => {
   const [subscription, setSubscription] = useState<any>(null)
   const [activeTab, setActiveTab] = useState('win')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [dataSources, setDataSources] = useState<any>(null)
 
   useEffect(() => {
-    getCurrentSubscription()
-      .then(setSubscription)
-      .catch(() => setError('Failed to load subscription'))
+    const token = localStorage.getItem('access_token')
+    Promise.all([
+      getCurrentSubscription(),
+      fetch(`${API_BASE}/data-sources`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(r => r.ok ? r.json() : null)
+        .catch(() => null)
+    ])
+      .then(([sub, ds]) => { setSubscription(sub); setDataSources(ds) })
+      .catch(() => setError('Failed to load data'))
       .finally(() => setLoading(false))
   }, [])
 
@@ -78,6 +87,9 @@ export const MLDashboard = () => {
           <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">{error}</div>
         )}
 
+        {/* Data Source Status Banner */}
+        {dataSources && <DataSourceBanner dataSources={dataSources} />}
+
         {/* Tab Navigation */}
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {tabs.map(t => (
@@ -105,6 +117,57 @@ export const MLDashboard = () => {
     </div>
   )
 }
+
+// ==========================================
+// Data Source Status Banner
+// ==========================================
+const DataSourceBanner = ({ dataSources }: { dataSources: any }) => {
+  const ud = dataSources?.user_data
+  const es = dataSources?.external_sources
+  const needsSetup = !ud?.profile_complete || !es?.permits?.configured || !es?.economic_indicators?.configured
+
+  if (!needsSetup) return null
+
+  return (
+    <div className="mb-6 p-4 bg-amber-500/5 border border-amber-500/20 rounded-lg" data-testid="data-source-banner">
+      <div className="flex items-center gap-2 mb-3">
+        <Database className="h-4 w-4 text-amber-500" />
+        <p className="text-amber-400 text-sm font-medium">Data Sources Setup</p>
+      </div>
+      <div className="grid md:grid-cols-3 gap-3 text-xs">
+        {!ud?.profile_complete && (
+          <a href="/onboarding" className="flex items-center gap-2 p-2 bg-slate-800/80 rounded text-slate-300 hover:text-white transition">
+            <span className="w-2 h-2 rounded-full bg-red-500" />
+            Complete your business profile
+            <ChevronRight className="h-3 w-3 ml-auto" />
+          </a>
+        )}
+        {!es?.permits?.configured && (
+          <div className="flex items-center gap-2 p-2 bg-slate-800/80 rounded text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-yellow-500" />
+            <span>Permit data: Not connected</span>
+          </div>
+        )}
+        {!es?.economic_indicators?.configured && (
+          <div className="flex items-center gap-2 p-2 bg-slate-800/80 rounded text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-yellow-500" />
+            <span>FRED economic data: Not connected</span>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ==========================================
+// Source Label Component
+// ==========================================
+const SourceLabel = ({ source, className = '' }: { source: string; className?: string }) => (
+  <span className={`inline-flex items-center gap-1 text-[10px] text-slate-500 ${className}`}>
+    <Database className="h-2.5 w-2.5" />
+    {source}
+  </span>
+)
 
 // ==========================================
 // Win Probability Tab
@@ -137,27 +200,6 @@ const WinProbabilityTab = () => {
     }
   }
 
-  const runCustomPrediction = async () => {
-    setLoading(true)
-    setSelectedId(null)
-    setPrediction(null)
-    try {
-      const result = await getMLWinProbability(undefined, {
-        name: "Sample Commercial Project",
-        value: 2500000,
-        sector: "Commercial",
-        state: "TX",
-        city: "Austin",
-        expected_bidders: 4
-      })
-      setPrediction(result)
-    } catch (err: any) {
-      setPrediction({ error: err.response?.data?.detail || 'Prediction failed' })
-    } finally {
-      setLoading(false)
-    }
-  }
-
   if (initLoading) return <LoadingBlock />
 
   return (
@@ -167,14 +209,16 @@ const WinProbabilityTab = () => {
         <Card className="bg-slate-900 border-slate-700">
           <CardHeader className="pb-3">
             <CardTitle className="text-white text-lg">Select Project</CardTitle>
-            <CardDescription className="text-slate-400">Choose a project to predict win probability</CardDescription>
+            <CardDescription className="text-slate-400">Choose one of your projects to predict win probability</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 max-h-[400px] overflow-y-auto">
             {projects.length === 0 && (
               <div className="text-center py-6">
-                <p className="text-slate-500 text-sm">No projects yet.</p>
-                <Button onClick={runCustomPrediction} className="mt-3 bg-blue-600 hover:bg-blue-700 text-sm" size="sm" data-testid="demo-predict-btn">
-                  Run Demo Prediction
+                <Target className="h-10 w-10 text-slate-700 mx-auto mb-3" />
+                <p className="text-slate-400 text-sm mb-1">No projects yet</p>
+                <p className="text-slate-500 text-xs mb-4">Add your real projects to get AI-powered win probability predictions.</p>
+                <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-sm" onClick={() => window.location.href = '/my-projects'} data-testid="add-project-btn">
+                  <Plus className="h-3 w-3 mr-1" /> Add Your Projects
                 </Button>
               </div>
             )}
@@ -190,7 +234,7 @@ const WinProbabilityTab = () => {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-white text-sm font-medium">{p.name}</p>
-                    <p className="text-slate-500 text-xs">{p.sector} · {p.city}, {p.state}</p>
+                    <p className="text-slate-500 text-xs">{p.sector} {p.city ? `· ${p.city}, ${p.state}` : ''}</p>
                   </div>
                   {p.value && <span className="text-green-400 text-sm font-medium">${(p.value / 1000000).toFixed(1)}M</span>}
                 </div>
@@ -207,6 +251,7 @@ const WinProbabilityTab = () => {
           <div className="space-y-4">
             <Card className="bg-slate-900 border-slate-700">
               <CardContent className="pt-6">
+                <SourceLabel source="AI prediction based on your project data" className="mb-3" />
                 <div className="text-center mb-6">
                   <div className="text-6xl font-bold text-green-400" data-testid="win-probability-value">
                     {(prediction.probability * 100).toFixed(1)}%
@@ -267,12 +312,12 @@ const WinProbabilityTab = () => {
           <Card className="bg-slate-900 border-slate-700">
             <CardContent className="py-16 text-center">
               <Target className="h-12 w-12 text-slate-700 mx-auto mb-3" />
-              <p className="text-slate-500">Select a project to generate a win probability prediction</p>
-              {projects.length === 0 && (
-                <Button onClick={runCustomPrediction} className="mt-4 bg-green-600 hover:bg-green-700" data-testid="demo-predict-btn-2">
-                  Try Demo Prediction
-                </Button>
-              )}
+              <p className="text-slate-500">
+                {projects.length > 0
+                  ? 'Select a project to generate a win probability prediction'
+                  : 'Add your projects first, then get AI-powered win probability predictions'
+                }
+              </p>
             </CardContent>
           </Card>
         )}
@@ -354,6 +399,7 @@ const DemandForecastTab = () => {
           <Card className="bg-slate-900 border-slate-700">
             <CardHeader className="pb-2">
               <CardTitle className="text-white text-lg">Market Momentum</CardTitle>
+              <SourceLabel source="Proprietary demand model" />
             </CardHeader>
             <CardContent>
               <div className="text-center mb-4">
@@ -388,6 +434,7 @@ const DemandForecastTab = () => {
           <Card className="bg-slate-900 border-slate-700 lg:col-span-2">
             <CardHeader className="pb-2">
               <CardTitle className="text-white text-lg">6-Month Forecast: {sector} in {region}</CardTitle>
+              <SourceLabel source="Proprietary forecasting engine" />
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
@@ -420,6 +467,7 @@ const DemandForecastTab = () => {
             <CardTitle className="text-white text-lg flex items-center gap-2">
               <MapPin className="h-5 w-5 text-amber-500" />Regional Outlook: {sector}
             </CardTitle>
+            <SourceLabel source="Proprietary regional analysis" />
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
@@ -429,7 +477,7 @@ const DemandForecastTab = () => {
                   <p className={`text-xs font-medium ${
                     data.direction === 'UP' ? 'text-green-400' : data.direction === 'DOWN' ? 'text-red-400' : 'text-slate-400'
                   }`}>
-                    {data.direction} · {data.strength}
+                    {data.direction} - {data.strength}
                   </p>
                   <p className="text-blue-400 text-sm font-medium mt-1">{data.momentum_score}</p>
                   <p className="text-slate-600 text-xs">momentum</p>
@@ -462,6 +510,26 @@ const CompetitiveIntelTab = () => {
   const cai = landscape?.competitive_advantage_index
   const rankings = landscape?.rankings || []
 
+  // Empty state when no competitors tracked
+  if (rankings.length === 0) {
+    return (
+      <div data-testid="competitive-intel-section">
+        <Card className="bg-slate-900 border-slate-700">
+          <CardContent className="py-16 text-center">
+            <Shield className="h-14 w-14 text-slate-700 mx-auto mb-4" />
+            <h3 className="text-white text-lg font-medium mb-2">No Competitors Tracked</h3>
+            <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">
+              Start tracking your real competitors to get AI-powered competitive intelligence, threat analysis, and market positioning insights.
+            </p>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '/competitors'} data-testid="add-competitors-btn">
+              <Plus className="h-4 w-4 mr-2" /> Track Competitors
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-6" data-testid="competitive-intel-section">
       {/* CAI Card */}
@@ -469,6 +537,7 @@ const CompetitiveIntelTab = () => {
         <Card className="bg-slate-900 border-slate-700">
           <CardHeader className="pb-2">
             <CardTitle className="text-white text-lg">Your Competitive Advantage Index</CardTitle>
+            <SourceLabel source="Based on your tracked competitors" />
           </CardHeader>
           <CardContent>
             <div className="grid md:grid-cols-4 gap-4">
@@ -516,6 +585,7 @@ const CompetitiveIntelTab = () => {
       <Card className="bg-slate-900 border-slate-700">
         <CardHeader className="pb-2">
           <CardTitle className="text-white text-lg">Competitor Threat Rankings</CardTitle>
+          <SourceLabel source={`Based on ${rankings.length} tracked competitor${rankings.length > 1 ? 's' : ''}`} />
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -539,7 +609,7 @@ const CompetitiveIntelTab = () => {
                   }`}>{r.threat_level}</p>
                 </div>
                 <div className="flex gap-4 text-xs">
-                  {r.strengths.length > 0 && (
+                  {r.strengths?.length > 0 && (
                     <div>
                       <p className="text-slate-500 mb-1">Strengths</p>
                       {r.strengths.slice(0, 2).map((s: string, j: number) => (
@@ -547,7 +617,7 @@ const CompetitiveIntelTab = () => {
                       ))}
                     </div>
                   )}
-                  {r.vulnerabilities.length > 0 && (
+                  {r.vulnerabilities?.length > 0 && (
                     <div>
                       <p className="text-slate-500 mb-1">Weaknesses</p>
                       {r.vulnerabilities.slice(0, 2).map((v: string, j: number) => (
@@ -558,9 +628,6 @@ const CompetitiveIntelTab = () => {
                 </div>
               </div>
             ))}
-            {rankings.length === 0 && (
-              <p className="text-slate-500 text-center py-8">Add competitors to see threat analysis. Using sample data for demo.</p>
-            )}
           </div>
         </CardContent>
       </Card>
@@ -575,6 +642,7 @@ const ProjectMatchingTab = () => {
   const [matches, setMatches] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     getMLProjectMatching(20, 20)
@@ -582,29 +650,72 @@ const ProjectMatchingTab = () => {
         setMatches(data.matches || [])
         setTotal(data.total || 0)
       })
-      .catch(() => {})
+      .catch(err => {
+        const detail = err?.response?.data?.detail
+        if (detail?.includes('profile')) {
+          setError('profile')
+        } else {
+          setError(detail || 'Failed to load matches')
+        }
+      })
       .finally(() => setLoading(false))
   }, [])
 
   if (loading) return <LoadingBlock />
 
-  return (
-    <div className="space-y-4" data-testid="project-matching-section">
-      <div className="flex justify-between items-center">
-        <p className="text-slate-400 text-sm">{total} matching opportunities found</p>
-      </div>
-
-      {matches.length === 0 && (
+  if (error === 'profile') {
+    return (
+      <div data-testid="project-matching-section">
         <Card className="bg-slate-900 border-slate-700">
-          <CardContent className="py-12 text-center">
-            <Zap className="h-12 w-12 text-slate-700 mx-auto mb-3" />
-            <p className="text-slate-400">Complete your profile to get personalized project matches</p>
-            <Button className="mt-3 bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '/onboarding'}>
+          <CardContent className="py-16 text-center">
+            <Zap className="h-14 w-14 text-slate-700 mx-auto mb-4" />
+            <h3 className="text-white text-lg font-medium mb-2">Complete Your Profile First</h3>
+            <p className="text-slate-400 text-sm max-w-md mx-auto mb-6">
+              We need to know your trade specialty, service area, and project preferences to match you with relevant opportunities.
+            </p>
+            <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => window.location.href = '/onboarding'} data-testid="complete-profile-btn">
               Complete Profile
             </Button>
           </CardContent>
         </Card>
-      )}
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-slate-900 border-slate-700">
+        <CardContent className="pt-6 text-center">
+          <AlertCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
+          <p className="text-red-400">{error}</p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  if (matches.length === 0) {
+    return (
+      <div data-testid="project-matching-section">
+        <Card className="bg-slate-900 border-slate-700">
+          <CardContent className="py-16 text-center">
+            <Zap className="h-14 w-14 text-slate-700 mx-auto mb-4" />
+            <h3 className="text-white text-lg font-medium mb-2">No Matching Projects Found</h3>
+            <p className="text-slate-400 text-sm max-w-md mx-auto mb-2">
+              Connect a permit data source to discover real construction opportunities in your area that match your profile.
+            </p>
+            <p className="text-slate-500 text-xs">Requires PERMIT_API_KEY to be configured.</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4" data-testid="project-matching-section">
+      <div className="flex justify-between items-center">
+        <p className="text-slate-400 text-sm">{total} matching opportunities found</p>
+        <SourceLabel source="Matched from live permit data + your profile" />
+      </div>
 
       {matches.map((m: any, i: number) => (
         <Card key={i} className={`bg-slate-900 border-slate-700 ${
@@ -626,7 +737,7 @@ const ProjectMatchingTab = () => {
                   </span>
                 </div>
                 <p className="text-slate-500 text-sm">
-                  {m.project?.sector} · {m.project?.city}, {m.project?.state}
+                  {m.project?.sector} {m.project?.city ? `· ${m.project.city}, ${m.project.state}` : ''}
                   {m.project?.value ? ` · $${(m.project.value / 1000000).toFixed(1)}M` : ''}
                 </p>
 
