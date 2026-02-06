@@ -51,6 +51,7 @@ export const PermitsPage = () => {
 
   const permits: Permit[] = data?.permits || []
   const tierLimit = data?.tier_limit || 25
+  const isConfigured = data?.configured !== false
 
   if (isLoading) {
     return (
@@ -72,6 +73,37 @@ export const PermitsPage = () => {
                 Please check your subscription status
               </CardDescription>
             </CardHeader>
+          </Card>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isConfigured || permits.length === 0) {
+    return (
+      <div className="min-h-screen bg-slate-950 pt-20 px-4 pb-12" data-testid="permits-page">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-3xl font-bold text-white mb-6">Construction Permits</h1>
+          <Card className="bg-slate-900 border-slate-700">
+            <CardContent className="py-16 text-center">
+              <FileText className="h-14 w-14 text-slate-700 mx-auto mb-4" />
+              <h3 className="text-white text-lg font-medium mb-2">
+                {!isConfigured ? 'Permit Data Source Not Connected' : 'No Permits Found'}
+              </h3>
+              <p className="text-slate-400 text-sm max-w-md mx-auto mb-4">
+                {!isConfigured
+                  ? 'Connect a permit data source to see real construction permits in your service area. This pulls live data from government building departments.'
+                  : 'No permits match your current filters and service area. Try adjusting your filters or updating your profile.'}
+              </p>
+              {!isConfigured && (
+                <div className="bg-slate-800 p-4 rounded-lg max-w-sm mx-auto text-left">
+                  <p className="text-slate-300 text-sm font-medium mb-2">Setup Required</p>
+                  <p className="text-slate-400 text-xs mb-1">1. Get an API key from a permit data provider</p>
+                  <p className="text-slate-400 text-xs mb-1">2. Set <code className="text-blue-400">PERMIT_API_KEY</code> in environment</p>
+                  <p className="text-slate-400 text-xs">3. Permits will auto-populate for your area</p>
+                </div>
+              )}
+            </CardContent>
           </Card>
         </div>
       </div>
