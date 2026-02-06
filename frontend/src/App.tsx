@@ -59,20 +59,32 @@ const Navigation = () => {
               <>
                 <Link to="/dashboard" className="text-slate-300 hover:text-white transition flex items-center">
                   <BarChart3 className="h-4 w-4 mr-1" />
-                  Analytics
+                  Dashboard
                 </Link>
-                <Link to="/predictions" className="text-slate-300 hover:text-white transition flex items-center">
-                  <TrendingUp className="h-4 w-4 mr-1" />
-                  ML Predictions
+                <Link to="/permits" className="text-slate-300 hover:text-white transition flex items-center">
+                  <FileText className="h-4 w-4 mr-1" />
+                  Permits
                 </Link>
-                <Link to="/competitors" className="text-slate-300 hover:text-white transition flex items-center">
-                  <Users className="h-4 w-4 mr-1" />
-                  Competitors
+                <Link to="/my-projects" className="text-slate-300 hover:text-white transition flex items-center">
+                  <Briefcase className="h-4 w-4 mr-1" />
+                  My Projects
                 </Link>
+                {(subscription.tier_id === 'professional' || subscription.tier_id === 'enterprise') && (
+                  <>
+                    <Link to="/predictions" className="text-slate-300 hover:text-white transition flex items-center">
+                      <TrendingUp className="h-4 w-4 mr-1" />
+                      ML Insights
+                    </Link>
+                    <Link to="/competitors" className="text-slate-300 hover:text-white transition flex items-center">
+                      <Users className="h-4 w-4 mr-1" />
+                      Competitors
+                    </Link>
+                  </>
+                )}
                 {subscription.tier_id === 'enterprise' && (
                   <Link to="/batch-scoring" className="text-slate-300 hover:text-white transition flex items-center">
                     <Target className="h-4 w-4 mr-1" />
-                    Batch Scoring
+                    Batch Score
                   </Link>
                 )}
               </>
@@ -82,8 +94,11 @@ const Navigation = () => {
               <div className="flex items-center space-x-4">
                 {subscription && (
                   <>
-                    <Link to="/notifications" className="text-slate-300 hover:text-white transition" title="Notification Settings">
+                    <Link to="/notifications" className="text-slate-300 hover:text-white transition" title="Notifications">
                       <Bell className="h-5 w-5" />
+                    </Link>
+                    <Link to="/settings" className="text-slate-300 hover:text-white transition" title="Settings">
+                      <Settings className="h-5 w-5" />
                     </Link>
                     <span className="text-sm text-green-400 bg-green-400/10 px-3 py-1 rounded-full">
                       {subscription.tier_name}
