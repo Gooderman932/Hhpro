@@ -328,11 +328,15 @@ function App() {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/subscription/success" element={<SubscriptionSuccess />} />
         <Route path="/login" element={<AuthPage />} />
+        <Route path="/onboarding" element={<Onboarding />} />
         <Route path="/dashboard" element={<Analytics />} />
+        <Route path="/permits" element={<PermitsPage />} />
+        <Route path="/my-projects" element={<MyProjectsPage />} />
         <Route path="/predictions" element={<MLDashboard />} />
         <Route path="/batch-scoring" element={<BatchScoring />} />
         <Route path="/competitors" element={<CompetitorMap />} />
         <Route path="/notifications" element={<NotificationSettings />} />
+        <Route path="/settings" element={<NotificationSettings />} />
       </Routes>
     </BrowserRouter>
   )
