@@ -28,7 +28,6 @@ const STATES = ['AZ', 'CA', 'CO', 'FL', 'GA', 'NV', 'OH', 'TN', 'TX', 'WA']
 export const MyProjectsPage = () => {
   const queryClient = useQueryClient()
   const [showForm, setShowForm] = useState(false)
-  const [editingProject, setEditingProject] = useState<UserProject | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     description: '',
