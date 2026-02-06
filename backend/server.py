@@ -373,8 +373,85 @@ async def get_payment_status(
     
     return {
         "status": checkout_status.status,
-        "payment_status": checkout_status.payment_status
+        "payment_status": checkout_status.payment_status,
+        "subscription": {
+            "tier_id": transaction.tier_id,
+            "tier_name": transaction.tier_name,
+            "price": transaction.amount,
+            "expires_at": (datetime.utcnow() + timedelta(days=30)).isoformat()
+        } if checkout_status.payment_status == "paid" else None
     }
+
+# Stripe Webhook for async payment confirmation
+@app.post("/api/webhook/stripe")
+async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
+    """Handle Stripe webhook events for payment confirmations."""
+    import json
+    
+    try:
+        body = await request.body()
+        payload = json.loads(body)
+        
+        event_type = payload.get("type", "")
+        
+        if event_type == "checkout.session.completed":
+            session_data = payload.get("data", {}).get("object", {})
+            session_id = session_data.get("id")
+            payment_status = session_data.get("payment_status")
+            metadata = session_data.get("metadata", {})
+            
+            if payment_status == "paid" and session_id:
+                # Find transaction
+                transaction = db.query(PaymentTransaction).filter(
+                    PaymentTransaction.session_id == session_id
+                ).first()
+                
+                if transaction and transaction.payment_status != "paid":
+                    transaction.payment_status = "paid"
+                    
+                    # Create subscription if not exists
+                    existing_sub = db.query(Subscription).filter(
+                        Subscription.session_id == session_id
+                    ).first()
+                    
+                    if not existing_sub:
+                        subscription = Subscription(
+                            subscription_id=str(uuid.uuid4()),
+                            session_id=session_id,
+                            user_id=transaction.user_id,
+                            tier_id=transaction.tier_id,
+                            tier_name=transaction.tier_name,
+                            price=transaction.amount,
+                            status="active",
+                            expires_at=datetime.utcnow() + timedelta(days=30)
+                        )
+                        db.add(subscription)
+                    
+                    db.commit()
+                    print(f"✅ Webhook: Subscription created for user {transaction.user_id}")
+        
+        elif event_type == "customer.subscription.deleted":
+            # Handle subscription cancellation
+            session_data = payload.get("data", {}).get("object", {})
+            customer_email = session_data.get("customer_email")
+            
+            if customer_email:
+                user = db.query(User).filter(User.email == customer_email).first()
+                if user:
+                    subscription = db.query(Subscription).filter(
+                        Subscription.user_id == user.id,
+                        Subscription.status == "active"
+                    ).first()
+                    if subscription:
+                        subscription.status = "cancelled"
+                        db.commit()
+                        print(f"✅ Webhook: Subscription cancelled for {customer_email}")
+        
+        return {"received": True}
+        
+    except Exception as e:
+        print(f"❌ Webhook error: {e}")
+        return {"received": True, "error": str(e)}
 
 @app.get("/api/subscriptions/current")
 async def get_current_subscription(
