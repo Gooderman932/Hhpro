@@ -34,6 +34,9 @@ class FREDService:
     
     async def fetch_series(self, series_id: str, limit: int = 12) -> Dict[str, Any]:
         """Fetch time series data from FRED."""
+        if not self.configured:
+            return {"series_id": series_id, "observations": [], "success": False,
+                    "error": "FRED_API_KEY not configured"}
         async with httpx.AsyncClient() as client:
             try:
                 response = await client.get(
@@ -54,7 +57,8 @@ class FREDService:
                     return {
                         "series_id": series_id,
                         "observations": observations,
-                        "success": True
+                        "success": True,
+                        "source": "Federal Reserve Economic Data (FRED)"
                     }
             except Exception as e:
                 print(f"FRED API error for {series_id}: {e}")
