@@ -1376,7 +1376,7 @@ async def get_permit_stats(
 @app.get("/api/economic-indicators")
 async def get_economic_indicators(
     current_user: User = Depends(get_current_user),
-    subscription: Subscription = Depends(require_professional),
+    subscription: Subscription = Depends(require_professional_tier),
     db: Session = Depends(get_db)
 ):
     """Get economic indicators (Pro+ only)."""
@@ -1408,7 +1408,7 @@ async def get_economic_indicators(
 @app.get("/api/benchmarks")
 async def get_industry_benchmarks(
     current_user: User = Depends(get_current_user),
-    subscription: Subscription = Depends(require_professional),
+    subscription: Subscription = Depends(require_professional_tier),
     db: Session = Depends(get_db)
 ):
     """Get industry benchmarks (Pro+ only)."""
@@ -1481,7 +1481,7 @@ async def mark_alert_read(
 @app.post("/api/alerts/generate")
 async def generate_smart_alerts(
     current_user: User = Depends(get_current_user),
-    subscription: Subscription = Depends(require_professional),
+    subscription: Subscription = Depends(require_professional_tier),
     db: Session = Depends(get_db)
 ):
     """Generate smart alerts based on user profile and market data."""
