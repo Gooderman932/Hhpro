@@ -155,7 +155,7 @@ export const PermitsPage = () => {
 
         {/* Permits Grid */}
         <div className="grid gap-4">
-          {permits.map((permit, index) => (
+          {permits.map((permit) => (
             <Card 
               key={permit.permit_number} 
               className={`bg-slate-900 border-slate-700 ${
