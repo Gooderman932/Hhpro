@@ -42,6 +42,14 @@ from app.services.notification import NotificationService
 from app.services.external_data import FREDService, PermitDataService, IndustryBenchmarkService
 from app.services.ai_enrichment import AIEnrichmentService
 
+# Import Proprietary ML Models (Poor Dude Holdings LLC IP)
+from app.ml.proprietary import (
+    WinProbabilityModel,
+    DemandForecastModel,
+    CompetitiveIntelligenceScorer,
+    ProjectMatcherAI
+)
+
 # Create all tables
 Base.metadata.create_all(bind=engine)
 
