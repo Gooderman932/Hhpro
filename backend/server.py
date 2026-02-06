@@ -1336,7 +1336,10 @@ async def get_permits(
     return {
         "permits": permits,
         "count": len(permits),
-        "tier_limit": max_limit
+        "tier_limit": max_limit,
+        "data_source": "permit_api" if permits else None,
+        "configured": permit_service.configured,
+        "setup_hint": None if permit_service.configured else "Connect a permit data source to see real construction permits in your area. Set PERMIT_API_KEY in environment."
     }
 
 @app.get("/api/permits/stats")
@@ -1403,7 +1406,9 @@ async def get_economic_indicators(
             "construction_trend": next((i for i in indicators if i["code"] == "TTLCONS"), {}),
             "housing_trend": next((i for i in indicators if i["code"] == "HOUST"), {}),
             "employment_trend": next((i for i in indicators if i["code"] == "CES2000000001"), {})
-        }
+        },
+        "configured": True,
+        "data_source": "Federal Reserve Economic Data (FRED)"
     }
 
 # ============================================
