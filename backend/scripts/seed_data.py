@@ -1,4 +1,8 @@
-"""Seed database with sample data for testing."""
+"""
+DEV ONLY - Seed database with sample data for development/testing.
+WARNING: DO NOT run in production. Production users should only see
+their own data and data from connected external APIs.
+"""
 import sys
 sys.path.insert(0, '/app/backend')
 
