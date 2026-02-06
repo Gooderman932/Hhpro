@@ -1433,10 +1433,17 @@ async def get_industry_benchmarks(
     db: Session = Depends(get_db)
 ):
     """Get industry benchmarks (Pro+ only)."""
-    # First, ensure we have some permit data
     permit_service = PermitDataService()
+    if not permit_service.configured:
+        return {
+            "benchmarks": {},
+            "configured": False,
+            "setup_hint": "Connect a permit data source to generate industry benchmarks. Set PERMIT_API_KEY in environment."
+        }
+
     permits = await permit_service.fetch_permits(limit=200)
-    permit_service.cache_permits(db, permits)
+    if permits:
+        permit_service.cache_permits(db, permits)
     
     # Calculate benchmarks
     benchmark_service = IndustryBenchmarkService()
