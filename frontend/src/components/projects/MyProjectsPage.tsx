@@ -78,7 +78,6 @@ export const MyProjectsPage = () => {
       city: '', state: '', bid_date: '', bidding_competitors: ''
     })
     setShowForm(false)
-    setEditingProject(null)
   }
 
   const handleSubmit = (e: React.FormEvent) => {
