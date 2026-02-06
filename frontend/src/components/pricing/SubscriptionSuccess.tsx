@@ -138,13 +138,38 @@ export const SubscriptionSuccess = () => {
 
           <div className="flex flex-col gap-3">
             {status === 'success' && (
-              <Button
-                data-testid="go-to-dashboard-btn"
-                className="w-full bg-green-600 hover:bg-green-700"
-                onClick={() => navigate('/')}
-              >
-                Go to Dashboard
-              </Button>
+              <>
+                <p className="text-green-400 text-sm mb-2">
+                  🎉 Payment successful! Accessing your {subscription?.tier_name || 'subscription'} features...
+                </p>
+                <Button
+                  data-testid="go-to-dashboard-btn"
+                  className="w-full bg-green-600 hover:bg-green-700"
+                  onClick={() => navigate('/dashboard')}
+                >
+                  Access Market Data Dashboard
+                </Button>
+                {(subscription?.tier_id === 'professional' || subscription?.tier_id === 'enterprise') && (
+                  <Button
+                    data-testid="go-to-predictions-btn"
+                    variant="outline"
+                    className="w-full border-blue-600 text-blue-400 hover:bg-blue-900/30"
+                    onClick={() => navigate('/predictions')}
+                  >
+                    View ML Predictions
+                  </Button>
+                )}
+                {subscription?.tier_id === 'enterprise' && (
+                  <Button
+                    data-testid="go-to-batch-scoring-btn"
+                    variant="outline"
+                    className="w-full border-purple-600 text-purple-400 hover:bg-purple-900/30"
+                    onClick={() => navigate('/batch-scoring')}
+                  >
+                    Enterprise Batch Scoring
+                  </Button>
+                )}
+              </>
             )}
 
             {status === 'error' && (
