@@ -1389,6 +1389,17 @@ async def get_economic_indicators(
 ):
     """Get economic indicators (Pro+ only)."""
     fred_service = FREDService()
+
+    if not fred_service.configured:
+        return {
+            "indicators": [],
+            "by_category": {},
+            "summary": {},
+            "configured": False,
+            "data_source": None,
+            "setup_hint": "Connect the Federal Reserve FRED API to see real economic indicators. Get a free API key at https://fred.stlouisfed.org/docs/api/api_key.html and set FRED_API_KEY in environment."
+        }
+
     indicators = await fred_service.get_all_indicators()
     
     # Group by category
