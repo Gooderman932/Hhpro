@@ -2043,6 +2043,53 @@ async def ml_project_matching(
     }
 
 # ============================================
+# DATA SOURCE STATUS
+# ============================================
+
+@app.get("/api/data-sources")
+async def get_data_sources_status(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get status of all data sources - shows what's connected and what needs setup."""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    user_projects = db.query(UserProject).filter(UserProject.user_id == current_user.id).count()
+    tracked_competitors = db.query(TrackedCompetitor).filter(TrackedCompetitor.user_id == current_user.id).count()
+    user_clients = db.query(UserClient).filter(UserClient.user_id == current_user.id).count()
+
+    permit_service = PermitDataService()
+    fred_service = FREDService()
+
+    return {
+        "user_data": {
+            "profile_complete": profile is not None,
+            "projects_count": user_projects,
+            "competitors_count": tracked_competitors,
+            "clients_count": user_clients
+        },
+        "external_sources": {
+            "permits": {
+                "configured": permit_service.configured,
+                "source": "Permit Data API",
+                "setup_url": "https://www.permitdata.org",
+                "env_var": "PERMIT_API_KEY"
+            },
+            "economic_indicators": {
+                "configured": fred_service.configured,
+                "source": "Federal Reserve FRED API",
+                "setup_url": "https://fred.stlouisfed.org/docs/api/api_key.html",
+                "env_var": "FRED_API_KEY"
+            }
+        },
+        "ml_models": {
+            "win_probability": {"status": "active", "data_required": "projects"},
+            "demand_forecast": {"status": "active", "data_required": "none"},
+            "competitive_intelligence": {"status": "active", "data_required": "competitors"},
+            "project_matching": {"status": "active" if profile else "needs_profile", "data_required": "profile + permits"}
+        }
+    }
+
+# ============================================
 # Health Check
 # ============================================
 
