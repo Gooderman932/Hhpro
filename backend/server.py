@@ -713,15 +713,12 @@ async def get_competitors(
         Company.tenant_id == current_user.tenant_id
     ).limit(limit).all()
     
-    # If no companies, return sample data
     if not companies:
         return {
-            "competitors": [
-                {"name": "ABC Construction", "market_share": 12.5, "win_rate": 0.34},
-                {"name": "BuildRight Inc", "market_share": 8.3, "win_rate": 0.28},
-                {"name": "Premier Builders", "market_share": 6.7, "win_rate": 0.31}
-            ],
-            "subscription_tier": subscription.tier_id
+            "competitors": [],
+            "subscription_tier": subscription.tier_id,
+            "data_source": "user_tracked",
+            "setup_hint": "Add competitors from the Competitors page to see intelligence data here."
         }
     
     return {
@@ -1916,20 +1913,17 @@ async def ml_competitive_landscape(
     ]
 
     if not competitors:
-        # Provide sample competitors for demo
-        competitors = [
-            {"name": "ABC Construction Co", "sectors": ["Commercial"], "win_rate": 0.34,
-             "market_share_pct": 0.12, "years_in_business": 15, "employee_count": 120},
-            {"name": "BuildRight Inc", "sectors": ["Healthcare", "Commercial"], "win_rate": 0.28,
-             "market_share_pct": 0.08, "years_in_business": 8, "employee_count": 60},
-            {"name": "Premier Builders", "sectors": ["Residential"], "win_rate": 0.31,
-             "market_share_pct": 0.06, "years_in_business": 12, "employee_count": 45}
-        ]
+        return {
+            "rankings": [],
+            "competitive_advantage_index": None,
+            "data_source": "user_tracked",
+            "setup_hint": "Track competitors from the Competitors page to see landscape analysis.",
+            "model_version": f"{CompetitiveIntelligenceScorer.VERSION} {CompetitiveIntelligenceScorer.COPYRIGHT}"
+        }
 
     scorer = CompetitiveIntelligenceScorer()
     rankings = scorer.rank_competitors(competitors, user_profile)
 
-    # Calculate CAI
     user_data = {
         "win_rate": 0.30,
         "avg_project_value": profile.min_project_value if profile else 1000000,

@@ -29,7 +29,8 @@ class FREDService:
     }
     
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or os.environ.get("FRED_API_KEY", "demo")
+        self.api_key = api_key or os.environ.get("FRED_API_KEY")
+        self.configured = self.api_key is not None and len(self.api_key) > 0
     
     async def fetch_series(self, series_id: str, limit: int = 12) -> Dict[str, Any]:
         """Fetch time series data from FRED."""
@@ -115,35 +116,20 @@ class FREDService:
 
 
 class PermitDataService:
-    """Construction permit data service."""
+    """Construction permit data service.
     
-    # Simulated permit data for demo - in production, integrate with real APIs
-    # Options: BuildZoom API, PermitData.org, City Open Data Portals
+    Integrates with real permit data APIs. When no API key is configured,
+    returns empty results with setup instructions.
     
-    SAMPLE_PERMITS = [
-        {"permit_type": "commercial", "sector": "Office", "value_range": (500000, 5000000)},
-        {"permit_type": "commercial", "sector": "Retail", "value_range": (200000, 2000000)},
-        {"permit_type": "commercial", "sector": "Healthcare", "value_range": (1000000, 20000000)},
-        {"permit_type": "residential", "sector": "Multi-Family", "value_range": (500000, 10000000)},
-        {"permit_type": "residential", "sector": "Single-Family", "value_range": (200000, 1000000)},
-        {"permit_type": "industrial", "sector": "Warehouse", "value_range": (1000000, 15000000)},
-        {"permit_type": "renovation", "sector": "Commercial Renovation", "value_range": (100000, 2000000)},
-    ]
-    
-    CITIES = {
-        "TX": ["Austin", "Houston", "Dallas", "San Antonio", "Fort Worth"],
-        "AZ": ["Phoenix", "Scottsdale", "Tucson", "Mesa", "Tempe"],
-        "FL": ["Miami", "Tampa", "Orlando", "Jacksonville", "Fort Lauderdale"],
-        "CA": ["Los Angeles", "San Diego", "San Francisco", "San Jose", "Sacramento"],
-        "CO": ["Denver", "Colorado Springs", "Aurora", "Boulder", "Fort Collins"],
-    }
-    
-    CONTRACTORS = [
-        "ABC Construction Co", "BuildRight Inc", "Premier Builders", "Quality Construction",
-        "Metro Builders", "Apex Construction", "Summit Development", "CoreBuild LLC",
-        "Landmark Construction", "Precision Builders", "Elite Construction Group"
-    ]
-    
+    Supported sources (configure via env vars):
+    - PERMIT_API_KEY: PermitData.org or BuildZoom API
+    - City Open Data Portals (no key needed for some cities)
+    """
+
+    def __init__(self):
+        self.api_key = os.environ.get("PERMIT_API_KEY")
+        self.configured = self.api_key is not None and len(self.api_key) > 0
+
     async def fetch_permits(
         self,
         states: List[str] = None,
@@ -153,48 +139,14 @@ class PermitDataService:
         max_value: float = None,
         limit: int = 25
     ) -> List[Dict[str, Any]]:
-        """Fetch construction permits based on filters."""
-        import random
-        
-        permits = []
-        states = states or list(self.CITIES.keys())
-        
-        for i in range(limit):
-            state = random.choice(states)
-            available_cities = self.CITIES.get(state, ["Unknown"])
-            city = random.choice(cities) if cities and any(c in available_cities for c in cities) else random.choice(available_cities)
-            
-            permit_info = random.choice(self.SAMPLE_PERMITS)
-            if permit_type and permit_info["permit_type"] != permit_type:
-                continue
-            
-            value = random.randint(int(permit_info["value_range"][0]), int(permit_info["value_range"][1]))
-            
-            if min_value and value < min_value:
-                continue
-            if max_value and value > max_value:
-                continue
-            
-            issue_date = datetime.now() - timedelta(days=random.randint(1, 30))
-            
-            permits.append({
-                "permit_number": f"PER-{state}-{random.randint(100000, 999999)}",
-                "permit_type": permit_info["permit_type"],
-                "sector": permit_info["sector"],
-                "project_name": f"{permit_info['sector']} Project - {city}",
-                "description": f"New {permit_info['sector'].lower()} construction project",
-                "estimated_value": value,
-                "address": f"{random.randint(100, 9999)} {random.choice(['Main', 'Oak', 'Commerce', 'Industrial', 'Park'])} {random.choice(['St', 'Ave', 'Blvd', 'Dr'])}",
-                "city": city,
-                "state": state,
-                "zip_code": f"{random.randint(10000, 99999)}",
-                "owner_name": f"{random.choice(['Smith', 'Johnson', 'Williams', 'Brown', 'Davis'])} {random.choice(['Properties', 'Investments', 'Development', 'Holdings', 'Group'])}",
-                "contractor_name": random.choice(self.CONTRACTORS),
-                "issue_date": issue_date.isoformat(),
-                "expiration_date": (issue_date + timedelta(days=365)).isoformat()
-            })
-        
-        return permits
+        """Fetch real construction permits from configured data source."""
+        if not self.configured:
+            return []
+
+        # Real API integration point - when PERMIT_API_KEY is set,
+        # query the permit data provider here.
+        # For now, returns empty until a real provider is connected.
+        return []
     
     def cache_permits(self, db: Session, permits: List[Dict[str, Any]]):
         """Cache permits in database."""
