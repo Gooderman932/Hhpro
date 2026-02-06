@@ -203,4 +203,108 @@ export const getNotificationHistory = async (limit: number = 20) => {
   return response.data
 }
 
+// User Profile
+export interface UserProfile {
+  onboarding_completed: boolean
+  business_type: string | null
+  trade_specialty: string | null
+  company_size: string | null
+  service_states: string[]
+  service_cities: string[]
+  service_radius_miles: number
+  min_project_value: number
+  max_project_value: number
+  preferred_sectors: string[]
+  saved_searches: any[]
+}
+
+export const getProfile = async (): Promise<UserProfile> => {
+  const response = await api.get<UserProfile>('/profile')
+  return response.data
+}
+
+export const updateProfile = async (profile: Partial<UserProfile>) => {
+  const response = await api.put('/profile', profile)
+  return response.data
+}
+
+// Permits
+export const getPermits = async (params: {
+  state?: string
+  permit_type?: string
+  min_value?: number
+  max_value?: number
+  limit?: number
+}) => {
+  const response = await api.get('/permits', { params })
+  return response.data
+}
+
+// My Projects
+export const getMyProjects = async () => {
+  const response = await api.get('/my-projects')
+  return response.data
+}
+
+export const createMyProject = async (project: any) => {
+  const response = await api.post('/my-projects', project)
+  return response.data
+}
+
+export const deleteMyProject = async (id: number) => {
+  const response = await api.delete(`/my-projects/${id}`)
+  return response.data
+}
+
+// Tracked Competitors
+export const getMyCompetitors = async () => {
+  const response = await api.get('/my-competitors')
+  return response.data
+}
+
+export const addCompetitor = async (competitor: any) => {
+  const response = await api.post('/my-competitors', competitor)
+  return response.data
+}
+
+// Economic Indicators
+export const getEconomicIndicators = async () => {
+  const response = await api.get('/economic-indicators')
+  return response.data
+}
+
+// Industry Benchmarks
+export const getBenchmarks = async () => {
+  const response = await api.get('/benchmarks')
+  return response.data
+}
+
+// Smart Alerts
+export const getAlerts = async (unreadOnly: boolean = false) => {
+  const response = await api.get('/alerts', { params: { unread_only: unreadOnly } })
+  return response.data
+}
+
+export const generateAlerts = async () => {
+  const response = await api.post('/alerts/generate')
+  return response.data
+}
+
+// AI Enrichment
+export const enrichProject = async (projectData: any) => {
+  const response = await api.post('/ai/enrich-project', projectData)
+  return response.data
+}
+
+export const matchOpportunities = async (limit: number = 20) => {
+  const response = await api.get('/ai/match-opportunities', { params: { limit } })
+  return response.data
+}
+
+// Tier Features
+export const getTierFeatures = async () => {
+  const response = await api.get('/tier-features')
+  return response.data
+}
+
 export default api
