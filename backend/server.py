@@ -1667,6 +1667,365 @@ async def get_tier_features():
     }
 
 # ============================================
+# PROPRIETARY ML MODEL ENDPOINTS
+# Copyright (c) 2025 Poor Dude Holdings LLC
+# ============================================
+
+class MLWinProbabilityRequest(BaseModel):
+    project_id: Optional[int] = None
+    project: Optional[Dict[str, Any]] = None
+
+class MLDemandForecastRequest(BaseModel):
+    region: str = "TX"
+    sector: str = "Commercial"
+    months_ahead: int = 6
+
+class MLCompetitorAnalysisRequest(BaseModel):
+    competitor_id: Optional[int] = None
+    competitor: Optional[Dict[str, Any]] = None
+
+class MLProjectMatchRequest(BaseModel):
+    min_score: float = 0
+    limit: int = 20
+
+@app.get("/api/ml/models-info")
+async def get_ml_models_info(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional_tier)
+):
+    """Get metadata about all proprietary ML models."""
+    return {
+        "models": [
+            WinProbabilityModel().get_model_info(),
+            DemandForecastModel().get_model_info(),
+            CompetitiveIntelligenceScorer().get_model_info(),
+            ProjectMatcherAI().get_model_info()
+        ],
+        "copyright": "© 2025 Poor Dude Holdings LLC",
+        "patent_status": "Patent Pending"
+    }
+
+@app.post("/api/ml/win-probability")
+async def ml_win_probability(
+    data: MLWinProbabilityRequest,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional_tier),
+    db: Session = Depends(get_db)
+):
+    """Proprietary Win Probability Prediction - © 2025 Poor Dude Holdings LLC"""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    user_profile = {
+        "preferred_sectors": profile.preferred_sectors or [] if profile else [],
+        "service_states": profile.service_states or [] if profile else [],
+        "min_project_value": profile.min_project_value if profile else 100000,
+        "max_project_value": profile.max_project_value if profile else 50000000,
+        "trade_specialty": profile.trade_specialty if profile else ""
+    }
+
+    # Get project data
+    project_data = data.project or {}
+    if data.project_id:
+        # Try UserProject first, then Project
+        up = db.query(UserProject).filter(
+            UserProject.id == data.project_id, UserProject.user_id == current_user.id
+        ).first()
+        if up:
+            project_data = {
+                "name": up.name, "description": up.description or "",
+                "value": up.value or 0, "sector": up.sector or "",
+                "state": up.state or "", "city": up.city or "",
+                "bid_date": up.bid_date.isoformat() if up.bid_date else None,
+                "expected_bidders": len(up.bidding_competitors or [])
+            }
+        else:
+            p = db.query(Project).filter(Project.id == data.project_id).first()
+            if not p:
+                raise HTTPException(status_code=404, detail="Project not found")
+            project_data = {
+                "name": p.title, "value": p.value or 0, "sector": p.sector or "",
+                "state": p.state or "", "city": p.city or ""
+            }
+
+    # Get user history for calibration
+    user_projects = db.query(UserProject).filter(UserProject.user_id == current_user.id).all()
+    history = [{"outcome": up.status} for up in user_projects]
+
+    # Get clients for relationship scoring
+    clients = db.query(UserClient).filter(UserClient.user_id == current_user.id).all()
+    user_data = {
+        "clients": [
+            {"company_name": c.company_name, "relationship_strength": c.relationship_strength}
+            for c in clients
+        ]
+    }
+
+    model = WinProbabilityModel(user_history=history)
+    prediction = model.predict(
+        project=project_data,
+        user_profile=user_profile,
+        user_data=user_data
+    )
+
+    return {
+        "probability": prediction.probability,
+        "confidence": prediction.confidence,
+        "recommendation": prediction.recommendation,
+        "explanation": prediction.explanation,
+        "factors": prediction.factors,
+        "model_version": prediction.model_version,
+        "watermark": prediction.watermark
+    }
+
+@app.post("/api/ml/demand-forecast")
+async def ml_demand_forecast(
+    data: MLDemandForecastRequest,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional_tier),
+    db: Session = Depends(get_db)
+):
+    """Proprietary Demand Forecast - © 2025 Poor Dude Holdings LLC"""
+    model = DemandForecastModel()
+
+    # Get momentum
+    momentum = model.calculate_market_momentum(data.region, data.sector)
+
+    # Get forecasts
+    forecasts = model.forecast(
+        region=data.region,
+        sector=data.sector,
+        months_ahead=min(data.months_ahead, 12)
+    )
+
+    return {
+        "momentum": {
+            "score": momentum.score,
+            "direction": momentum.direction,
+            "strength": momentum.strength,
+            "factors": momentum.contributing_factors
+        },
+        "forecasts": [
+            {
+                "period": f.period,
+                "predicted_demand": f.predicted_demand,
+                "confidence_interval": list(f.confidence_interval),
+                "trend": f.trend,
+                "factors": f.factors,
+                "watermark": f.watermark
+            }
+            for f in forecasts
+        ],
+        "model_version": f"{DemandForecastModel.VERSION} {DemandForecastModel.COPYRIGHT}",
+        "region": data.region,
+        "sector": data.sector
+    }
+
+@app.get("/api/ml/regional-outlook")
+async def ml_regional_outlook(
+    sector: str = "Commercial",
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional_tier),
+    db: Session = Depends(get_db)
+):
+    """Proprietary Regional Outlook - © 2025 Poor Dude Holdings LLC"""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    regions = (profile.service_states if profile and profile.service_states else
+               ["TX", "FL", "AZ", "CA", "CO", "GA", "NC", "TN", "WA", "OH"])
+
+    model = DemandForecastModel()
+    outlook = model.get_regional_outlook(regions, sector)
+
+    return {
+        "outlook": outlook,
+        "sector": sector,
+        "model_version": f"{DemandForecastModel.VERSION} {DemandForecastModel.COPYRIGHT}"
+    }
+
+@app.post("/api/ml/competitive-analysis")
+async def ml_competitive_analysis(
+    data: MLCompetitorAnalysisRequest,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional_tier),
+    db: Session = Depends(get_db)
+):
+    """Proprietary Competitive Intelligence - © 2025 Poor Dude Holdings LLC"""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    user_profile = {
+        "preferred_sectors": profile.preferred_sectors or [] if profile else [],
+        "service_states": profile.service_states or [] if profile else []
+    }
+
+    competitor_data = data.competitor or {}
+    if data.competitor_id:
+        tc = db.query(TrackedCompetitor).filter(
+            TrackedCompetitor.id == data.competitor_id,
+            TrackedCompetitor.user_id == current_user.id
+        ).first()
+        if not tc:
+            raise HTTPException(status_code=404, detail="Competitor not found")
+        competitor_data = {
+            "name": tc.company_name,
+            "company_type": tc.company_type,
+            "sectors": tc.specialties or [],
+            "win_rate": 0.25,
+            "recent_wins": tc.recent_wins or 0,
+            "recent_bids": tc.recent_bids or 0,
+            "threat_level": tc.threat_level
+        }
+
+    scorer = CompetitiveIntelligenceScorer()
+    result = scorer.score_competitor(competitor_data, user_profile)
+
+    return {
+        "competitor_name": result.competitor_name,
+        "threat_level": result.threat_level,
+        "threat_score": result.threat_score,
+        "factors": result.factors,
+        "vulnerabilities": result.vulnerabilities,
+        "strengths": result.strengths,
+        "model_version": result.model_version,
+        "watermark": result.watermark
+    }
+
+@app.get("/api/ml/competitive-landscape")
+async def ml_competitive_landscape(
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional_tier),
+    db: Session = Depends(get_db)
+):
+    """Proprietary Competitive Landscape Analysis - © 2025 Poor Dude Holdings LLC"""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    user_profile = {
+        "preferred_sectors": profile.preferred_sectors or [] if profile else [],
+        "service_states": profile.service_states or [] if profile else []
+    }
+
+    tracked = db.query(TrackedCompetitor).filter(
+        TrackedCompetitor.user_id == current_user.id
+    ).all()
+
+    competitors = [
+        {
+            "id": tc.id,
+            "name": tc.company_name,
+            "company_type": tc.company_type,
+            "sectors": tc.specialties or [],
+            "win_rate": 0.25 + (tc.recent_wins or 0) * 0.05,
+            "threat_level": tc.threat_level
+        }
+        for tc in tracked
+    ]
+
+    if not competitors:
+        # Provide sample competitors for demo
+        competitors = [
+            {"name": "ABC Construction Co", "sectors": ["Commercial"], "win_rate": 0.34,
+             "market_share_pct": 0.12, "years_in_business": 15, "employee_count": 120},
+            {"name": "BuildRight Inc", "sectors": ["Healthcare", "Commercial"], "win_rate": 0.28,
+             "market_share_pct": 0.08, "years_in_business": 8, "employee_count": 60},
+            {"name": "Premier Builders", "sectors": ["Residential"], "win_rate": 0.31,
+             "market_share_pct": 0.06, "years_in_business": 12, "employee_count": 45}
+        ]
+
+    scorer = CompetitiveIntelligenceScorer()
+    rankings = scorer.rank_competitors(competitors, user_profile)
+
+    # Calculate CAI
+    user_data = {
+        "win_rate": 0.30,
+        "avg_project_value": profile.min_project_value if profile else 1000000,
+        "capacity_utilization": 0.75,
+        "repeat_client_rate": 0.35,
+        "certifications": []
+    }
+    market_data = {"avg_win_rate": 0.27, "avg_project_value": 2000000}
+    cai = scorer.calculate_competitive_advantage_index(user_data, market_data)
+
+    return {
+        "rankings": [
+            {
+                "competitor_name": r.competitor_name,
+                "threat_level": r.threat_level,
+                "threat_score": r.threat_score,
+                "vulnerabilities": r.vulnerabilities,
+                "strengths": r.strengths
+            }
+            for r in rankings
+        ],
+        "competitive_advantage_index": {
+            "score": cai.overall_score,
+            "position": cai.market_position,
+            "strengths": cai.strengths,
+            "improvement_areas": cai.improvement_areas,
+            "competitive_gaps": cai.competitive_gaps
+        },
+        "model_version": f"{CompetitiveIntelligenceScorer.VERSION} {CompetitiveIntelligenceScorer.COPYRIGHT}"
+    }
+
+@app.post("/api/ml/project-matching")
+async def ml_project_matching(
+    data: MLProjectMatchRequest,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Proprietary Project Matching - © 2025 Poor Dude Holdings LLC"""
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    if not profile:
+        raise HTTPException(status_code=400, detail="Complete your profile first for project matching")
+
+    user_profile = {
+        "trade_specialty": profile.trade_specialty or "",
+        "preferred_sectors": profile.preferred_sectors or [],
+        "service_states": profile.service_states or [],
+        "service_cities": profile.service_cities or [],
+        "min_project_value": profile.min_project_value or 0,
+        "max_project_value": profile.max_project_value or 50000000,
+        "company_size": profile.company_size or "11-50"
+    }
+
+    # Get permits as project pool
+    permit_service = PermitDataService()
+    permits = await permit_service.fetch_permits(
+        states=profile.service_states,
+        limit=data.limit * 2
+    )
+
+    # Convert permits to project format
+    projects = [
+        {
+            "name": p.get("project_name", ""),
+            "description": p.get("description", ""),
+            "value": p.get("estimated_value", 0),
+            "sector": p.get("sector", ""),
+            "state": p.get("state", ""),
+            "city": p.get("city", ""),
+            "owner_name": p.get("owner_name", ""),
+            "permit_number": p.get("permit_number", "")
+        }
+        for p in permits
+    ]
+
+    matcher = ProjectMatcherAI()
+    matches = matcher.match_projects(projects, user_profile, min_score=data.min_score)
+
+    return {
+        "matches": [
+            {
+                "project": m.project,
+                "fit_score": m.fit_score,
+                "match_factors": m.match_factors,
+                "match_reasons": m.match_reasons,
+                "concerns": m.concerns,
+                "recommendation": m.recommendation,
+                "watermark": m.watermark
+            }
+            for m in matches[:data.limit]
+        ],
+        "total": len(matches),
+        "model_version": f"{ProjectMatcherAI.VERSION} {ProjectMatcherAI.COPYRIGHT}"
+    }
+
+# ============================================
 # Health Check
 # ============================================
 
