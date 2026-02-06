@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react"
 import "@/App.css"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
-import { Menu, X, LogOut, User, BarChart3, TrendingUp, Users, Target, Bell } from "lucide-react"
+import { Menu, X, LogOut, User, BarChart3, TrendingUp, Users, Target, Bell, FileText, Briefcase, Settings } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { PricingPage } from "./components/pricing/PricingPage"
 import { SubscriptionSuccess } from "./components/pricing/SubscriptionSuccess"
 import { AuthPage } from "./components/auth/AuthPage"
-import { getCurrentSubscription } from "./services/api"
+import { getCurrentSubscription, getProfile } from "./services/api"
 import type { Subscription } from "./types/subscription"
 import Analytics from "./components/dashboard/Analytics"
 import CompetitorMap from "./components/intelligence/CompetitorMap"
 import { MLDashboard } from "./components/dashboard/MLDashboard"
 import { BatchScoring } from "./components/dashboard/BatchScoring"
 import { NotificationSettings } from "./components/settings/NotificationSettings"
+import { Onboarding } from "./components/onboarding/Onboarding"
+import { PermitsPage } from "./components/permits/PermitsPage"
+import { MyProjectsPage } from "./components/projects/MyProjectsPage"
 
 // Navigation component
 const Navigation = () => {
