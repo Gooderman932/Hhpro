@@ -307,4 +307,54 @@ export const getTierFeatures = async () => {
   return response.data
 }
 
+// ============================================
+// Proprietary ML Model Endpoints
+// © 2025 Poor Dude Holdings LLC
+// ============================================
+
+export const getMLModelsInfo = async () => {
+  const response = await api.get('/ml/models-info')
+  return response.data
+}
+
+export const getMLWinProbability = async (projectId?: number, project?: any) => {
+  const response = await api.post('/ml/win-probability', {
+    project_id: projectId,
+    project
+  })
+  return response.data
+}
+
+export const getMLDemandForecast = async (region: string, sector: string, months: number = 6) => {
+  const response = await api.post('/ml/demand-forecast', {
+    region, sector, months_ahead: months
+  })
+  return response.data
+}
+
+export const getMLRegionalOutlook = async (sector: string = 'Commercial') => {
+  const response = await api.get('/ml/regional-outlook', { params: { sector } })
+  return response.data
+}
+
+export const getMLCompetitiveAnalysis = async (competitorId?: number, competitor?: any) => {
+  const response = await api.post('/ml/competitive-analysis', {
+    competitor_id: competitorId,
+    competitor
+  })
+  return response.data
+}
+
+export const getMLCompetitiveLandscape = async () => {
+  const response = await api.get('/ml/competitive-landscape')
+  return response.data
+}
+
+export const getMLProjectMatching = async (minScore: number = 0, limit: number = 20) => {
+  const response = await api.post('/ml/project-matching', {
+    min_score: minScore, limit
+  })
+  return response.data
+}
+
 export default api
