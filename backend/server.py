@@ -268,9 +268,16 @@ async def require_enterprise_tier(
     """Require Enterprise tier."""
     subscription = await get_user_subscription(user, db)
     if not subscription:
-        raise HTTPException(status_code=403, detail="Active subscription required")
-    if subscription.tier_id != "enterprise":
-        raise HTTPException(status_code=403, detail="Enterprise subscription required")
+        raise HTTPException(
+            status_code=403,
+            detail="Active subscription required. Upgrade at /pricing to access this feature."
+        )
+    tier_level = TIER_LEVELS.get(subscription.tier_id, 0)
+    if tier_level < TIER_LEVELS["enterprise"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Enterprise subscription ($399/mo) required for this feature. Upgrade at /pricing."
+        )
     return subscription
 
 # ============================================
