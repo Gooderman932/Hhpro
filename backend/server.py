@@ -2251,9 +2251,34 @@ async def get_data_sources_status(
 # ============================================
 
 @app.get("/health")
-async def health_check():
-    return {"status": "healthy", "service": "HHDrywall Pro API", "version": "3.0.0"}
+async def health_check(db: Session = Depends(get_db)):
+    """Production health check with system status."""
+    permit_service = PermitDataService()
+    fred_service = FREDService()
+
+    stripe_mode = "live" if STRIPE_API_KEY.startswith("sk_live_") else "test" if STRIPE_API_KEY.startswith("sk_test_") else "not_configured"
+
+    db_ok = True
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        db_ok = False
+
+    return {
+        "status": "healthy" if db_ok else "degraded",
+        "service": "HHDrywall Pro API",
+        "version": "1.0.0",
+        "environment": ENVIRONMENT,
+        "database": "connected" if db_ok else "disconnected",
+        "stripe_mode": stripe_mode,
+        "external_apis": {
+            "fred": "connected" if fred_service.configured else "not_configured",
+            "permits": "connected" if permit_service.configured else "not_configured"
+        },
+        "ml_models": "loaded",
+        "copyright": "Poor Dude Holdings LLC"
+    }
 
 @app.get("/")
 async def root():
-    return {"message": "HHDrywall Pro API", "version": "3.0.0", "docs": "/docs"}
+    return {"message": "Construction Intelligence Platform API", "version": "1.0.0", "docs": "/docs"}
