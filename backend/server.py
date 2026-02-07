@@ -233,10 +233,13 @@ async def require_subscription(
     user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ) -> Subscription:
-    """Require active subscription."""
+    """Require any active subscription (Basic+)."""
     subscription = await get_user_subscription(user, db)
     if not subscription:
-        raise HTTPException(status_code=403, detail="Active subscription required")
+        raise HTTPException(
+            status_code=403,
+            detail="Active subscription required. Upgrade at /pricing to access this feature."
+        )
     return subscription
 
 async def require_professional_tier(
@@ -246,9 +249,16 @@ async def require_professional_tier(
     """Require Professional or Enterprise tier."""
     subscription = await get_user_subscription(user, db)
     if not subscription:
-        raise HTTPException(status_code=403, detail="Active subscription required")
-    if subscription.tier_id not in ["professional", "enterprise"]:
-        raise HTTPException(status_code=403, detail="Professional or Enterprise subscription required")
+        raise HTTPException(
+            status_code=403,
+            detail="Active subscription required. Upgrade at /pricing to access this feature."
+        )
+    tier_level = TIER_LEVELS.get(subscription.tier_id, 0)
+    if tier_level < TIER_LEVELS["professional"]:
+        raise HTTPException(
+            status_code=403,
+            detail="Pro subscription ($149/mo) required for AI predictions. Upgrade at /pricing."
+        )
     return subscription
 
 async def require_enterprise_tier(
