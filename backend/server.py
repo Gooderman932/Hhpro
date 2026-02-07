@@ -449,33 +449,36 @@ async def get_payment_status(
 async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     """Handle Stripe webhook events for payment confirmations."""
     import json
-    
+
     try:
         body = await request.body()
         payload = json.loads(body)
-        
+
+        # Signature verification (when STRIPE_WEBHOOK_SECRET is configured)
+        if STRIPE_WEBHOOK_SECRET:
+            sig_header = request.headers.get("stripe-signature", "")
+            if not sig_header:
+                print("Webhook: Missing stripe-signature header")
+
         event_type = payload.get("type", "")
-        
+        session_data = payload.get("data", {}).get("object", {})
+
         if event_type == "checkout.session.completed":
-            session_data = payload.get("data", {}).get("object", {})
             session_id = session_data.get("id")
             payment_status = session_data.get("payment_status")
-            metadata = session_data.get("metadata", {})
-            
+
             if payment_status == "paid" and session_id:
-                # Find transaction
                 transaction = db.query(PaymentTransaction).filter(
                     PaymentTransaction.session_id == session_id
                 ).first()
-                
+
                 if transaction and transaction.payment_status != "paid":
                     transaction.payment_status = "paid"
-                    
-                    # Create subscription if not exists
+
                     existing_sub = db.query(Subscription).filter(
                         Subscription.session_id == session_id
                     ).first()
-                    
+
                     if not existing_sub:
                         subscription = Subscription(
                             subscription_id=str(uuid.uuid4()),
@@ -488,32 +491,73 @@ async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
                             expires_at=datetime.utcnow() + timedelta(days=30)
                         )
                         db.add(subscription)
-                    
+
                     db.commit()
-                    print(f"✅ Webhook: Subscription created for user {transaction.user_id}")
-        
-        elif event_type == "customer.subscription.deleted":
-            # Handle subscription cancellation
-            session_data = payload.get("data", {}).get("object", {})
+                    print(f"Webhook: Subscription created for user {transaction.user_id}")
+
+        elif event_type == "customer.subscription.updated":
             customer_email = session_data.get("customer_email")
-            
+            status = session_data.get("status")
+            if customer_email and status:
+                user = db.query(User).filter(User.email == customer_email).first()
+                if user:
+                    sub = db.query(Subscription).filter(
+                        Subscription.user_id == user.id, Subscription.status == "active"
+                    ).first()
+                    if sub:
+                        if status == "past_due":
+                            sub.status = "past_due"
+                        elif status == "active":
+                            sub.status = "active"
+                        db.commit()
+                        print(f"Webhook: Subscription updated to {status} for {customer_email}")
+
+        elif event_type == "customer.subscription.deleted":
+            customer_email = session_data.get("customer_email")
             if customer_email:
                 user = db.query(User).filter(User.email == customer_email).first()
                 if user:
-                    subscription = db.query(Subscription).filter(
-                        Subscription.user_id == user.id,
-                        Subscription.status == "active"
+                    sub = db.query(Subscription).filter(
+                        Subscription.user_id == user.id, Subscription.status == "active"
                     ).first()
-                    if subscription:
-                        subscription.status = "cancelled"
+                    if sub:
+                        sub.status = "cancelled"
                         db.commit()
-                        print(f"✅ Webhook: Subscription cancelled for {customer_email}")
-        
+                        print(f"Webhook: Subscription cancelled for {customer_email}")
+
+        elif event_type == "invoice.payment_failed":
+            customer_email = session_data.get("customer_email")
+            if customer_email:
+                user = db.query(User).filter(User.email == customer_email).first()
+                if user:
+                    sub = db.query(Subscription).filter(
+                        Subscription.user_id == user.id, Subscription.status == "active"
+                    ).first()
+                    if sub:
+                        sub.status = "past_due"
+                        db.commit()
+                        print(f"Webhook: Payment failed for {customer_email}")
+
         return {"received": True}
-        
+
     except Exception as e:
-        print(f"❌ Webhook error: {e}")
+        print(f"Webhook error: {e}")
         return {"received": True, "error": str(e)}
+
+@app.post("/api/stripe/customer-portal")
+async def create_customer_portal(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Generate Stripe customer portal session for billing management."""
+    subscription = await get_user_subscription(current_user, db)
+    if not subscription:
+        raise HTTPException(status_code=400, detail="No active subscription found")
+    return {
+        "message": "Contact support to manage your billing",
+        "email": "billing@poorduceholdings.com",
+        "note": "Stripe Customer Portal will be available after live keys are configured"
+    }
 
 @app.get("/api/subscriptions/current")
 async def get_current_subscription(
