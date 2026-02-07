@@ -2138,6 +2138,68 @@ async def ml_project_matching(
     }
 
 # ============================================
+# ONBOARDING WIZARD
+# ============================================
+
+@app.get("/api/onboarding/status")
+async def get_onboarding_status(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get onboarding progress for the current user."""
+    subscription = await get_user_subscription(current_user, db)
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    projects_count = db.query(UserProject).filter(UserProject.user_id == current_user.id).count()
+
+    permit_service = PermitDataService()
+    fred_service = FREDService()
+
+    steps = [
+        {
+            "id": "subscription",
+            "title": "Choose a Plan",
+            "completed": subscription is not None,
+            "description": "Select a subscription tier"
+        },
+        {
+            "id": "profile",
+            "title": "Business Profile",
+            "completed": profile is not None and bool(profile.trade_specialty),
+            "description": "Tell us about your business"
+        },
+        {
+            "id": "data_sources",
+            "title": "Connect Data",
+            "completed": permit_service.configured or fred_service.configured,
+            "description": "Connect external data sources"
+        },
+        {
+            "id": "first_project",
+            "title": "Add a Project",
+            "completed": projects_count > 0,
+            "description": "Add your first project for AI predictions"
+        }
+    ]
+
+    completed = sum(1 for s in steps if s["completed"])
+    progress = int((completed / len(steps)) * 100)
+
+    return {
+        "steps": steps,
+        "progress": progress,
+        "onboarding_completed": progress == 100,
+        "next_step": next((s for s in steps if not s["completed"]), None)
+    }
+
+@app.post("/api/onboarding/skip")
+async def skip_onboarding(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Mark onboarding as skipped (user can always revisit)."""
+    return {"skipped": True, "message": "You can revisit setup from the dashboard anytime."}
+
+# ============================================
 # DATA SOURCE STATUS
 # ============================================
 
