@@ -235,3 +235,7 @@ backups/
 .env.production.local
 .env.production
 !.env.example
+-e 
+# Environment files
+*.env
+*.env.*
