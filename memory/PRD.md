@@ -6,103 +6,89 @@
 ---
 
 ## Original Problem Statement
-Build a premium Construction Intelligence Platform with proprietary AI/ML models as the core intellectual property of Poor Dude Holdings LLC. The platform provides construction industry professionals with market analytics, competitor intelligence, demand forecasting, and project matching capabilities.
+Build a premium Construction Intelligence Platform with proprietary AI/ML models as the core intellectual property of Poor Dude Holdings LLC. Production-ready SaaS with live billing, tier-based gating, and real data delivery.
 
 ## Architecture
 - **Frontend**: React + Vite + TypeScript + Tailwind CSS + Shadcn/UI
 - **Backend**: FastAPI + Python + SQLAlchemy
 - **Database**: PostgreSQL (Supabase - remote)
-- **Payments**: Stripe (with webhooks)
+- **Payments**: Stripe (via emergentintegrations)
 - **Email**: Resend
 - **ML**: Custom proprietary models (scikit-learn as base tooling)
+
+## Pricing Structure
+| Tier | Price | Key Features |
+|------|-------|-------------|
+| Basic | $49/mo | Projects, 25 permits/mo, basic indicators, weekly digest |
+| Pro | $149/mo | State-wide permits, real-time alerts, Win Probability, 3-month forecast, competitor intel |
+| Enterprise | $399/mo | Multi-state, 6-month forecast, advanced ML, API access, custom training |
 
 ## What's Been Implemented
 
 ### Core Infrastructure (COMPLETE)
 - User registration and JWT authentication
-- Three-tier Stripe subscription system (Basic $299, Professional $799, Enterprise $1999)
-- Payment-to-feature-access pipeline with webhooks
-- Supabase PostgreSQL database (fully migrated from MongoDB)
-- CORS, hot-reload, supervisor-managed services
+- Stripe checkout with webhook handling (checkout.session.completed, subscription.updated, subscription.deleted, invoice.payment_failed)
+- Customer portal endpoint
+- Production mode validation (rejects test keys)
+- Health check with system status
 
-### Phase 1: User Personalization (COMPLETE)
-- 4-step onboarding form (business type, trade, service area, sectors)
-- User profile API (GET/PUT /api/profile)
-- My Projects CRUD with AI enrichment
-- Tracked Competitors CRUD
-- User Clients management
-- Saved searches (tier-limited)
-- Permits page with filters and match scoring
-- Notification settings with Resend email integration
+### Tier-Based Feature Gating (COMPLETE - December 2025)
+- `require_subscription` (Basic+), `require_professional_tier` (Pro+), `require_enterprise_tier`
+- Proper 403 responses with upgrade messages and pricing info
+- Demand forecast capped at 3 months for Pro, 6 months for Enterprise
+- Permit limits per tier
 
-### Phase 2: Proprietary AI/ML Models (COMPLETE - December 2025)
-All 4 proprietary models implemented with legal headers, watermarks, and connected to API endpoints:
+### Proprietary AI/ML Models (COMPLETE)
+1. **Win Probability** - Multi-factor bid success prediction with legal_notice, watermark
+2. **Demand Forecasting** - Market Momentum + forecasts with tier-based limits
+3. **Competitive Intelligence** - Threat scoring + CAI
+4. **Project Matching** - Semantic matching with fit scores
 
-1. **Win Probability Model** (`/api/ml/win-probability`)
-   - Multi-factor bid success prediction
-   - Factors: project fit, competitive pressure, historical performance, market conditions, timing, relationships
-   - Outputs: probability, confidence, recommendation, watermark
+### Onboarding Wizard (COMPLETE - December 2025)
+- 4-step wizard: Subscription → Profile → Data Sources → First Project
+- Progress tracking via `/api/onboarding/status`
+- Appears on Analytics dashboard for incomplete users
+- Dismissible via sessionStorage
 
-2. **Demand Forecasting Engine** (`/api/ml/demand-forecast`, `/api/ml/regional-outlook`)
-   - Market Momentum Score calculation
-   - Seasonality-adjusted forecasts (1-12 months)
-   - Regional and sector growth factors
-
-3. **Competitive Intelligence Scorer** (`/api/ml/competitive-analysis`, `/api/ml/competitive-landscape`)
-   - Competitor Threat Scoring (0-100)
-   - Competitive Advantage Index (CAI)
-   - Vulnerability and strength identification
-
-4. **Project-Contractor Matching AI** (`/api/ml/project-matching`)
-   - Semantic text similarity for trade matching
-   - Multi-factor fit scoring
-   - Adaptive learning from user feedback
-
-### Mock Data Removal & Real Value Delivery (COMPLETE - December 2025)
-- Removed ALL fake/sample/demo data from production endpoints
-- PermitDataService returns empty when PERMIT_API_KEY not configured
-- FREDService returns empty when FRED_API_KEY not configured
-- Competitor endpoints return empty when no real tracked competitors
-- Data source status endpoint (`/api/data-sources`) shows configuration status
-- Proper empty states in frontend with setup instructions
+### Mock Data Removal (COMPLETE)
+- Zero sample/demo data in production endpoints
+- All data sources return empty with setup hints when unconfigured
 - Data source labels on all ML predictions
 
-### Legal Documentation (COMPLETE - December 2025)
-- `/backend/legal/PATENT_PENDING.md` - 4 patent applications documented with claims
-- `/backend/legal/TRADE_SECRETS.md` - Trade secret classification and protections
-- `/backend/legal/IP_ASSIGNMENT.md` - IP ownership and third-party component declaration
-- `/backend/legal/LICENSE_PROPRIETARY.md` - Proprietary software license terms
-- `/backend/app/ml/proprietary/README.md` - Model inventory and patent status
-- All 4 ML model files have copyright headers, patent pending notices, and watermarks
+### Legal Documentation (COMPLETE)
+- `/backend/legal/PATENT_PENDING.md` - 4 patent applications with claims
+- `/backend/legal/TRADE_SECRETS.md` - Trade secret classification
+- `/backend/legal/IP_ASSIGNMENT.md` - IP ownership declaration
+- `/backend/legal/LICENSE_PROPRIETARY.md` - Proprietary license terms
+- All ML files have copyright headers and watermarks
 
-### Tier-Based Feature Gating (COMPLETE)
-- Basic: Projects, permits (25/mo), basic filters
-- Professional: ML predictions, competitor tracking, economic indicators, benchmarks
-- Enterprise: All features, batch scoring, API access, LLM insights
+### Deployment Documentation (COMPLETE)
+- `/docs/PRODUCTION_ENV_VARS.md` - All env vars with setup instructions
+- `/docs/DEPLOYMENT_CHECKLIST.md` - Pre/post deployment verification
+- `/backend/.env.example` - Template for production env
 
-## Data Source Configuration (For Deployment)
-
-External API keys needed (set in /backend/.env):
-| Variable | Source | Signup URL |
-|----------|--------|------------|
-| PERMIT_API_KEY | Permit data provider | https://www.permitdata.org |
-| FRED_API_KEY | Federal Reserve FRED | https://fred.stlouisfed.org/docs/api/api_key.html |
+## External API Keys Needed (For Deployment)
+| Variable | Source | URL |
+|----------|--------|-----|
+| STRIPE_API_KEY | Stripe (live) | https://dashboard.stripe.com/apikeys |
+| STRIPE_WEBHOOK_SECRET | Stripe webhooks | https://dashboard.stripe.com/webhooks |
+| FRED_API_KEY | Federal Reserve | https://fred.stlouisfed.org/docs/api/api_key.html |
+| PERMIT_API_KEY | Permit provider | https://www.permitdata.org |
 
 ## Pending / Upcoming Tasks
 
-### P1 - Phase 3: External Data Integrations
-- [ ] Connect real FRED API when user provides key
+### P1 - Real External Data
+- [ ] Connect FRED API when user provides key
 - [ ] Connect permit data source when user provides key
 - [ ] Census Bureau / BLS API integration
 
-### P1 - Phase 4: Real-time Features
+### P1 - Real-time Features
 - [ ] WebSocket setup for live notifications
 - [ ] Smart Alerts system based on ML outputs
-- [ ] Real-time permit monitoring
 
 ### P2 - Refactoring
 - [ ] Move inline routes from server.py into /routes/ modules
-- [ ] Add comprehensive pytest suite
+- [ ] Add comprehensive pytest suite beyond production readiness tests
 
 ## Test Credentials
 - Enterprise: `malcolmgoodmen@gmail.com` / `Test123!`
