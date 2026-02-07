@@ -23,7 +23,12 @@ interface UserProject {
 
 const SECTORS = ['Commercial', 'Residential', 'Healthcare', 'Education', 'Industrial', 'Retail']
 const STATUSES = ['bidding', 'won', 'lost', 'in_progress', 'completed']
-const STATES = ['AZ', 'CA', 'CO', 'FL', 'GA', 'NV', 'OH', 'TN', 'TX', 'WA']
+const STATES = [
+  'AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN','IA',
+  'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM',
+  'NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA',
+  'WV','WI','WY','PR','GU','VI','AS','MP'
+]
 
 export const MyProjectsPage = () => {
   const queryClient = useQueryClient()
