@@ -961,7 +961,12 @@ async def get_notification_history(
 
 # Available options for frontend
 AVAILABLE_SECTORS = ["Commercial", "Residential", "Healthcare", "Industrial", "Retail", "Education", "Infrastructure", "Public"]
-AVAILABLE_REGIONS = ["AZ", "CA", "CO", "FL", "GA", "NV", "OH", "TN", "TX", "WA"]
+AVAILABLE_REGIONS = [
+    "AL","AK","AZ","AR","CA","CO","CT","DE","DC","FL","GA","HI","ID","IL","IN","IA",
+    "KS","KY","LA","ME","MD","MA","MI","MN","MS","MO","MT","NE","NV","NH","NJ","NM",
+    "NY","NC","ND","OH","OK","OR","PA","RI","SC","SD","TN","TX","UT","VT","VA","WA",
+    "WV","WI","WY","PR","GU","VI","AS","MP"
+]
 
 @app.get("/api/notifications/options")
 async def get_notification_options():
@@ -1953,7 +1958,7 @@ async def ml_regional_outlook(
     """Proprietary Regional Outlook - © 2025 Poor Dude Holdings LLC"""
     profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
     regions = (profile.service_states if profile and profile.service_states else
-               ["TX", "FL", "AZ", "CA", "CO", "GA", "NC", "TN", "WA", "OH"])
+               AVAILABLE_REGIONS[:10])
 
     model = DemandForecastModel()
     outlook = model.get_regional_outlook(regions, sector)

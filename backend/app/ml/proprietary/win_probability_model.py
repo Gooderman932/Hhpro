@@ -232,7 +232,7 @@ class WinProbabilityModel:
         base_score += sector_factors.get(project_sector, 0)
         
         # Regional adjustments (TRADE SECRET)
-        hot_markets = ["TX", "FL", "AZ", "NC", "TN"]
+        hot_markets = ["TX", "FL", "AZ", "NC", "TN", "GA", "SC", "UT", "ID", "CO", "NV"]
         if project_state in hot_markets:
             base_score += 0.10
         
