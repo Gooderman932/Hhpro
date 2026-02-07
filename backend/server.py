@@ -280,6 +280,15 @@ async def require_enterprise_tier(
         )
     return subscription
 
+async def require_admin(
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+) -> User:
+    """Require admin access."""
+    if not getattr(user, 'is_admin', False):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
 # ============================================
 # Auth Endpoints
 # ============================================
