@@ -23,6 +23,7 @@ const Navigation = () => {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [subscription, setSubscription] = useState<Subscription | null>(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const isLoggedIn = !!localStorage.getItem('token')
 
   useEffect(() => {
@@ -30,6 +31,12 @@ const Navigation = () => {
       getCurrentSubscription()
         .then(setSubscription)
         .catch(() => {})
+      // Check admin status via a lightweight call
+      import('./services/api').then(mod => {
+        mod.default.get('/admin/revenue?days=1')
+          .then(() => setIsAdmin(true))
+          .catch(() => setIsAdmin(false))
+      })
     }
   }, [isLoggedIn])
 
