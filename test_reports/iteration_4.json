@@ -1,0 +1,82 @@
+{
+  "summary": "Admin Revenue Dashboard Testing Complete - All 18 backend tests PASSED, all frontend tests PASSED. The admin-only revenue dashboard is fully functional with proper access control.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Revenue Trend Chart", "issues": ["Revenue chart shows 'No paid transactions' - this is correct behavior since subscriptions were created manually without real payment transactions. The MRR is calculated from active subscriptions."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_admin_dashboard.py",
+    "/app/test_reports/pytest/admin_dashboard_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_admin_dashboard.py"
+  ],
+  "success_rate": {
+    "backend": "100% (18/18 tests passed)",
+    "frontend": "100% (all admin dashboard features working)"
+  },
+  "test_credentials": {
+    "Admin User": {"email": "malcolmgoodmen@gmail.com", "password": "Test123!", "is_admin": true},
+    "Non-Admin User": {"email": "nopay@test.com", "password": "test123", "is_admin": false}
+  },
+  "seed_data_creation": "None required - used existing users with is_admin flag already set",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Admin Revenue Dashboard fully implemented and tested. malcolmgoodmen@gmail.com is the only admin user (is_admin=true in Supabase). Current subscription data shows 2 active subscribers: 1 Pro ($799) and 1 Enterprise ($1999). The revenue chart shows 'No paid transactions' because subscriptions were created without Stripe checkout flow - MRR is calculated from active subscriptions table directly.",
+  "features_tested": {
+    "Backend Tests (18/18 passed)": {
+      "Admin login": "PASS - Admin user can authenticate",
+      "Non-admin login": "PASS - Non-admin user can authenticate",
+      "GET /api/admin/revenue (admin)": "PASS - Returns 200 with full revenue metrics",
+      "GET /api/admin/revenue (non-admin)": "PASS - Returns 403 'Admin access required'",
+      "GET /api/admin/revenue (no auth)": "PASS - Returns 401/403",
+      "Summary fields validation": "PASS - All fields present: mrr, arr, arpu, churn_rate_pct, conversion_rate_pct, total_users, growth_rate_pct, top_tier_by_revenue",
+      "Tier breakdown validation": "PASS - counts and revenue for basic/professional/enterprise",
+      "LTV by tier validation": "PASS - LTV calculations for each tier",
+      "Revenue trend validation": "PASS - Array with date/revenue pairs",
+      "Recent transactions validation": "PASS - Correct structure",
+      "Recent signups validation": "PASS - Correct structure",
+      "Alerts validation": "PASS - failed_payments, cancelled_last_30d, past_due_accounts",
+      "30-day range": "PASS - Returns 30 data points",
+      "60-day range": "PASS - Returns 60 data points",
+      "90-day range": "PASS - Returns 90 data points",
+      "CSV export (admin)": "PASS - Returns text/csv with correct headers",
+      "CSV export (non-admin)": "PASS - Returns 403",
+      "CSV export (no auth)": "PASS - Returns 401/403"
+    },
+    "Frontend Tests (All Passed)": {
+      "Admin nav link for admin": "PASS - Visible with amber color (text-amber-400)",
+      "Admin nav link for non-admin": "PASS - NOT visible",
+      "Admin dashboard loads": "PASS - All components render",
+      "KPI cards (MRR, ARR, Subs, Churn)": "PASS - Shows $2.8k MRR, $33.6k ARR, 2 subs, 0% churn",
+      "Secondary metrics (ARPU, Conversion, Growth)": "PASS - All visible with correct values",
+      "Revenue by Tier chart": "PASS - Shows Basic $0, Pro $799, Enterprise $2.0k",
+      "Subscriber Mix donut": "PASS - Shows 2 active (1 Pro, 1 Enterprise)",
+      "LTV cards": "PASS - Shows $980 Basic, $3.0k Pro, $8.0k Enterprise",
+      "Date range buttons": "PASS - 30d, 60d, 90d all functional",
+      "Refresh button": "PASS - Refreshes data",
+      "Export CSV button": "PASS - Visible and accessible",
+      "Non-admin access denied": "PASS - Shows 'Access Denied' page with shield icon"
+    }
+  },
+  "mocked_apis": {
+    "has_mocked_apis": false,
+    "note": "All revenue data comes from real subscriptions and payment_transactions tables. No mock data."
+  },
+  "data_insights": {
+    "current_mrr": "$2,798 (1 Pro @ $799 + 1 Enterprise @ $1,999)",
+    "active_subscribers": 2,
+    "total_users": 3,
+    "conversion_rate": "66.7% (2 subscribers / 3 users)",
+    "note": "Old pricing in database (Pro $799, Enterprise $1999) - pricing was updated to $49/$149/$399 but existing subscriptions retain old prices"
+  }
+}
