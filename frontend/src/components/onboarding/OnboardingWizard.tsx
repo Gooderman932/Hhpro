@@ -33,7 +33,15 @@ export const OnboardingWizard = () => {
         setProgress(data.progress)
         if (data.onboarding_completed) setDismissed(true)
       })
-      .catch(() => setDismissed(true))
+      .catch(() => {
+        // Only dismiss on 401/403, show wizard otherwise
+        setSteps([
+          { id: 'subscription', title: 'Choose a Plan', completed: false, description: 'Select a subscription tier' },
+          { id: 'profile', title: 'Business Profile', completed: false, description: 'Tell us about your business' },
+          { id: 'data_sources', title: 'Connect Data', completed: false, description: 'Connect external data sources' },
+          { id: 'first_project', title: 'Add a Project', completed: false, description: 'Add your first project' }
+        ])
+      })
       .finally(() => setLoading(false))
   }, [])
 
