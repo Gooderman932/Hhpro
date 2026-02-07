@@ -1885,7 +1885,9 @@ async def ml_win_probability(
         "explanation": prediction.explanation,
         "factors": prediction.factors,
         "model_version": prediction.model_version,
-        "watermark": prediction.watermark
+        "watermark": prediction.watermark,
+        "legal_notice": "Patent Pending. Proprietary Algorithm of Poor Dude Holdings LLC.",
+        "data_sources": ["user project data", "user profile", "user history"]
     }
 
 @app.post("/api/ml/demand-forecast")
