@@ -379,7 +379,12 @@ const DemandForecastTab = () => {
               <label className="text-slate-400 text-xs block mb-1">Region</label>
               <select value={region} onChange={e => setRegion(e.target.value)}
                 className="p-2 bg-slate-800 border border-slate-600 rounded-lg text-white text-sm" data-testid="forecast-region-select">
-                {['TX','FL','AZ','CA','CO','GA','NC','TN','WA','OH','NV','PA','NY','IL'].map(r =>
+                {[
+                  'AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN','IA',
+                  'KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM',
+                  'NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA',
+                  'WV','WI','WY','PR','GU','VI','AS','MP'
+                ].map(r =>
                   <option key={r} value={r}>{r}</option>
                 )}
               </select>
