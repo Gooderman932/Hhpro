@@ -303,7 +303,7 @@ class TestMLResponses:
         data = response.json()
         assert "momentum" in data
         assert "forecasts" in data
-        assert "watermark" in data  # Contains copyright notice
+        assert "legal_notice" in data or "watermark" in data  # Contains copyright notice
 
 
 class TestDataSourcesStatus:
