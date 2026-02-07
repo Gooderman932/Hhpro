@@ -357,4 +357,27 @@ export const getMLProjectMatching = async (minScore: number = 0, limit: number =
   return response.data
 }
 
+// ============================================
+// Onboarding Wizard
+// ============================================
+
+export const getOnboardingStatus = async () => {
+  const response = await api.get('/onboarding/status')
+  return response.data
+}
+
+export const skipOnboarding = async () => {
+  const response = await api.post('/onboarding/skip')
+  return response.data
+}
+
+// ============================================
+// Stripe Billing
+// ============================================
+
+export const createCustomerPortal = async () => {
+  const response = await api.post('/stripe/customer-portal')
+  return response.data
+}
+
 export default api
