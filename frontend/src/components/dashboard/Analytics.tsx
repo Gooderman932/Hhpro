@@ -107,6 +107,9 @@ const Analytics = () => {
           </p>
         </div>
 
+        {/* Onboarding Wizard */}
+        <OnboardingWizard />
+
         {/* Summary Stats */}
         <div className="grid md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-slate-900 border-slate-700">
