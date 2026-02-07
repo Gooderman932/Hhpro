@@ -95,6 +95,12 @@ const Navigation = () => {
                     Batch Score
                   </Link>
                 )}
+                {isAdmin && (
+                  <Link to="/admin" className="text-amber-400 hover:text-amber-300 transition flex items-center" data-testid="admin-nav-link">
+                    <ShieldCheck className="h-4 w-4 mr-1" />
+                    Admin
+                  </Link>
+                )}
               </>
             )}
             
