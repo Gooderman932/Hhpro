@@ -54,10 +54,17 @@ from app.ml.proprietary import (
 Base.metadata.create_all(bind=engine)
 
 # Configuration
-SECRET_KEY = os.environ.get('SECRET_KEY', 'your-secret-key-change-in-production')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 ALGORITHM = os.environ.get('ALGORITHM', 'HS256')
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.environ.get('ACCESS_TOKEN_EXPIRE_MINUTES', '30'))
 STRIPE_API_KEY = os.environ.get('STRIPE_API_KEY', '')
+STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET', '')
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
+
+# Production safety: reject test keys in production
+if ENVIRONMENT == 'production' and STRIPE_API_KEY.startswith('sk_test_'):
+    import warnings
+    warnings.warn("WARNING: Test Stripe key detected. Set live key (sk_live_) for production billing.")
 
 # Parse CORS origins
 cors_origins_str = os.environ.get('CORS_ORIGINS', '*')
@@ -162,33 +169,57 @@ async def get_current_user(
 MARKET_DATA_TIERS = [
     {
         "tier_id": "basic",
-        "name": "Basic Analytics",
-        "price": 299.00,
+        "name": "Basic",
+        "price": 49.00,
         "billing_period": "monthly",
-        "description": "Essential market insights for growing contractors",
-        "features": ["Regional trends", "Basic analytics", "Up to 100 projects", "Email support"]
+        "description": "Essential tools for independent contractors",
+        "features": [
+            "Your own projects & competitors",
+            "Permits in 50-mile radius (25/month)",
+            "Basic economic indicators",
+            "Simple AI recommendations",
+            "Weekly email digest"
+        ]
     },
     {
         "tier_id": "professional",
-        "name": "Professional Suite",
-        "price": 799.00,
+        "name": "Pro",
+        "price": 149.00,
         "billing_period": "monthly",
-        "description": "Comprehensive analytics for established contractors",
-        "features": ["All Basic features", "Win probability predictions", "Demand forecasting", 
-                     "Competitor analysis", "Up to 1,000 projects", "Priority support"]
+        "description": "Full intelligence suite for growing firms",
+        "features": [
+            "Everything in Basic",
+            "State-wide permits (unlimited)",
+            "Real-time alerts",
+            "Win Probability AI model",
+            "Demand Forecasting (3-month)",
+            "Competitor Intelligence",
+            "Economic dashboard",
+            "CSV export"
+        ]
     },
     {
         "tier_id": "enterprise",
-        "name": "Enterprise Platform",
-        "price": 1999.00,
+        "name": "Enterprise",
+        "price": 399.00,
         "billing_period": "monthly",
-        "description": "Full-scale intelligence for large construction firms",
-        "features": ["All Professional features", "Opportunity scoring", "API access",
-                     "Custom predictions", "Unlimited projects", "Dedicated support"]
+        "description": "Maximum intelligence for large contractors",
+        "features": [
+            "Everything in Pro",
+            "Multi-state coverage (5 states)",
+            "6-month demand forecasting",
+            "Advanced ML models",
+            "API access",
+            "Custom model training",
+            "Priority support"
+        ]
     }
 ]
 
-TIER_PRICES = {"basic": 299.00, "professional": 799.00, "enterprise": 1999.00}
+TIER_PRICES = {"basic": 49.00, "professional": 149.00, "enterprise": 399.00}
+
+# Tier hierarchy for gating
+TIER_LEVELS = {"basic": 1, "professional": 2, "enterprise": 3}
 
 async def get_user_subscription(user: User, db: Session) -> Optional[Subscription]:
     """Get active subscription for user."""
