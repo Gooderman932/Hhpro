@@ -14,7 +14,7 @@ Build a premium Construction Intelligence Platform with proprietary AI/ML models
 - **Database**: PostgreSQL (Supabase - remote)
 - **Payments**: Stripe (with webhooks)
 - **Email**: Resend
-- **ML**: Custom proprietary models (scikit-learn acceptable as base)
+- **ML**: Custom proprietary models (scikit-learn as base tooling)
 
 ## What's Been Implemented
 
@@ -41,65 +41,69 @@ All 4 proprietary models implemented with legal headers, watermarks, and connect
 1. **Win Probability Model** (`/api/ml/win-probability`)
    - Multi-factor bid success prediction
    - Factors: project fit, competitive pressure, historical performance, market conditions, timing, relationships
-   - Outputs: probability, confidence, recommendation (STRONG PURSUE/PURSUE/EVALUATE/PASS), watermark
+   - Outputs: probability, confidence, recommendation, watermark
 
 2. **Demand Forecasting Engine** (`/api/ml/demand-forecast`, `/api/ml/regional-outlook`)
    - Market Momentum Score calculation
    - Seasonality-adjusted forecasts (1-12 months)
    - Regional and sector growth factors
-   - Confidence intervals per period
 
 3. **Competitive Intelligence Scorer** (`/api/ml/competitive-analysis`, `/api/ml/competitive-landscape`)
    - Competitor Threat Scoring (0-100)
    - Competitive Advantage Index (CAI)
-   - Multi-factor analysis: market share, win rate, project overlap, pricing, capacity, reputation
    - Vulnerability and strength identification
 
 4. **Project-Contractor Matching AI** (`/api/ml/project-matching`)
    - Semantic text similarity for trade matching
-   - Multi-factor fit scoring: trade, value, geography, sector, complexity
+   - Multi-factor fit scoring
    - Adaptive learning from user feedback
-   - Match reasons and concerns
 
-### Frontend ML Dashboard (COMPLETE - December 2025)
-- 4-tab AI Intelligence Hub at `/predictions`
-- Win Probability tab with project selection and factor breakdown
-- Demand Forecast tab with momentum score, timeline, and regional outlook
-- Competitive Intel tab with CAI and threat rankings
-- Project Matching tab with fit scores and recommendations
+### Mock Data Removal & Real Value Delivery (COMPLETE - December 2025)
+- Removed ALL fake/sample/demo data from production endpoints
+- PermitDataService returns empty when PERMIT_API_KEY not configured
+- FREDService returns empty when FRED_API_KEY not configured
+- Competitor endpoints return empty when no real tracked competitors
+- Data source status endpoint (`/api/data-sources`) shows configuration status
+- Proper empty states in frontend with setup instructions
+- Data source labels on all ML predictions
+
+### Legal Documentation (COMPLETE - December 2025)
+- `/backend/legal/PATENT_PENDING.md` - 4 patent applications documented with claims
+- `/backend/legal/TRADE_SECRETS.md` - Trade secret classification and protections
+- `/backend/legal/IP_ASSIGNMENT.md` - IP ownership and third-party component declaration
+- `/backend/legal/LICENSE_PROPRIETARY.md` - Proprietary software license terms
+- `/backend/app/ml/proprietary/README.md` - Model inventory and patent status
+- All 4 ML model files have copyright headers, patent pending notices, and watermarks
 
 ### Tier-Based Feature Gating (COMPLETE)
 - Basic: Projects, permits (25/mo), basic filters
 - Professional: ML predictions, competitor tracking, economic indicators, benchmarks
 - Enterprise: All features, batch scoring, API access, LLM insights
 
+## Data Source Configuration (For Deployment)
+
+External API keys needed (set in /backend/.env):
+| Variable | Source | Signup URL |
+|----------|--------|------------|
+| PERMIT_API_KEY | Permit data provider | https://www.permitdata.org |
+| FRED_API_KEY | Federal Reserve FRED | https://fred.stlouisfed.org/docs/api/api_key.html |
+
 ## Pending / Upcoming Tasks
 
 ### P1 - Phase 3: External Data Integrations
-- [ ] Integrate FRED API with real API key (currently mock/demo mode)
-- [ ] Integrate construction permit data source (currently mocked)
+- [ ] Connect real FRED API when user provides key
+- [ ] Connect permit data source when user provides key
 - [ ] Census Bureau / BLS API integration
-- [ ] ENV vars: FRED_API_KEY, PERMIT_API_KEY
 
 ### P1 - Phase 4: Real-time Features
 - [ ] WebSocket setup for live notifications
 - [ ] Smart Alerts system based on ML outputs
 - [ ] Real-time permit monitoring
 
-### P2 - Legal Documentation
-- [ ] /legal/PATENT_PENDING.md
-- [ ] IP documentation and license files
-- [ ] Full copyright audit of all ML files
-
 ### P2 - Refactoring
 - [ ] Move inline routes from server.py into /routes/ modules
-- [ ] Clean up deprecated route directory
 - [ ] Add comprehensive pytest suite
 
 ## Test Credentials
 - Enterprise: `malcolmgoodmen@gmail.com` / `Test123!`
 - Unpaid: `nopay@test.com` / `test123`
-
-## MOCKED Services
-- **PermitDataService**: Generates random mock permit data
-- **FREDService**: Falls back to demo mode without real FRED_API_KEY
