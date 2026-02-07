@@ -10,6 +10,7 @@ import { getAnalyticsSummary, getRegionalAnalysis } from '../../services/api'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { Loader2, AlertCircle, PieChart as PieChartIcon, MapPin } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
+import { OnboardingWizard } from '../onboarding/OnboardingWizard'
 
 interface AnalyticsSummary {
   sector_distribution?: Record<string, number>
