@@ -1898,15 +1898,13 @@ async def ml_demand_forecast(
     """Proprietary Demand Forecast - © 2025 Poor Dude Holdings LLC"""
     model = DemandForecastModel()
 
-    # Get momentum
-    momentum = model.calculate_market_momentum(data.region, data.sector)
+    # Tier-based forecast limit: Pro=3 months, Enterprise=6+ months
+    tier_level = TIER_LEVELS.get(subscription.tier_id, 0)
+    max_months = 6 if tier_level >= TIER_LEVELS["enterprise"] else 3
+    months = min(data.months_ahead, max_months)
 
-    # Get forecasts
-    forecasts = model.forecast(
-        region=data.region,
-        sector=data.sector,
-        months_ahead=min(data.months_ahead, 12)
-    )
+    momentum = model.calculate_market_momentum(data.region, data.sector)
+    forecasts = model.forecast(region=data.region, sector=data.sector, months_ahead=months)
 
     return {
         "momentum": {
@@ -1926,7 +1924,10 @@ async def ml_demand_forecast(
             }
             for f in forecasts
         ],
+        "legal_notice": "Patent Pending. Proprietary Algorithm of Poor Dude Holdings LLC.",
         "model_version": f"{DemandForecastModel.VERSION} {DemandForecastModel.COPYRIGHT}",
+        "max_months": max_months,
+        "tier": subscription.tier_id,
         "region": data.region,
         "sector": data.sector
     }
