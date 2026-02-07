@@ -338,6 +338,7 @@ function App() {
         <Route path="/competitors" element={<CompetitorMap />} />
         <Route path="/notifications" element={<NotificationSettings />} />
         <Route path="/settings" element={<NotificationSettings />} />
+        <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </BrowserRouter>
   )
