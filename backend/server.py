@@ -6,7 +6,7 @@ from fastapi import FastAPI, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timedelta
