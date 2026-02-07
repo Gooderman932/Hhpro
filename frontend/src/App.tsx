@@ -312,7 +312,7 @@ const Home = () => {
       {/* Footer */}
       <footer className="py-8 px-4 border-t border-slate-800">
         <div className="max-w-6xl mx-auto text-center text-slate-500 text-sm">
-          <p>© 2025 HHDrywall Pro. All rights reserved.</p>
+          <p>© 2025 Poor Dude Holdings LLC. All rights reserved.</p>
         </div>
       </footer>
     </div>
