@@ -85,9 +85,23 @@ class DemandForecastModel:
     
     # Regional growth factors (TRADE SECRET)
     _REGIONAL_FACTORS = {
-        "TX": 1.25, "FL": 1.22, "AZ": 1.20, "NC": 1.18, "TN": 1.15,
-        "GA": 1.12, "CO": 1.10, "NV": 1.08, "WA": 1.05, "CA": 1.02,
-        "OH": 0.98, "PA": 0.95, "NY": 0.92, "IL": 0.90
+        # Southeast - High Growth
+        "TX": 1.25, "FL": 1.22, "NC": 1.18, "TN": 1.15, "GA": 1.12, "SC": 1.10,
+        "AL": 1.05, "MS": 1.02, "LA": 1.00, "AR": 0.98, "KY": 0.97, "VA": 1.08,
+        "WV": 0.90,
+        # Southwest/Mountain
+        "AZ": 1.20, "NV": 1.08, "CO": 1.10, "UT": 1.15, "NM": 1.02, "ID": 1.18,
+        "MT": 1.05, "WY": 0.95, "OK": 1.00,
+        # Pacific
+        "CA": 1.02, "WA": 1.05, "OR": 1.03, "HI": 0.98, "AK": 0.92,
+        # Midwest
+        "OH": 0.98, "IL": 0.90, "MI": 0.95, "IN": 1.00, "WI": 0.97, "MN": 1.02,
+        "IA": 0.96, "MO": 0.98, "KS": 0.95, "NE": 0.97, "SD": 1.00, "ND": 1.05,
+        # Northeast
+        "PA": 0.95, "NY": 0.92, "NJ": 0.95, "CT": 0.93, "MA": 0.98, "MD": 1.00,
+        "DE": 0.97, "RI": 0.92, "VT": 0.90, "NH": 0.95, "ME": 0.93, "DC": 1.05,
+        # Territories
+        "PR": 0.88, "GU": 0.85, "VI": 0.82, "AS": 0.80, "MP": 0.80
     }
     
     # Sector growth multipliers (TRADE SECRET)
