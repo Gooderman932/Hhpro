@@ -2147,6 +2147,185 @@ async def ml_project_matching(
     }
 
 # ============================================
+# ADMIN REVENUE DASHBOARD
+# ============================================
+
+@app.get("/api/admin/revenue")
+async def admin_revenue_dashboard(
+    days: int = 90,
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Admin-only revenue dashboard metrics."""
+    from datetime import timezone
+    now = datetime.utcnow()
+    cutoff = now - timedelta(days=days)
+
+    # Active subscriptions
+    active_subs = db.query(Subscription).filter(Subscription.status == "active").all()
+    cancelled_subs = db.query(Subscription).filter(
+        Subscription.status == "cancelled",
+        Subscription.created_at >= cutoff
+    ).all()
+
+    # Count by tier
+    tier_counts = {"basic": 0, "professional": 0, "enterprise": 0}
+    tier_revenue = {"basic": 0.0, "professional": 0.0, "enterprise": 0.0}
+    for s in active_subs:
+        tier = s.tier_id or "basic"
+        tier_counts[tier] = tier_counts.get(tier, 0) + 1
+        tier_revenue[tier] = tier_revenue.get(tier, 0) + (s.price or TIER_PRICES.get(tier, 0))
+
+    total_active = sum(tier_counts.values())
+    mrr = sum(tier_revenue.values())
+    arr = mrr * 12
+    arpu = mrr / total_active if total_active > 0 else 0
+
+    # Churn rate (last 30 days)
+    thirty_days_ago = now - timedelta(days=30)
+    cancelled_30d = db.query(Subscription).filter(
+        Subscription.status == "cancelled",
+        Subscription.created_at >= thirty_days_ago
+    ).count()
+    active_at_start = total_active + cancelled_30d
+    churn_rate = (cancelled_30d / active_at_start * 100) if active_at_start > 0 else 0
+
+    # Total users and conversion rate
+    total_users = db.query(User).count()
+    conversion_rate = (total_active / total_users * 100) if total_users > 0 else 0
+
+    # LTV per tier (simplified: ARPU / churn)
+    monthly_churn_decimal = churn_rate / 100 if churn_rate > 0 else 0.05
+    ltv_by_tier = {}
+    for tier, price in TIER_PRICES.items():
+        ltv_by_tier[tier] = round(price / monthly_churn_decimal, 2) if monthly_churn_decimal > 0 else round(price * 20, 2)
+
+    # Revenue trend (daily for the period)
+    revenue_trend = []
+    transactions = db.query(PaymentTransaction).filter(
+        PaymentTransaction.payment_status == "paid",
+        PaymentTransaction.created_at >= cutoff
+    ).order_by(PaymentTransaction.created_at).all()
+
+    daily_rev: dict = {}
+    for tx in transactions:
+        day = tx.created_at.strftime("%Y-%m-%d") if tx.created_at else "unknown"
+        daily_rev[day] = daily_rev.get(day, 0) + (tx.amount or 0)
+
+    for i in range(days):
+        day = (cutoff + timedelta(days=i)).strftime("%Y-%m-%d")
+        revenue_trend.append({"date": day, "revenue": daily_rev.get(day, 0)})
+
+    # Recent transactions
+    recent_txns = db.query(PaymentTransaction).order_by(
+        PaymentTransaction.created_at.desc()
+    ).limit(10).all()
+
+    # Recent signups
+    recent_users = db.query(User).order_by(User.created_at.desc()).limit(10).all()
+
+    # Failed payments (past_due subscriptions)
+    past_due = db.query(Subscription).filter(Subscription.status == "past_due").all()
+
+    # Growth: compare current month subs to previous month
+    this_month_start = now.replace(day=1, hour=0, minute=0, second=0)
+    last_month_start = (this_month_start - timedelta(days=1)).replace(day=1)
+    this_month_subs = db.query(Subscription).filter(
+        Subscription.status == "active",
+        Subscription.created_at >= this_month_start
+    ).count()
+    last_month_subs = db.query(Subscription).filter(
+        Subscription.status == "active",
+        Subscription.created_at >= last_month_start,
+        Subscription.created_at < this_month_start
+    ).count()
+    growth_rate = ((this_month_subs - last_month_subs) / last_month_subs * 100) if last_month_subs > 0 else 0
+
+    # Top tier by revenue
+    top_tier = max(tier_revenue, key=tier_revenue.get) if any(tier_revenue.values()) else "none"
+
+    return {
+        "summary": {
+            "mrr": round(mrr, 2),
+            "arr": round(arr, 2),
+            "total_active_subscribers": total_active,
+            "arpu": round(arpu, 2),
+            "churn_rate_pct": round(churn_rate, 2),
+            "conversion_rate_pct": round(conversion_rate, 2),
+            "total_users": total_users,
+            "growth_rate_pct": round(growth_rate, 2),
+            "top_tier_by_revenue": top_tier
+        },
+        "tier_breakdown": {
+            "counts": tier_counts,
+            "revenue": {k: round(v, 2) for k, v in tier_revenue.items()}
+        },
+        "ltv_by_tier": ltv_by_tier,
+        "revenue_trend": revenue_trend,
+        "recent_transactions": [
+            {
+                "id": tx.id,
+                "email": tx.user_email,
+                "tier": tx.tier_id,
+                "amount": tx.amount,
+                "status": tx.payment_status,
+                "date": tx.created_at.isoformat() if tx.created_at else None
+            }
+            for tx in recent_txns
+        ],
+        "recent_signups": [
+            {
+                "id": u.id,
+                "email": u.email,
+                "name": u.full_name,
+                "date": u.created_at.isoformat() if u.created_at else None
+            }
+            for u in recent_users
+        ],
+        "alerts": {
+            "failed_payments": len(past_due),
+            "cancelled_last_30d": cancelled_30d,
+            "past_due_accounts": [
+                {"user_id": s.user_id, "tier": s.tier_id, "price": s.price}
+                for s in past_due
+            ]
+        },
+        "period_days": days
+    }
+
+@app.get("/api/admin/revenue/export")
+async def admin_revenue_export(
+    admin: User = Depends(require_admin),
+    db: Session = Depends(get_db)
+):
+    """Export revenue data as CSV."""
+    from io import StringIO
+    import csv
+
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(["Transaction ID", "Email", "Tier", "Amount", "Currency", "Status", "Date"])
+
+    transactions = db.query(PaymentTransaction).order_by(
+        PaymentTransaction.created_at.desc()
+    ).all()
+
+    for tx in transactions:
+        writer.writerow([
+            tx.transaction_id, tx.user_email, tx.tier_id,
+            tx.amount, tx.currency, tx.payment_status,
+            tx.created_at.isoformat() if tx.created_at else ""
+        ])
+
+    from fastapi.responses import StreamingResponse
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue()]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=revenue_export_{datetime.utcnow().strftime('%Y%m%d')}.csv"}
+    )
+
+# ============================================
 # ONBOARDING WIZARD
 # ============================================
 
