@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import "@/App.css"
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom"
-import { Menu, X, LogOut, User, BarChart3, TrendingUp, Users, Target, Bell, FileText, Briefcase, Settings } from "lucide-react"
+import { Menu, X, LogOut, User, BarChart3, TrendingUp, Users, Target, Bell, FileText, Briefcase, Settings, ShieldCheck } from "lucide-react"
 import { Button } from "./components/ui/button"
 import { PricingPage } from "./components/pricing/PricingPage"
 import { SubscriptionSuccess } from "./components/pricing/SubscriptionSuccess"
