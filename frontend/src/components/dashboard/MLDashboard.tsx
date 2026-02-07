@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { TrendingUp, Target, MapPin, Loader2, AlertCircle, Shield, Zap, Brain, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, Lock, Database, ExternalLink, Plus } from 'lucide-react'
+import { TrendingUp, Target, MapPin, Loader2, AlertCircle, Shield, Zap, Brain, ArrowUpRight, ArrowDownRight, Minus, ChevronRight, Lock, Database, Plus } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { DollarSign, Users, TrendingUp, TrendingDown, AlertTriangle, RefreshCw, Download, Loader2, ShieldCheck, BarChart3, ArrowUpRight, ArrowDownRight, Clock } from 'lucide-react'
+import { DollarSign, Users, TrendingUp, TrendingDown, AlertTriangle, RefreshCw, Download, Loader2, ShieldCheck, BarChart3, Clock } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
 import { Button } from '../ui/button'
 import api from '../../services/api'

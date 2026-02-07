@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Check, ChevronRight, CreditCard, User, Database, FolderPlus, X, Loader2 } from 'lucide-react'
+import { Check, ChevronRight, CreditCard, User, Database, FolderPlus, X } from 'lucide-react'
 import { Card, CardContent } from '../ui/card'
-import { Button } from '../ui/button'
 import { getOnboardingStatus, skipOnboarding } from '../../services/api'
 
 interface OnboardingStep {
