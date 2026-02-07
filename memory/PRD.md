@@ -27,47 +27,48 @@ Build a premium Construction Intelligence Platform with proprietary AI/ML models
 
 ### Core Infrastructure (COMPLETE)
 - User registration and JWT authentication
-- Stripe checkout with webhook handling (checkout.session.completed, subscription.updated, subscription.deleted, invoice.payment_failed)
+- Stripe checkout with webhook handling
 - Customer portal endpoint
 - Production mode validation (rejects test keys)
 - Health check with system status
 
-### Tier-Based Feature Gating (COMPLETE - December 2025)
-- `require_subscription` (Basic+), `require_professional_tier` (Pro+), `require_enterprise_tier`
-- Proper 403 responses with upgrade messages and pricing info
-- Demand forecast capped at 3 months for Pro, 6 months for Enterprise
-- Permit limits per tier
+### Tier-Based Feature Gating (COMPLETE)
+- require_subscription (Basic+), require_professional_tier (Pro+), require_enterprise_tier
+- Proper 403 responses with upgrade messages
+- Demand forecast: Pro=3 months, Enterprise=6 months
 
 ### Proprietary AI/ML Models (COMPLETE)
-1. **Win Probability** - Multi-factor bid success prediction with legal_notice, watermark
-2. **Demand Forecasting** - Market Momentum + forecasts with tier-based limits
-3. **Competitive Intelligence** - Threat scoring + CAI
-4. **Project Matching** - Semantic matching with fit scores
+1. Win Probability - Multi-factor bid success prediction
+2. Demand Forecasting - Market Momentum + forecasts
+3. Competitive Intelligence - Threat scoring + CAI
+4. Project-Contractor Matching AI
 
-### Onboarding Wizard (COMPLETE - December 2025)
-- 4-step wizard: Subscription → Profile → Data Sources → First Project
-- Progress tracking via `/api/onboarding/status`
-- Appears on Analytics dashboard for incomplete users
-- Dismissible via sessionStorage
+### Onboarding Wizard (COMPLETE)
+- 4-step wizard: Subscription -> Profile -> Data Sources -> First Project
+- Progress tracking via /api/onboarding/status
 
 ### Mock Data Removal (COMPLETE)
-- Zero sample/demo data in production endpoints
-- All data sources return empty with setup hints when unconfigured
+- Zero sample/demo data in production
 - Data source labels on all ML predictions
 
 ### Legal Documentation (COMPLETE)
-- `/backend/legal/PATENT_PENDING.md` - 4 patent applications with claims
-- `/backend/legal/TRADE_SECRETS.md` - Trade secret classification
-- `/backend/legal/IP_ASSIGNMENT.md` - IP ownership declaration
-- `/backend/legal/LICENSE_PROPRIETARY.md` - Proprietary license terms
-- All ML files have copyright headers and watermarks
+- PATENT_PENDING.md, TRADE_SECRETS.md, IP_ASSIGNMENT.md, LICENSE_PROPRIETARY.md
+
+### Admin Revenue Dashboard (COMPLETE - December 2025)
+- Admin-only access (is_admin=true on users table, locked to malcolmgoodmen@gmail.com)
+- KPI Cards: MRR, ARR, Active Subscribers, Churn Rate
+- Secondary Metrics: ARPU, Conversion Rate, Growth Rate, Top Tier, Total Users
+- Revenue by Tier bar chart, Subscriber Mix donut chart, LTV by Tier cards
+- Revenue Trend (90-day timeline)
+- Recent Transactions and Recent Signups tables
+- Alerts: Failed payments, cancellations
+- CSV Export, Date range selector (30/60/90d), Refresh button
+- Non-admin users see "Access Denied" page
 
 ### Deployment Documentation (COMPLETE)
-- `/docs/PRODUCTION_ENV_VARS.md` - All env vars with setup instructions
-- `/docs/DEPLOYMENT_CHECKLIST.md` - Pre/post deployment verification
-- `/backend/.env.example` - Template for production env
+- /docs/PRODUCTION_ENV_VARS.md, /docs/DEPLOYMENT_CHECKLIST.md, .env.example
 
-## External API Keys Needed (For Deployment)
+## External API Keys Needed
 | Variable | Source | URL |
 |----------|--------|-----|
 | STRIPE_API_KEY | Stripe (live) | https://dashboard.stripe.com/apikeys |
@@ -80,16 +81,15 @@ Build a premium Construction Intelligence Platform with proprietary AI/ML models
 ### P1 - Real External Data
 - [ ] Connect FRED API when user provides key
 - [ ] Connect permit data source when user provides key
-- [ ] Census Bureau / BLS API integration
 
 ### P1 - Real-time Features
 - [ ] WebSocket setup for live notifications
-- [ ] Smart Alerts system based on ML outputs
+- [ ] Smart Alerts system
 
 ### P2 - Refactoring
 - [ ] Move inline routes from server.py into /routes/ modules
-- [ ] Add comprehensive pytest suite beyond production readiness tests
+- [ ] Comprehensive pytest suite
 
 ## Test Credentials
-- Enterprise: `malcolmgoodmen@gmail.com` / `Test123!`
+- Admin: `malcolmgoodmen@gmail.com` / `Test123!` (is_admin=true)
 - Unpaid: `nopay@test.com` / `test123`
