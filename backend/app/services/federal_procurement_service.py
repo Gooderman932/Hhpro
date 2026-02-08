@@ -105,6 +105,7 @@ class FederalProcurementService:
             filters: Dict[str, Any] = {
                 "time_period": [{"start_date": "2024-01-01", "end_date": datetime.utcnow().strftime("%Y-%m-%d")}],
                 "naics_codes": CONSTRUCTION_NAICS[:15],
+                "award_type_codes": ["A", "B", "C", "D"],  # Contract types: BPA, Purchase Order, Delivery Order, Definitive Contract
             }
             if state and state in STATE_FIPS:
                 filters["place_of_performance_locations"] = [
@@ -116,7 +117,7 @@ class FederalProcurementService:
                 "fields": [
                     "Award ID", "Recipient Name", "Description", "Award Amount",
                     "Start Date", "End Date", "Awarding Agency", "Place of Performance State Code",
-                    "Place of Performance City Name", "NAICS Code"
+                    "Place of Performance City Name", "NAICS Code", "internal_id"
                 ],
                 "limit": limit,
                 "page": 1,
