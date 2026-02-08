@@ -54,19 +54,42 @@ export const PricingPage = () => {
   }, [isLoggedIn])
 
   const handleSubscribe = async (tierId: string) => {
-    if (!isLoggedIn) {
-      navigate('/login?redirect=/pricing')
-      return
-    }
-
     setCheckoutLoading(tierId)
     setError(null)
 
     try {
-      const { url } = await createCheckoutSession(tierId)
-      window.location.href = url
+      // Use public checkout for non-logged-in users, authenticated checkout for logged-in
+      if (isLoggedIn) {
+        const { url } = await createCheckoutSession(tierId)
+        window.location.href = url
+      } else {
+        // Public checkout - no auth required
+        const API_URL = import.meta.env.VITE_API_URL || '/api'
+        const response = await fetch(`${API_URL}/stripe/public-checkout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tier_id: tierId,
+            success_url: `${window.location.origin}/subscription/success`,
+            cancel_url: window.location.href
+          })
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error(errorData.detail || 'Failed to create checkout')
+        }
+        
+        const data = await response.json()
+        if (data.checkout_url) {
+          window.location.href = data.checkout_url
+        } else {
+          throw new Error('No checkout URL returned')
+        }
+      }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to start checkout')
+      console.error('Checkout error:', err)
+      setError(err.message || err.response?.data?.detail || 'Failed to start checkout. Please try again.')
       setCheckoutLoading(null)
     }
   }
