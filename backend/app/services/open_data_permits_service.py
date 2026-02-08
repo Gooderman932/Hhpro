@@ -114,6 +114,15 @@ OPEN_DATA_SOURCES = {
         "type": "socrata",
         "date_field": "issued_date",
     },
+    # PENNSYLVANIA - VERIFIED WORKING (CARTO)
+    "philadelphia": {
+        "name": "Philadelphia",
+        "state": "PA",
+        "url": "https://phl.carto.com/api/v2/sql",
+        "type": "carto",
+        "query": "SELECT * FROM permits ORDER BY permitissuedate DESC LIMIT {limit}",
+        "date_field": "permitissuedate",
+    },
 }
 
 # Map states to their available cities
