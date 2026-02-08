@@ -163,12 +163,21 @@ class OpenDataPermitsService:
                     if city.lower() in cfg["name"].lower() or cfg["name"].lower() in city.lower():
                         sources_to_query.append(key)
         elif state:
-            # All cities in that state
+            # All cities in that state - ONLY return data from that state
             sources_to_query = STATE_TO_CITIES.get(state.upper(), [])
             
-            # If no direct coverage, query all sources to provide value
+            # If no direct coverage, return empty - don't show data from other states
+            # This is critical for data accuracy - customers expect state-specific data
             if not sources_to_query:
-                sources_to_query = list(OPEN_DATA_SOURCES.keys())
+                return {
+                    "permits": [],
+                    "total_fetched": 0,
+                    "sources_queried": [],
+                    "sources_failed": [],
+                    "coverage_note": f"No open data portal available for {state}. We currently have coverage in: {', '.join(sorted(STATE_TO_CITIES.keys()))}",
+                    "no_coverage": True,
+                    "available_states": sorted(STATE_TO_CITIES.keys()),
+                }
         else:
             # Query all sources for broad coverage
             sources_to_query = list(OPEN_DATA_SOURCES.keys())
