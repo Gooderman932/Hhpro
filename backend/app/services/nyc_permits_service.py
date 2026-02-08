@@ -50,19 +50,30 @@ class NYCPermitsService:
         except (ValueError, TypeError):
             cost = None
 
+        house = raw.get("house__", "")
+        street = raw.get("street_name", "")
+        addr = f"{house} {street}".strip()
+
+        # Build a meaningful description from job_type
+        jt = raw.get("job_type", "")
+        job_desc = {"A1": "Major Alteration", "A2": "Minor Alteration", "A3": "Minor Alteration",
+                    "NB": "New Building", "DM": "Demolition", "SG": "Sign"}.get(jt, jt)
+        wt = raw.get("work_type", "")
+        desc = f"{job_desc} - {wt}".strip(" -") if wt else job_desc
+
         return {
             "permit_id": raw.get("job__") or raw.get("permit_si_no") or "",
-            "address": f"{raw.get('house__', '')} {raw.get('street_name', '')}".strip(),
+            "address": addr,
             "city": BOROUGH_MAP.get(borough, borough.title()),
             "state": "NY",
             "geo": {"lat": None, "lng": None},
-            "work_type": raw.get("job_type") or raw.get("permit_type") or "General",
-            "estimated_cost": cost,
+            "work_type": desc or "General Construction",
+            "estimated_cost": cost if cost and cost > 0 else None,
             "filing_date": raw.get("issuance_date") or raw.get("filing_date") or "",
             "status": raw.get("permit_status") or "issued",
             "contractor_name": raw.get("owner_s_first_name", ""),
             "contractor_license": raw.get("applicant_license__") or None,
-            "description": raw.get("job_description") or "",
+            "description": f"{desc} at {addr}, {BOROUGH_MAP.get(borough, borough.title())}, NY",
             "source": "nyc_dob_open_data",
             "raw": raw,
         }
