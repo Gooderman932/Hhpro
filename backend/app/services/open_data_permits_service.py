@@ -49,13 +49,13 @@ OPEN_DATA_SOURCES = {
         "type": "socrata",
         "date_field": "issue_date",
     },
-    # WASHINGTON - VERIFIED WORKING
+    # WASHINGTON - VERIFIED WORKING (different field name)
     "seattle": {
         "name": "Seattle",
         "state": "WA",
         "url": "https://data.seattle.gov/resource/76t5-zqzr.json",
         "type": "socrata",
-        "date_field": "issue_date",
+        "date_field": "statuscurrent",  # Using status field as date field not available
     },
     # MASSACHUSETTS - VERIFIED WORKING (CKAN)
     "boston": {
@@ -65,14 +65,6 @@ OPEN_DATA_SOURCES = {
         "type": "ckan",
         "resource_id": "6ddcd912-32a0-43df-9908-63574f8c7e77",
         "date_field": "issued_date",
-    },
-    # LOUISIANA - VERIFIED WORKING
-    "new_orleans": {
-        "name": "New Orleans",
-        "state": "LA",
-        "url": "https://data.nola.gov/resource/ykvg-5qge.json",
-        "type": "socrata",
-        "date_field": "issueddate",
     },
     # MISSOURI - VERIFIED WORKING
     "kansas_city": {
