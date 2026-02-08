@@ -3,7 +3,7 @@ import { Check, Zap, Building2, Rocket } from 'lucide-react'
 import { Button } from '../ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card'
 import { Badge } from '../ui/badge'
-import { getPricingTiers, createCheckoutSession, getCurrentSubscription } from '../../services/api'
+import { getPricingTiers, getCurrentSubscription } from '../../services/api'
 import type { PricingTier, Subscription } from '../../types/subscription'
 
 const tierIcons: Record<string, React.ReactNode> = {
