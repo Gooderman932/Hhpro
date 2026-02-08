@@ -1,0 +1,350 @@
+<!--
+  ============================================
+  Construction Intelligence Platform
+  Website Integration Snippet
+  Poor Dude Holdings LLC
+  ============================================
+  
+  HOW TO USE:
+  1. Copy everything between the <script> and </style> tags
+  2. Paste into your WordPress page or HTML file
+  3. Update API_URL if needed (for production deployment)
+  
+  This creates subscription buttons that redirect to Stripe checkout.
+-->
+
+<!-- COPY FROM HERE -->
+
+<script>
+// ============================================
+// Configuration - UPDATE for production
+// ============================================
+const API_URL = 'https://agent-env-62160c2c-bc10-4173-9662-8ef2158aecee.stage-preview.emergentagent.com';
+
+// Tier definitions
+const TIERS = {
+  basic: { name: 'Basic', price: 49, color: '#2563eb' },
+  professional: { name: 'Pro', price: 149, color: '#7c3aed' },
+  enterprise: { name: 'Enterprise', price: 399, color: '#f59e0b' }
+};
+
+/**
+ * Subscribe to a tier
+ * Creates Stripe checkout session and redirects
+ */
+async function subscribe(tier) {
+  const btn = event?.target;
+  const originalText = btn?.innerHTML;
+  
+  try {
+    // Loading state
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '⏳ Processing...';
+    }
+    
+    // Create checkout session
+    const response = await fetch(`${API_URL}/api/stripe/public-checkout`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tier_id: tier,
+        success_url: window.location.origin + '/payment-success',
+        cancel_url: window.location.href
+      })
+    });
+    
+    const data = await response.json();
+    
+    if (data.checkout_url) {
+      window.location.href = data.checkout_url;
+    } else {
+      throw new Error(data.detail || 'Could not create checkout');
+    }
+    
+  } catch (error) {
+    console.error('Subscription error:', error);
+    alert('Error: ' + error.message + '\n\nPlease try again or contact support.');
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+}
+
+/**
+ * Go to Market Data app login
+ */
+function goToMarketData() {
+  window.location.href = API_URL + '/login';
+}
+
+console.log('✅ HH Drywall subscription integration loaded');
+</script>
+
+<!-- Pricing Section HTML -->
+<div class="hhd-pricing-section">
+  <h2 class="hhd-pricing-title">Construction Market Intelligence</h2>
+  <p class="hhd-pricing-subtitle">AI-powered permit data and competitive insights</p>
+  
+  <div class="hhd-pricing-cards">
+    <!-- Basic Tier -->
+    <div class="hhd-card">
+      <div class="hhd-card-header">
+        <h3>Basic</h3>
+        <div class="hhd-price">$49<span>/mo</span></div>
+      </div>
+      <ul class="hhd-features">
+        <li>✓ 25 permits per search</li>
+        <li>✓ Major metro coverage</li>
+        <li>✓ Market analytics</li>
+        <li>✓ Email support</li>
+      </ul>
+      <button class="hhd-btn hhd-btn-basic" onclick="subscribe('basic')">
+        Get Started
+      </button>
+    </div>
+    
+    <!-- Pro Tier (Popular) -->
+    <div class="hhd-card hhd-card-popular">
+      <div class="hhd-popular-badge">MOST POPULAR</div>
+      <div class="hhd-card-header">
+        <h3>Pro</h3>
+        <div class="hhd-price">$149<span>/mo</span></div>
+      </div>
+      <ul class="hhd-features">
+        <li>✓ 100 permits per search</li>
+        <li>✓ Nationwide coverage</li>
+        <li>✓ Federal opportunities</li>
+        <li>✓ ML-powered insights</li>
+        <li>✓ Competitor tracking</li>
+        <li>✓ Priority support</li>
+      </ul>
+      <button class="hhd-btn hhd-btn-pro" onclick="subscribe('professional')">
+        Get Started
+      </button>
+    </div>
+    
+    <!-- Enterprise Tier -->
+    <div class="hhd-card">
+      <div class="hhd-card-header">
+        <h3>Enterprise</h3>
+        <div class="hhd-price">$399<span>/mo</span></div>
+      </div>
+      <ul class="hhd-features">
+        <li>✓ 250 permits per search</li>
+        <li>✓ All data sources</li>
+        <li>✓ API access</li>
+        <li>✓ Custom models</li>
+        <li>✓ White-glove onboarding</li>
+        <li>✓ Dedicated manager</li>
+      </ul>
+      <button class="hhd-btn hhd-btn-enterprise" onclick="subscribe('enterprise')">
+        Contact Sales
+      </button>
+    </div>
+  </div>
+  
+  <div class="hhd-login-section">
+    <button class="hhd-btn-login" onclick="goToMarketData()">
+      Already subscribed? Access Market Data →
+    </button>
+  </div>
+</div>
+
+<style>
+/* HH Drywall Pricing Styles */
+.hhd-pricing-section {
+  font-family: system-ui, -apple-system, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 60px 20px;
+  background: linear-gradient(180deg, #0f172a 0%, #1e293b 100%);
+  color: white;
+  border-radius: 16px;
+}
+
+.hhd-pricing-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.hhd-pricing-subtitle {
+  text-align: center;
+  color: #94a3b8;
+  font-size: 1.1rem;
+  margin-bottom: 3rem;
+}
+
+.hhd-pricing-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 2rem;
+}
+
+.hhd-card {
+  background: #1e293b;
+  border: 2px solid #334155;
+  border-radius: 16px;
+  padding: 32px 24px;
+  position: relative;
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.hhd-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+
+.hhd-card-popular {
+  border-color: #7c3aed;
+  background: linear-gradient(180deg, #1e293b 0%, #2e1065 100%);
+}
+
+.hhd-popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, #7c3aed, #a855f7);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 16px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+.hhd-card-header h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.hhd-price {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.hhd-price span {
+  font-size: 1rem;
+  font-weight: 400;
+  color: #94a3b8;
+}
+
+.hhd-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.hhd-features li {
+  padding: 10px 0;
+  border-bottom: 1px solid #334155;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.hhd-features li:last-child {
+  border-bottom: none;
+}
+
+.hhd-btn {
+  width: 100%;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.hhd-btn:disabled {
+  background: #64748b !important;
+  cursor: wait;
+}
+
+.hhd-btn-basic {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+}
+
+.hhd-btn-basic:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.4);
+}
+
+.hhd-btn-pro {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: white;
+}
+
+.hhd-btn-pro:hover:not(:disabled) {
+  background: linear-gradient(135deg, #6d28d9, #5b21b6);
+  box-shadow: 0 4px 20px rgba(124, 58, 237, 0.4);
+}
+
+.hhd-btn-enterprise {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: white;
+}
+
+.hhd-btn-enterprise:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d97706, #b45309);
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+}
+
+.hhd-login-section {
+  text-align: center;
+  padding-top: 20px;
+}
+
+.hhd-btn-login {
+  background: transparent;
+  border: 2px solid #3b82f6;
+  color: #3b82f6;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.hhd-btn-login:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: #60a5fa;
+  color: #60a5fa;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .hhd-pricing-title {
+    font-size: 1.8rem;
+  }
+  .hhd-pricing-cards {
+    grid-template-columns: 1fr;
+  }
+  .hhd-price {
+    font-size: 2.5rem;
+  }
+}
+</style>
+
+<!-- END COPY HERE -->
+
+<!--
+  WORDPRESS INSTRUCTIONS:
+  
+  1. Edit your pricing page
+  2. Add a "Custom HTML" block (or switch to HTML/Text mode)
+  3. Paste the code above
+  4. Save and preview
+  
+  For production, update API_URL to your deployed backend URL.
+-->
