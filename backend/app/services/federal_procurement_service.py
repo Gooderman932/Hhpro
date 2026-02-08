@@ -128,13 +128,18 @@ class FederalProcurementService:
 
         # Retry logic for intermittent API failures
         max_retries = 3
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "HHDrywallPro/2.0 (Construction Intelligence Platform)",
+            "Accept": "application/json"
+        }
         for attempt in range(max_retries):
             try:
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     resp = await client.post(
                         f"{USA_SPENDING_BASE}/search/spending_by_award/",
                         json=payload,
-                        headers={"Content-Type": "application/json"},
+                        headers=headers,
                     )
                     if resp.status_code == 200:
                         data = resp.json()
