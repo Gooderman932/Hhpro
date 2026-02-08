@@ -420,6 +420,103 @@ async def create_checkout(
     
     return CheckoutResponse(url=session.url, session_id=session.session_id)
 
+# ============================================
+# PUBLIC CHECKOUT - For website integration (no auth required)
+# ============================================
+
+class PublicCheckoutRequest(BaseModel):
+    tier_id: str
+    email: Optional[str] = None
+    success_url: Optional[str] = None
+    cancel_url: Optional[str] = None
+
+@app.post("/api/stripe/public-checkout")
+async def create_public_checkout_session(
+    request: Request,
+    data: PublicCheckoutRequest,
+    db: Session = Depends(get_db)
+):
+    """
+    Create a Stripe checkout session WITHOUT requiring authentication.
+    Used by external websites (hhdrywallrepair.com) to initiate subscriptions.
+    
+    After payment, user will need to create an account or link to existing account.
+    """
+    # Validate tier
+    tier_info = PRICING_TIERS.get(data.tier_id)
+    if not tier_info:
+        raise HTTPException(status_code=400, detail=f"Invalid tier: {data.tier_id}")
+    
+    if not STRIPE_API_KEY:
+        raise HTTPException(status_code=500, detail="Payment system not configured")
+    
+    # Build URLs
+    host_url = str(request.base_url).rstrip('/')
+    success_url = data.success_url or f"{host_url}/subscription/success?session_id={{CHECKOUT_SESSION_ID}}"
+    cancel_url = data.cancel_url or f"{host_url}/pricing"
+    
+    # Create Stripe checkout
+    stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=f"{host_url}/api/webhook/stripe")
+    
+    amount = tier_info["price"]
+    checkout_request = StripeCheckoutRequest(
+        amount=amount,
+        currency="usd",
+        success_url=success_url,
+        cancel_url=cancel_url,
+        metadata={
+            "tier_id": data.tier_id,
+            "tier_name": tier_info["name"],
+            "source": "website_integration",
+            "customer_email": data.email or ""
+        }
+    )
+    
+    session = await stripe_checkout.create_checkout_session(checkout_request)
+    
+    # Store pending transaction (without user_id for now)
+    transaction = PaymentTransaction(
+        transaction_id=str(uuid.uuid4()),
+        session_id=session.session_id,
+        user_id=None,  # Will be linked after account creation
+        user_email=data.email,
+        tier_id=data.tier_id,
+        tier_name=tier_info["name"],
+        amount=amount
+    )
+    db.add(transaction)
+    db.commit()
+    
+    return {
+        "checkout_url": session.url,
+        "session_id": session.session_id,
+        "tier": {
+            "id": data.tier_id,
+            "name": tier_info["name"],
+            "price": amount
+        }
+    }
+
+@app.get("/api/stripe/session/{session_id}")
+async def get_checkout_session_info(
+    request: Request,
+    session_id: str,
+    db: Session = Depends(get_db)
+):
+    """Get info about a checkout session (for post-payment account creation)."""
+    transaction = db.query(PaymentTransaction).filter(PaymentTransaction.session_id == session_id).first()
+    if not transaction:
+        raise HTTPException(status_code=404, detail="Session not found")
+    
+    return {
+        "session_id": session_id,
+        "tier_id": transaction.tier_id,
+        "tier_name": transaction.tier_name,
+        "amount": transaction.amount,
+        "status": transaction.payment_status,
+        "email": transaction.user_email
+    }
+
 @app.get("/api/subscriptions/status/{session_id}")
 async def get_payment_status(
     request: Request,
