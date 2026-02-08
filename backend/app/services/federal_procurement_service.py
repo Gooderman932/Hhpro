@@ -101,48 +101,58 @@ class FederalProcurementService:
 
     async def _fetch_usaspending_opportunities(self, state: Optional[str], limit: int) -> List[Dict]:
         """Fetch recent construction awards from USAspending as opportunity proxies."""
-        try:
-            # Use a valid date range (USAspending data is typically delayed)
-            end_date = min(datetime.utcnow(), datetime(2025, 12, 31)).strftime("%Y-%m-%d")
-            filters: Dict[str, Any] = {
-                "time_period": [{"start_date": "2024-01-01", "end_date": end_date}],
-                "naics_codes": CONSTRUCTION_NAICS[:5],  # Limit to top 5 NAICS codes
-                "award_type_codes": ["A", "B", "C", "D"],  # Contract types
-            }
-            if state and state in STATE_FIPS:
-                filters["place_of_performance_locations"] = [
-                    {"country": "USA", "state": state}
-                ]
+        # Use a valid date range (USAspending data is typically delayed)
+        end_date = min(datetime.utcnow(), datetime(2025, 12, 31)).strftime("%Y-%m-%d")
+        filters: Dict[str, Any] = {
+            "time_period": [{"start_date": "2024-01-01", "end_date": end_date}],
+            "naics_codes": CONSTRUCTION_NAICS[:5],  # Limit to top 5 NAICS codes
+            "award_type_codes": ["A", "B", "C", "D"],  # Contract types
+        }
+        if state and state in STATE_FIPS:
+            filters["place_of_performance_locations"] = [
+                {"country": "USA", "state": state}
+            ]
 
-            payload = {
-                "filters": filters,
-                "fields": [
-                    "Award ID", "Recipient Name", "Description", "Award Amount",
-                    "Start Date", "End Date", "Awarding Agency", "Place of Performance State Code",
-                    "Place of Performance City Name", "NAICS Code", "internal_id"
-                ],
-                "limit": limit,
-                "page": 1,
-                "sort": "Award Amount",
-                "order": "desc",
-            }
+        payload = {
+            "filters": filters,
+            "fields": [
+                "Award ID", "Recipient Name", "Description", "Award Amount",
+                "Start Date", "End Date", "Awarding Agency", "Place of Performance State Code",
+                "Place of Performance City Name", "NAICS Code", "internal_id"
+            ],
+            "limit": limit,
+            "page": 1,
+            "sort": "Award Amount",
+            "order": "desc",
+        }
 
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                resp = await client.post(
-                    f"{USA_SPENDING_BASE}/search/spending_by_award/",
-                    json=payload,
-                    headers={"Content-Type": "application/json"},
-                )
-                print(f"USAspending response status: {resp.status_code}")
-                if resp.status_code == 200:
-                    data = resp.json()
-                    results = data.get("results") or []
-                    print(f"USAspending returned {len(results)} results")
-                    return [self._normalize_usaspending(r) for r in results[:limit]]
-                else:
-                    print(f"USAspending returned {resp.status_code}: {resp.text[:200]}")
-        except Exception as e:
-            print(f"USAspending error: {e}")
+        # Retry logic for intermittent API failures
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                async with httpx.AsyncClient(timeout=30.0) as client:
+                    resp = await client.post(
+                        f"{USA_SPENDING_BASE}/search/spending_by_award/",
+                        json=payload,
+                        headers={"Content-Type": "application/json"},
+                    )
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        results = data.get("results") or []
+                        print(f"USAspending returned {len(results)} results")
+                        return [self._normalize_usaspending(r) for r in results[:limit]]
+                    elif resp.status_code == 500 and attempt < max_retries - 1:
+                        print(f"USAspending returned 500, retrying ({attempt + 1}/{max_retries})...")
+                        import asyncio
+                        await asyncio.sleep(2)
+                        continue
+                    else:
+                        print(f"USAspending returned {resp.status_code}")
+            except Exception as e:
+                print(f"USAspending error (attempt {attempt + 1}): {e}")
+                if attempt < max_retries - 1:
+                    import asyncio
+                    await asyncio.sleep(2)
         return []
 
     async def get_award_stats(self, state_code: Optional[str] = None, fy: Optional[int] = None) -> Dict[str, Any]:
