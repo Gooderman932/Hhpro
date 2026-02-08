@@ -105,7 +105,7 @@ class FederalProcurementService:
         end_date = min(datetime.utcnow(), datetime(2025, 12, 31)).strftime("%Y-%m-%d")
         filters: Dict[str, Any] = {
             "time_period": [{"start_date": "2024-01-01", "end_date": end_date}],
-            "naics_codes": CONSTRUCTION_NAICS[:5],  # Limit to top 5 NAICS codes
+            "naics_codes": ["236220"],  # Commercial building construction - most reliable
             "award_type_codes": ["A", "B", "C", "D"],  # Contract types
         }
         if state and state in STATE_FIPS:
