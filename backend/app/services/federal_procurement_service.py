@@ -101,20 +101,16 @@ class FederalProcurementService:
 
     async def _fetch_usaspending_opportunities(self, state: Optional[str], limit: int) -> List[Dict]:
         """Fetch recent construction awards from USAspending as opportunity proxies."""
+        import subprocess
+        import json as json_mod
+        
         end_date = "2025-12-31"
         start_date = "2024-01-01"
         
-        # Nationwide search for reliability - state filtering done post-fetch
-        base_filters: Dict[str, Any] = {
+        base_filters = {
             "time_period": [{"start_date": start_date, "end_date": end_date}],
             "naics_codes": ["236220", "236210", "237110", "238310"],
             "award_type_codes": ["A", "B", "C", "D"],
-        }
-        
-        headers = {
-            "Content-Type": "application/json",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-            "Accept": "application/json"
         }
         
         payload = {
@@ -124,47 +120,46 @@ class FederalProcurementService:
                 "Start Date", "End Date", "Awarding Agency", "Place of Performance State Code",
                 "Place of Performance City Name", "NAICS Code", "internal_id"
             ],
-            "limit": limit * 3,  # Fetch more to filter by state
+            "limit": limit * 3,
             "page": 1,
             "sort": "Award Amount",
             "order": "desc",
         }
-
-        # Use synchronous httpx for reliability
-        import asyncio
-        from concurrent.futures import ThreadPoolExecutor
         
-        def sync_fetch():
-            try:
-                resp = httpx.post(
-                    f"{USA_SPENDING_BASE}/search/spending_by_award/",
-                    json=payload,
-                    headers=headers,
-                    timeout=30.0
-                )
-                if resp.status_code == 200:
-                    data = resp.json()
-                    results = data.get("results") or []
-                    print(f"USAspending returned {len(results)} results")
-                    return results
-                else:
-                    print(f"USAspending returned {resp.status_code}")
-            except Exception as e:
-                print(f"USAspending error: {e}")
-            return []
+        try:
+            # Use subprocess to call curl for reliability
+            result = subprocess.run(
+                [
+                    "curl", "-s", "--max-time", "30",
+                    "-X", "POST",
+                    "https://api.usaspending.gov/api/v2/search/spending_by_award/",
+                    "-H", "Content-Type: application/json",
+                    "-H", "Accept: application/json",
+                    "-d", json_mod.dumps(payload)
+                ],
+                capture_output=True,
+                text=True,
+                timeout=35
+            )
+            
+            if result.returncode == 0 and result.stdout:
+                data = json_mod.loads(result.stdout)
+                results = data.get("results") or []
+                print(f"USAspending returned {len(results)} results")
+                
+                normalized = [self._normalize_usaspending(r) for r in results]
+                if state:
+                    filtered = [o for o in normalized if o.get("place_of_performance_state") == state]
+                    if filtered:
+                        return filtered[:limit]
+                
+                return normalized[:limit]
+            else:
+                print(f"USAspending curl error: {result.stderr[:200] if result.stderr else 'no output'}")
+        except Exception as e:
+            print(f"USAspending error: {e}")
         
-        loop = asyncio.get_event_loop()
-        with ThreadPoolExecutor() as pool:
-            results = await loop.run_in_executor(pool, sync_fetch)
-        
-        # Filter by state if provided, otherwise return all
-        normalized = [self._normalize_usaspending(r) for r in results]
-        if state:
-            filtered = [o for o in normalized if o.get("place_of_performance_state") == state]
-            if filtered:
-                return filtered[:limit]
-        
-        return normalized[:limit]
+        return []
 
     async def get_award_stats(self, state_code: Optional[str] = None, fy: Optional[int] = None) -> Dict[str, Any]:
         """Aggregate award stats for construction NAICS in a state."""
