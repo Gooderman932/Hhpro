@@ -2335,6 +2335,93 @@ async def admin_revenue_export(
     )
 
 # ============================================
+# UNIFIED PERMIT INTELLIGENCE SEARCH
+# ============================================
+
+TIER_PERMIT_LIMITS = {"basic": 25, "professional": 100, "enterprise": 250}
+
+@app.get("/api/permits/search")
+async def search_permits_unified(
+    location: Optional[str] = None,
+    state: Optional[str] = None,
+    limit: int = 25,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_subscription),
+    db: Session = Depends(get_db)
+):
+    """Unified Permit Intelligence Search - merges paid + free sources with proprietary AI scoring."""
+    tier = subscription.tier_id
+    tier_limit = TIER_PERMIT_LIMITS.get(tier, 25)
+    limit = min(limit, tier_limit)
+
+    # Build user profile for ML enrichment
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    user_profile = {
+        "trade_specialty": profile.trade_specialty if profile else "",
+        "preferred_sectors": profile.preferred_sectors or [] if profile else [],
+        "service_states": profile.service_states or [] if profile else [],
+        "service_cities": profile.service_cities or [] if profile else [],
+        "min_project_value": profile.min_project_value if profile else 50000,
+        "max_project_value": profile.max_project_value if profile else 10000000,
+        "company_size": profile.company_size if profile else "11-50",
+    }
+
+    all_permits = []
+    data_sources = []
+
+    # 1. Commercial permits (paid - Pro/Enterprise get priority)
+    commercial_svc = CommercialPermitsService()
+    if commercial_svc.configured:
+        commercial = await commercial_svc.search(location=location, state=state, limit=limit)
+        all_permits.extend(commercial)
+        provider_name = commercial_svc.provider.title()
+        if commercial:
+            data_sources.append(f"{provider_name} ({len(commercial)} permits)")
+
+    # 2. NYC Open Data (free - always available, especially for Basic tier)
+    if not state or state == "NY" or not all_permits:
+        nyc_svc = NYCPermitsService()
+        nyc_limit = max(10, limit - len(all_permits))
+        nyc_permits = await nyc_svc.get_recent_permits(limit=nyc_limit, days_back=30)
+        if nyc_permits:
+            all_permits.extend(nyc_permits)
+            data_sources.append(f"NYC Dept of Buildings ({len(nyc_permits)} permits)")
+
+    # 3. Census aggregate stats (sidebar info, not individual permits)
+    census_svc = CensusPermitsService()
+    census_data = await census_svc.get_building_permits(state_code=state)
+
+    # 4. Enrich all permits with proprietary AI
+    enrichment = PermitEnrichmentService()
+    enriched = []
+    for p in all_permits[:limit]:
+        try:
+            enriched.append(enrichment.enrich_permit(p, user_profile))
+        except Exception:
+            enriched.append(p)
+
+    # Sort by opportunity score descending
+    enriched.sort(key=lambda x: x.get("proprietary_analysis", {}).get("opportunity_score", 0), reverse=True)
+
+    if not data_sources:
+        data_sources.append("No permit sources configured")
+
+    return {
+        "success": True,
+        "count": len(enriched),
+        "tier": tier,
+        "permits": enriched,
+        "census_stats": census_data,
+        "data_sources": data_sources,
+        "legal_notice": "Government data belongs to respective agencies. All AI analysis is Patent Pending, Proprietary of Poor Dude Holdings LLC.",
+        "tier_limits": {
+            "basic": "25 permits/search, NYC open data",
+            "pro": "100 permits/search, nationwide paid + open data",
+            "enterprise": "250 permits/search, all sources + API access",
+        },
+    }
+
+# ============================================
 # ONBOARDING WIZARD
 # ============================================
 
