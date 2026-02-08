@@ -78,25 +78,49 @@ class FederalProcurementService:
         return results[:limit]
 
     async def _fetch_sam(self, state: Optional[str], limit: int) -> List[Dict]:
+        """Fetch opportunities from SAM.gov API."""
+        import requests
+        
         try:
-            params: Dict[str, Any] = {
+            # Build parameters for SAM.gov Opportunities API
+            params = {
                 "api_key": self.sam_key,
-                "limit": limit,
-                "postedFrom": (datetime.utcnow().replace(day=1)).strftime("%m/%d/%Y"),
-                "ncode": ",".join(CONSTRUCTION_NAICS[:10]),
+                "limit": str(min(limit, 100)),
+                "postedFrom": "01/01/2024",
+                "postedTo": "12/31/2025",
+                "ptype": "o,k,p",  # Solicitation, Combined Synopsis, Presolicitation
             }
+            
+            # Add NAICS codes for construction (comma-separated)
+            params["naics"] = ",".join(CONSTRUCTION_NAICS[:5])  # Top construction codes
+            
+            # Add state filter if provided
             if state:
                 params["state"] = state
-
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                resp = await client.get(f"{SAM_BASE}/search", params=params)
-                if resp.status_code == 200:
-                    data = resp.json()
-                    opps = data.get("opportunitiesData") or data.get("opportunities") or []
-                    return [self._normalize_sam(o) for o in opps[:limit]]
-                print(f"SAM.gov returned {resp.status_code}")
+            
+            print(f"[SAM.gov] Fetching with key: {self.sam_key[:20]}...")
+            
+            # Use requests for reliability
+            resp = requests.get(
+                f"{SAM_BASE}/search",
+                params=params,
+                timeout=20,
+                headers={"Accept": "application/json"}
+            )
+            
+            print(f"[SAM.gov] Response status: {resp.status_code}")
+            
+            if resp.status_code == 200:
+                data = resp.json()
+                opps = data.get("opportunitiesData") or data.get("opportunities") or data.get("_embedded", {}).get("results", []) or []
+                print(f"[SAM.gov] Found {len(opps)} opportunities")
+                return [self._normalize_sam(o) for o in opps[:limit]]
+            else:
+                print(f"[SAM.gov] Error response: {resp.text[:200]}")
+                
         except Exception as e:
-            print(f"SAM.gov error: {e}")
+            print(f"[SAM.gov] Error: {e}")
+        
         return []
 
     async def _fetch_usaspending_opportunities(self, state: Optional[str], limit: int) -> List[Dict]:
