@@ -102,8 +102,10 @@ class FederalProcurementService:
     async def _fetch_usaspending_opportunities(self, state: Optional[str], limit: int) -> List[Dict]:
         """Fetch recent construction awards from USAspending as opportunity proxies."""
         try:
+            # Use a valid date range (USAspending data is typically delayed)
+            end_date = min(datetime.utcnow(), datetime(2025, 12, 31)).strftime("%Y-%m-%d")
             filters: Dict[str, Any] = {
-                "time_period": [{"start_date": "2024-01-01", "end_date": datetime.utcnow().strftime("%Y-%m-%d")}],
+                "time_period": [{"start_date": "2024-01-01", "end_date": end_date}],
                 "naics_codes": CONSTRUCTION_NAICS[:15],
                 "award_type_codes": ["A", "B", "C", "D"],  # Contract types: BPA, Purchase Order, Delivery Order, Definitive Contract
             }
