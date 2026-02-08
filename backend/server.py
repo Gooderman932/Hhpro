@@ -72,9 +72,17 @@ if ENVIRONMENT == 'production' and STRIPE_API_KEY.startswith('sk_test_'):
     import warnings
     warnings.warn("WARNING: Test Stripe key detected. Set live key (sk_live_) for production billing.")
 
-# Parse CORS origins
+# Parse CORS origins - include hhdrywallrepair.com for website integration
 cors_origins_str = os.environ.get('CORS_ORIGINS', '*')
 CORS_ORIGINS = [origin.strip() for origin in cors_origins_str.split(',')]
+# Add known domains for website integration
+CORS_ORIGINS.extend([
+    "https://hhdrywallrepair.com",
+    "https://www.hhdrywallrepair.com",
+    "http://hhdrywallrepair.com",
+    "http://www.hhdrywallrepair.com",
+    "https://job-trade-match.preview.emergentagent.com",
+])
 
 # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
