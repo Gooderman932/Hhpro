@@ -7,7 +7,7 @@ import httpx
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 
-SAM_BASE = "https://api.sam.gov/opportunities/v2"
+SAM_BASE = "https://api.sam.gov/prod/opportunities/v2"
 USA_SPENDING_BASE = "https://api.usaspending.gov/api/v2"
 
 # Construction-related NAICS codes
