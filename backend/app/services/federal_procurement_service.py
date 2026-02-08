@@ -104,16 +104,21 @@ class FederalProcurementService:
         end_date = "2025-12-31"
         start_date = "2024-01-01"
         
-        # Build filters - nationwide first for reliability, then state-specific
         base_filters: Dict[str, Any] = {
             "time_period": [{"start_date": start_date, "end_date": end_date}],
             "naics_codes": ["236220", "236210", "237110", "238310"],
             "award_type_codes": ["A", "B", "C", "D"],
         }
         
+        # Add state filter if provided
+        if state and state in STATE_FIPS:
+            base_filters["place_of_performance_locations"] = [
+                {"country": "USA", "state": state}
+            ]
+        
         headers = {
             "Content-Type": "application/json",
-            "User-Agent": "HHDrywallPro/2.0 (Construction Intelligence Platform)",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
             "Accept": "application/json"
         }
         
@@ -130,25 +135,25 @@ class FederalProcurementService:
             "order": "desc",
         }
 
-        # Use synchronous client in thread pool for reliability
+        # Use synchronous httpx in thread pool for reliability
         import asyncio
         from concurrent.futures import ThreadPoolExecutor
         
         def sync_fetch():
             try:
-                with httpx.Client(timeout=30.0, http2=False, follow_redirects=True) as client:
-                    resp = client.post(
-                        f"{USA_SPENDING_BASE}/search/spending_by_award/",
-                        json=payload,
-                        headers=headers,
-                    )
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        results = data.get("results") or []
-                        print(f"USAspending returned {len(results)} results")
-                        return results
-                    else:
-                        print(f"USAspending returned {resp.status_code}")
+                resp = httpx.post(
+                    f"{USA_SPENDING_BASE}/search/spending_by_award/",
+                    json=payload,
+                    headers=headers,
+                    timeout=30.0
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    results = data.get("results") or []
+                    print(f"USAspending returned {len(results)} results")
+                    return results
+                else:
+                    print(f"USAspending returned {resp.status_code}")
             except Exception as e:
                 print(f"USAspending error: {e}")
             return []
