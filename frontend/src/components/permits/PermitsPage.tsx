@@ -109,6 +109,20 @@ export const PermitsDashboard = () => {
           </div>
         )}
 
+        {/* No Coverage Warning */}
+        {meta?.no_coverage_warning && (
+          <div className="mb-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400 text-sm flex items-start gap-3">
+            <AlertCircle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium mb-1">No Data Available for This State</p>
+              <p className="text-amber-400/80">{meta.no_coverage_warning}</p>
+              <p className="mt-2 text-xs text-amber-400/60">
+                We only show REAL permit data from official government sources. States with coverage: {meta.available_states?.join(', ')}
+              </p>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm flex items-center gap-2">
             <AlertCircle className="h-4 w-4" />{error}
@@ -127,10 +141,17 @@ export const PermitsDashboard = () => {
               <Shield className="h-14 w-14 text-slate-700 mx-auto mb-4" />
               <h3 className="text-white text-lg font-medium mb-2">No Permits Found</h3>
               <p className="text-slate-400 text-sm max-w-md mx-auto">
-                {meta?.data_sources?.includes('No permit sources configured')
-                  ? 'Connect a paid permit source (Shovels.ai or BatchData) for nationwide coverage. NYC open data is included free.'
-                  : 'Try adjusting your search filters or broadening your location.'}
+                {meta?.no_coverage_warning
+                  ? `This state doesn't have a public permit data portal. Try searching in: ${meta.available_states?.slice(0, 5).join(', ')}...`
+                  : meta?.data_sources?.includes('No permit sources configured')
+                    ? 'Connect a paid permit source (Shovels.ai or BatchData) for nationwide coverage.'
+                    : 'Try adjusting your search filters or searching a different location.'}
               </p>
+              {meta?.available_coverage && (
+                <div className="mt-4 text-xs text-slate-500">
+                  <p>Currently available: {Object.keys(meta.available_coverage || {}).join(', ')}</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
