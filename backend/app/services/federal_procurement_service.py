@@ -80,27 +80,32 @@ class FederalProcurementService:
     async def _fetch_sam(self, state: Optional[str], limit: int) -> List[Dict]:
         """Fetch opportunities from SAM.gov API."""
         import requests
+        from datetime import datetime, timedelta
         
         try:
+            # Build date range - SAM.gov requires max 1 year range
+            today = datetime.utcnow()
+            posted_from = (today - timedelta(days=90)).strftime("%m/%d/%Y")  # Last 90 days
+            posted_to = today.strftime("%m/%d/%Y")
+            
             # Build parameters for SAM.gov Opportunities API
             params = {
                 "api_key": self.sam_key,
                 "limit": str(min(limit, 100)),
-                "postedFrom": "01/01/2024",
-                "postedTo": "12/31/2025",
+                "postedFrom": posted_from,
+                "postedTo": posted_to,
                 "ptype": "o,k,p",  # Solicitation, Combined Synopsis, Presolicitation
             }
             
-            # Add NAICS codes for construction (comma-separated)
-            params["naics"] = ",".join(CONSTRUCTION_NAICS[:5])  # Top construction codes
+            # Add NAICS codes for construction
+            params["naics"] = ",".join(CONSTRUCTION_NAICS[:5])
             
             # Add state filter if provided
             if state:
                 params["state"] = state
             
-            print(f"[SAM.gov] Fetching with key: {self.sam_key[:20]}...")
+            print(f"[SAM.gov] Fetching opportunities ({posted_from} to {posted_to})...")
             
-            # Use requests for reliability
             resp = requests.get(
                 f"{SAM_BASE}/search",
                 params=params,
@@ -108,15 +113,14 @@ class FederalProcurementService:
                 headers={"Accept": "application/json"}
             )
             
-            print(f"[SAM.gov] Response status: {resp.status_code}")
-            
             if resp.status_code == 200:
                 data = resp.json()
-                opps = data.get("opportunitiesData") or data.get("opportunities") or data.get("_embedded", {}).get("results", []) or []
-                print(f"[SAM.gov] Found {len(opps)} opportunities")
+                opps = data.get("opportunitiesData") or []
+                total = data.get("totalRecords", 0)
+                print(f"[SAM.gov] Found {len(opps)} of {total} total opportunities")
                 return [self._normalize_sam(o) for o in opps[:limit]]
             else:
-                print(f"[SAM.gov] Error response: {resp.text[:200]}")
+                print(f"[SAM.gov] Error {resp.status_code}: {resp.text[:200]}")
                 
         except Exception as e:
             print(f"[SAM.gov] Error: {e}")
