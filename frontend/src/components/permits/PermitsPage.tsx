@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Search, Loader2, MapPin, DollarSign, Calendar, Star, Target, AlertCircle, ChevronDown, Database, Shield, Clock } from 'lucide-react'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { Search, Loader2, MapPin, DollarSign, Calendar, Star, Target, AlertCircle, Database, Shield, Clock } from 'lucide-react'
+import { Card, CardContent } from '../ui/card'
 import { Button } from '../ui/button'
 import api from '../../services/api'
 
