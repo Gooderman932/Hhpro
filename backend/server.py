@@ -463,7 +463,7 @@ async def create_public_checkout_session(
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=f"{host_url}/api/webhook/stripe")
     
     amount = TIER_PRICES[data.tier_id]
-    checkout_request = StripeCheckoutRequest(
+    checkout_request = CheckoutSessionRequest(
         amount=amount,
         currency="usd",
         success_url=success_url,
