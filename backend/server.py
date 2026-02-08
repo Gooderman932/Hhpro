@@ -443,9 +443,13 @@ async def create_public_checkout_session(
     After payment, user will need to create an account or link to existing account.
     """
     # Validate tier
-    tier_info = PRICING_TIERS.get(data.tier_id)
-    if not tier_info:
-        raise HTTPException(status_code=400, detail=f"Invalid tier: {data.tier_id}")
+    if data.tier_id not in TIER_PRICES:
+        raise HTTPException(status_code=400, detail=f"Invalid tier: {data.tier_id}. Valid: basic, professional, enterprise")
+    
+    # Get tier info
+    tier_data = next((t for t in MARKET_DATA_TIERS if t["tier_id"] == data.tier_id), None)
+    if not tier_data:
+        raise HTTPException(status_code=400, detail="Tier configuration not found")
     
     if not STRIPE_API_KEY:
         raise HTTPException(status_code=500, detail="Payment system not configured")
@@ -458,7 +462,7 @@ async def create_public_checkout_session(
     # Create Stripe checkout
     stripe_checkout = StripeCheckout(api_key=STRIPE_API_KEY, webhook_url=f"{host_url}/api/webhook/stripe")
     
-    amount = tier_info["price"]
+    amount = TIER_PRICES[data.tier_id]
     checkout_request = StripeCheckoutRequest(
         amount=amount,
         currency="usd",
@@ -466,7 +470,7 @@ async def create_public_checkout_session(
         cancel_url=cancel_url,
         metadata={
             "tier_id": data.tier_id,
-            "tier_name": tier_info["name"],
+            "tier_name": tier_data["name"],
             "source": "website_integration",
             "customer_email": data.email or ""
         }
@@ -481,7 +485,7 @@ async def create_public_checkout_session(
         user_id=None,  # Will be linked after account creation
         user_email=data.email,
         tier_id=data.tier_id,
-        tier_name=tier_info["name"],
+        tier_name=tier_data["name"],
         amount=amount
     )
     db.add(transaction)
@@ -492,7 +496,7 @@ async def create_public_checkout_session(
         "session_id": session.session_id,
         "tier": {
             "id": data.tier_id,
-            "name": tier_info["name"],
+            "name": tier_data["name"],
             "price": amount
         }
     }
