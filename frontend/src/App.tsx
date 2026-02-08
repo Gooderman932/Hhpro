@@ -192,6 +192,15 @@ const Navigation = () => {
                       >
                         Competitors
                       </Link>
+                      {(subscription.tier_id === 'professional' || subscription.tier_id === 'enterprise') && (
+                        <Link
+                          to="/federal-opportunities"
+                          className="text-slate-300 hover:text-white"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          Federal Opportunities
+                        </Link>
+                      )}
                       {subscription.tier_id === 'enterprise' && (
                         <Link
                           to="/batch-scoring"
