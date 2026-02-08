@@ -54,7 +54,7 @@ def seed_database():
                 user_id=enterprise_user.id,
                 tier_id="enterprise",
                 tier_name="Enterprise Platform",
-                price=1999.00,
+                price=399.00,
                 status="active",
                 expires_at=datetime.utcnow() + timedelta(days=365)
             )
@@ -82,7 +82,7 @@ def seed_database():
                 user_id=pro_user.id,
                 tier_id="professional",
                 tier_name="Professional Suite",
-                price=799.00,
+                price=149.00,
                 status="active",
                 expires_at=datetime.utcnow() + timedelta(days=365)
             )
