@@ -101,11 +101,14 @@ class FederalProcurementService:
 
     async def _fetch_usaspending_opportunities(self, state: Optional[str], limit: int) -> List[Dict]:
         """Fetch recent construction awards from USAspending as opportunity proxies."""
-        # Use a valid date range (USAspending data is typically delayed)
-        end_date = min(datetime.utcnow(), datetime(2025, 12, 31)).strftime("%Y-%m-%d")
+        # Use a valid date range - current data is available through late 2024/early 2025
+        # Avoid future dates which cause API errors
+        end_date = "2025-12-31"  # Fixed safe end date
+        start_date = "2024-01-01"
+        
         filters: Dict[str, Any] = {
-            "time_period": [{"start_date": "2024-01-01", "end_date": end_date}],
-            "naics_codes": ["236220"],  # Commercial building construction - most reliable
+            "time_period": [{"start_date": start_date, "end_date": end_date}],
+            "naics_codes": ["236220", "236210", "237110", "238310"],  # Core construction NAICS
             "award_type_codes": ["A", "B", "C", "D"],  # Contract types
         }
         if state and state in STATE_FIPS:
@@ -152,7 +155,7 @@ class FederalProcurementService:
                         await asyncio.sleep(2)
                         continue
                     else:
-                        print(f"USAspending returned {resp.status_code}")
+                        print(f"USAspending returned {resp.status_code}: {resp.text[:200]}")
             except Exception as e:
                 print(f"USAspending error (attempt {attempt + 1}): {e}")
                 if attempt < max_retries - 1:
