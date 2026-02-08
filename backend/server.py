@@ -41,6 +41,10 @@ from app.services.scoring import ScoringService
 from app.services.notification import NotificationService
 from app.services.external_data import FREDService, PermitDataService, IndustryBenchmarkService
 from app.services.ai_enrichment import AIEnrichmentService
+from app.services.commercial_permits_service import CommercialPermitsService
+from app.services.nyc_permits_service import NYCPermitsService
+from app.services.census_permits_service import CensusPermitsService
+from app.services.permit_enrichment_service import PermitEnrichmentService
 
 # Import Proprietary ML Models (Poor Dude Holdings LLC IP)
 from app.ml.proprietary import (
