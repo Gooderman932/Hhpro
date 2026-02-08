@@ -249,6 +249,15 @@ class OpenDataPermitsService:
                         if data.get("success"):
                             records = data.get("result", {}).get("records", [])
                             return [self._normalize_permit(p, cfg) for p in records]
+                elif cfg.get("type") == "carto":
+                    # Philadelphia-style CARTO API
+                    query = cfg["query"].format(limit=limit)
+                    params = {"q": query, "format": "json"}
+                    resp = await client.get(cfg["url"], headers=headers, params=params)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        rows = data.get("rows", [])
+                        return [self._normalize_permit(p, cfg) for p in rows]
                 else:
                     # Standard Socrata format
                     params = {
