@@ -17,6 +17,7 @@ import { Onboarding } from "./components/onboarding/Onboarding"
 import PermitsPage from "./components/permits/PermitsPage"
 import { MyProjectsPage } from "./components/projects/MyProjectsPage"
 import { AdminDashboard } from "./components/admin/AdminDashboard"
+import FederalOpportunities from "./components/procurement/FederalOpportunities"
 
 // Navigation component
 const Navigation = () => {
