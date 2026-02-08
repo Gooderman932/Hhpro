@@ -47,7 +47,7 @@ OPEN_DATA_SOURCES = {
         "state": "TX",
         "url": "https://data.austintexas.gov/resource/3syk-w9eu.json",
         "type": "socrata",
-        "date_field": "issued_date",
+        "date_field": "issue_date",
     },
     # WASHINGTON - VERIFIED WORKING
     "seattle": {
