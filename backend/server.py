@@ -2533,6 +2533,11 @@ async def search_permits_unified(
 
     # Get available coverage for transparency
     available_coverage = open_data_svc.get_available_coverage()
+    
+    # Check if state was requested but no coverage
+    no_coverage_warning = None
+    if state and open_data_result.get("no_coverage"):
+        no_coverage_warning = f"No permit data available for {state}. We have real-time data for these states: {', '.join(sorted(available_coverage.keys()))}"
 
     return {
         "success": True,
@@ -2542,11 +2547,13 @@ async def search_permits_unified(
         "census_stats": census_data,
         "data_sources": data_sources,
         "coverage_note": coverage_note,
+        "no_coverage_warning": no_coverage_warning,
         "available_coverage": available_coverage,
+        "available_states": sorted(available_coverage.keys()),
         "legal_notice": "Permit data from official government open data portals. All AI analysis is Patent Pending, Proprietary of Poor Dude Holdings LLC.",
         "tier_limits": {
-            "basic": "25 permits/search, major metros",
-            "professional": "100 permits/search, nationwide coverage",
+            "basic": "25 permits/search, available metros",
+            "professional": "100 permits/search, all available states",
             "enterprise": "250 permits/search, all sources + API access",
         },
     }
