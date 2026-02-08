@@ -357,6 +357,7 @@ function App() {
         <Route path="/notifications" element={<NotificationSettings />} />
         <Route path="/settings" element={<NotificationSettings />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/federal-opportunities" element={<FederalOpportunities />} />
       </Routes>
     </BrowserRouter>
   )
