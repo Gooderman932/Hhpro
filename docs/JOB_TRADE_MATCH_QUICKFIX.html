@@ -1,0 +1,220 @@
+<!--
+  ============================================
+  QUICK FIX FOR job-trade-match Market Data
+  ============================================
+  
+  INSTRUCTIONS:
+  1. Go to job-trade-match project in Emergent
+  2. Find the Market Data page/component
+  3. Add this script tag at the end of the page
+  
+  This will:
+  - Fix the pricing from $299/$799/$1999 to $49/$149/$399
+  - Make "Subscribe Now" buttons actually work
+  - Connect to the Construction Intelligence backend
+-->
+
+<script>
+(function() {
+  'use strict';
+  
+  // Backend API URL - UPDATE THIS if deployed elsewhere
+  const API_URL = 'https://agent-env-62160c2c-bc10-4173-9662-8ef2158aecee.stage-preview.emergentagent.com';
+  
+  // Correct pricing
+  const CORRECT_PRICING = {
+    basic: { price: 49, name: 'Basic' },
+    professional: { price: 149, name: 'Pro' },
+    enterprise: { price: 399, name: 'Enterprise' }
+  };
+  
+  // Fix pricing on page load
+  function fixPricing() {
+    // Find all price elements and fix them
+    const priceElements = document.querySelectorAll('*');
+    
+    priceElements.forEach(el => {
+      if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3) {
+        const text = el.textContent;
+        
+        // Fix old prices
+        if (text.includes('$299')) {
+          el.textContent = text.replace('$299', '$49');
+        }
+        if (text.includes('$799')) {
+          el.textContent = text.replace('$799', '$149');
+        }
+        if (text.includes('$1999') || text.includes('$1,999')) {
+          el.textContent = text.replace(/\$1,?999/, '$399');
+        }
+      }
+    });
+    
+    console.log('✅ Pricing fixed to $49/$149/$399');
+  }
+  
+  // Subscribe function
+  async function subscribe(tier) {
+    const btn = event?.target;
+    const originalText = btn?.textContent;
+    
+    try {
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+        btn.style.opacity = '0.7';
+      }
+      
+      const response = await fetch(`${API_URL}/api/stripe/public-checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier_id: tier,
+          success_url: window.location.origin + '/market-data?payment=success',
+          cancel_url: window.location.href
+        })
+      });
+      
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({}));
+        throw new Error(error.detail || 'Checkout failed');
+      }
+      
+      const data = await response.json();
+      
+      if (data.checkout_url) {
+        window.location.href = data.checkout_url;
+      } else {
+        throw new Error('No checkout URL');
+      }
+      
+    } catch (error) {
+      console.error('Subscription error:', error);
+      alert('Error: ' + error.message + '\n\nPlease try again.');
+      
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = originalText;
+        btn.style.opacity = '1';
+      }
+    }
+  }
+  
+  // Attach click handlers to Subscribe buttons
+  function attachHandlers() {
+    const buttons = document.querySelectorAll('button');
+    
+    buttons.forEach(btn => {
+      const text = btn.textContent.toLowerCase();
+      
+      if (text.includes('subscribe')) {
+        // Find which tier this button belongs to by looking at nearby price
+        const card = btn.closest('div[class*="card"], div[class*="Card"], section, article') || btn.parentElement?.parentElement;
+        
+        if (card) {
+          const cardText = card.textContent;
+          
+          let tier = 'basic';
+          if (cardText.includes('Professional') || cardText.includes('Pro')) {
+            tier = 'professional';
+          } else if (cardText.includes('Enterprise')) {
+            tier = 'enterprise';
+          }
+          
+          // Remove existing onclick and add new one
+          btn.onclick = function(e) {
+            e.preventDefault();
+            subscribe(tier);
+          };
+          
+          // Update button style
+          btn.style.cursor = 'pointer';
+          
+          console.log(`✅ Attached handler to ${tier} button`);
+        }
+      }
+    });
+  }
+  
+  // Check for payment success
+  function checkPaymentSuccess() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      // Show success message
+      const banner = document.createElement('div');
+      banner.innerHTML = `
+        <div style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(90deg, #22c55e, #16a34a);
+          color: white;
+          padding: 16px;
+          text-align: center;
+          font-weight: bold;
+          z-index: 9999;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        ">
+          🎉 Payment Successful! Check your email for login instructions.
+          <button onclick="this.parentElement.remove()" style="
+            margin-left: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+          ">Dismiss</button>
+        </div>
+      `;
+      document.body.prepend(banner);
+      
+      // Remove query param
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+  
+  // Initialize when DOM is ready
+  function init() {
+    fixPricing();
+    attachHandlers();
+    checkPaymentSuccess();
+    console.log('✅ Market Data integration initialized');
+  }
+  
+  // Run on load
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  
+  // Also run after a short delay to catch dynamically loaded content
+  setTimeout(init, 1000);
+  setTimeout(init, 3000);
+  
+  // Expose globally for manual testing
+  window.subscribeToTier = subscribe;
+  window.fixMarketDataPricing = fixPricing;
+  
+})();
+</script>
+
+<!--
+  ALTERNATIVE: If you can edit the React components directly,
+  replace the Subscribe buttons with:
+  
+  <button onClick={() => {
+    fetch('https://agent-env-62160c2c-bc10-4173-9662-8ef2158aecee.stage-preview.emergentagent.com/api/stripe/public-checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier_id: 'basic' }) // or 'professional' or 'enterprise'
+    })
+    .then(r => r.json())
+    .then(data => window.location.href = data.checkout_url)
+    .catch(e => alert('Error: ' + e.message));
+  }}>
+    Subscribe Now
+  </button>
+-->
