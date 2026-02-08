@@ -106,8 +106,8 @@ class FederalProcurementService:
             end_date = min(datetime.utcnow(), datetime(2025, 12, 31)).strftime("%Y-%m-%d")
             filters: Dict[str, Any] = {
                 "time_period": [{"start_date": "2024-01-01", "end_date": end_date}],
-                "naics_codes": CONSTRUCTION_NAICS[:15],
-                "award_type_codes": ["A", "B", "C", "D"],  # Contract types: BPA, Purchase Order, Delivery Order, Definitive Contract
+                "naics_codes": CONSTRUCTION_NAICS[:5],  # Limit to top 5 NAICS codes
+                "award_type_codes": ["A", "B", "C", "D"],  # Contract types
             }
             if state and state in STATE_FIPS:
                 filters["place_of_performance_locations"] = [
@@ -127,17 +127,20 @@ class FederalProcurementService:
                 "order": "desc",
             }
 
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 resp = await client.post(
                     f"{USA_SPENDING_BASE}/search/spending_by_award/",
                     json=payload,
                     headers={"Content-Type": "application/json"},
                 )
+                print(f"USAspending response status: {resp.status_code}")
                 if resp.status_code == 200:
                     data = resp.json()
                     results = data.get("results") or []
+                    print(f"USAspending returned {len(results)} results")
                     return [self._normalize_usaspending(r) for r in results[:limit]]
-                print(f"USAspending returned {resp.status_code}")
+                else:
+                    print(f"USAspending returned {resp.status_code}: {resp.text[:200]}")
         except Exception as e:
             print(f"USAspending error: {e}")
         return []
