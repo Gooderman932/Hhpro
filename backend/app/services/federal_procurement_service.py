@@ -104,45 +104,37 @@ class FederalProcurementService:
         import subprocess
         import json as json_mod
         
-        end_date = "2025-12-31"
-        start_date = "2024-01-01"
-        
-        base_filters = {
-            "time_period": [{"start_date": start_date, "end_date": end_date}],
-            "naics_codes": ["236220", "236210", "237110", "238310"],
-            "award_type_codes": ["A", "B", "C", "D"],
-        }
-        
-        payload = {
-            "filters": base_filters,
+        # Fixed payload string for reliability
+        payload_str = json_mod.dumps({
+            "filters": {
+                "time_period": [{"start_date": "2024-01-01", "end_date": "2025-12-31"}],
+                "naics_codes": ["236220", "236210", "237110", "238310"],
+                "award_type_codes": ["A", "B", "C", "D"]
+            },
             "fields": [
                 "Award ID", "Recipient Name", "Description", "Award Amount",
                 "Start Date", "End Date", "Awarding Agency", "Place of Performance State Code",
                 "Place of Performance City Name", "NAICS Code", "internal_id"
             ],
-            "limit": limit * 3,
+            "limit": min(limit * 3, 100),
             "page": 1,
             "sort": "Award Amount",
-            "order": "desc",
-        }
+            "order": "desc"
+        })
         
         try:
-            # Use subprocess to call curl for reliability
             result = subprocess.run(
-                [
-                    "curl", "-s", "--max-time", "30",
-                    "-X", "POST",
-                    "https://api.usaspending.gov/api/v2/search/spending_by_award/",
-                    "-H", "Content-Type: application/json",
-                    "-H", "Accept: application/json",
-                    "-d", json_mod.dumps(payload)
-                ],
+                ["curl", "-s", "--max-time", "30", "-X", "POST",
+                 "https://api.usaspending.gov/api/v2/search/spending_by_award/",
+                 "-H", "Content-Type: application/json",
+                 "-H", "Accept: application/json",
+                 "-d", payload_str],
                 capture_output=True,
                 text=True,
                 timeout=35
             )
             
-            if result.returncode == 0 and result.stdout:
+            if result.returncode == 0 and result.stdout and result.stdout.strip().startswith("{"):
                 data = json_mod.loads(result.stdout)
                 results = data.get("results") or []
                 print(f"USAspending returned {len(results)} results")
@@ -155,7 +147,9 @@ class FederalProcurementService:
                 
                 return normalized[:limit]
             else:
-                print(f"USAspending curl error: {result.stderr[:200] if result.stderr else 'no output'}")
+                print(f"USAspending response issue: {result.stdout[:100] if result.stdout else 'empty'}")
+        except subprocess.TimeoutExpired:
+            print("USAspending timeout")
         except Exception as e:
             print(f"USAspending error: {e}")
         
