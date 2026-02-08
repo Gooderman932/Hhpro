@@ -2424,6 +2424,68 @@ async def search_permits_unified(
     }
 
 # ============================================
+# FEDERAL PROCUREMENT (SAM.gov / USAspending)
+# ============================================
+
+@app.get("/api/procurement/federal")
+async def get_federal_opportunities(
+    state: Optional[str] = None,
+    limit: int = 25,
+    current_user: User = Depends(get_current_user),
+    subscription: Subscription = Depends(require_professional_tier),
+    db: Session = Depends(get_db)
+):
+    """AI-ranked federal construction opportunities. Pro+ tier."""
+    tier = subscription.tier_id
+    tier_limit = {"professional": 50, "enterprise": 150}.get(tier, 25)
+    limit = min(limit, tier_limit)
+
+    profile = db.query(UserProfile).filter(UserProfile.user_id == current_user.id).first()
+    user_profile = {
+        "trade_specialty": profile.trade_specialty if profile else "",
+        "preferred_sectors": profile.preferred_sectors or [] if profile else [],
+        "service_states": profile.service_states or [] if profile else [],
+        "min_project_value": profile.min_project_value if profile else 50000,
+        "max_project_value": profile.max_project_value if profile else 10000000,
+        "company_size": profile.company_size if profile else "11-50",
+    }
+
+    search_state = state or (profile.service_states[0] if profile and profile.service_states else None)
+
+    fed_svc = FederalProcurementService()
+    raw_opps = await fed_svc.get_construction_opportunities(state_code=search_state, limit=limit)
+
+    enrichment = ProcurementEnrichmentService()
+    enriched = []
+    for opp in raw_opps:
+        try:
+            enriched.append(enrichment.enrich_opportunity(opp, user_profile))
+        except Exception:
+            enriched.append(opp)
+
+    enriched.sort(key=lambda x: x.get("proprietary_analysis", {}).get("opportunity_score", 0), reverse=True)
+
+    award_stats = await fed_svc.get_award_stats(state_code=search_state)
+
+    sources = []
+    if any(o.get("source") == "sam.gov" for o in enriched):
+        sources.append("SAM.gov")
+    if any(o.get("source") == "usaspending.gov" for o in enriched):
+        sources.append("USAspending.gov")
+    if not sources:
+        sources.append("USAspending.gov (attempted)")
+
+    return {
+        "success": True,
+        "count": len(enriched),
+        "tier": tier,
+        "opportunities": enriched,
+        "award_stats": award_stats,
+        "data_sources": sources,
+        "legal_notice": "Federal procurement data from official U.S. government systems. All AI analysis is Patent Pending, Proprietary of Poor Dude Holdings LLC.",
+    }
+
+# ============================================
 # ONBOARDING WIZARD
 # ============================================
 
