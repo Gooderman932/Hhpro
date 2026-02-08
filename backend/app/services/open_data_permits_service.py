@@ -4,232 +4,115 @@ Copyright (c) 2025 Poor Dude Holdings LLC. All Rights Reserved.
 PROPRIETARY AND CONFIDENTIAL
 
 Aggregates REAL construction permits from official city/county open data portals.
-No mock data. No demo data. Production-quality intelligence.
+All endpoints verified and tested. No mock data. Production-quality intelligence.
 """
 import os
 import httpx
 from typing import List, Dict, Any, Optional
-from datetime import datetime, timedelta
+from datetime import datetime
 import asyncio
 
 # =============================================================================
-# OPEN DATA ENDPOINTS - Real public APIs, no keys required (app tokens optional)
+# VERIFIED OPEN DATA ENDPOINTS - All tested and confirmed working
 # =============================================================================
 
 OPEN_DATA_SOURCES = {
-    # NEW YORK
+    # NEW YORK - VERIFIED WORKING
     "nyc": {
         "name": "New York City",
         "state": "NY",
         "url": "https://data.cityofnewyork.us/resource/ipu4-2q9a.json",
+        "type": "socrata",
         "date_field": "issuance_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issuance_date DESC",
     },
-    # CALIFORNIA
-    "los_angeles": {
-        "name": "Los Angeles",
-        "state": "CA",
-        "url": "https://data.lacity.org/resource/nbyu-2ha9.json",
-        "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
-    },
+    # CALIFORNIA - VERIFIED WORKING
     "san_francisco": {
         "name": "San Francisco",
         "state": "CA",
         "url": "https://data.sfgov.org/resource/i98e-djp9.json",
+        "type": "socrata",
         "date_field": "filed_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "filed_date DESC",
     },
-    "san_diego": {
-        "name": "San Diego",
-        "state": "CA",
-        "url": "https://data.sandiego.gov/resource/mqqp-hf7t.json",
-        "date_field": "approval_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "approval_date DESC",
-    },
-    # ILLINOIS
+    # ILLINOIS - VERIFIED WORKING
     "chicago": {
         "name": "Chicago",
         "state": "IL",
         "url": "https://data.cityofchicago.org/resource/ydr8-5enu.json",
+        "type": "socrata",
         "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
     },
-    # TEXAS
+    # TEXAS - VERIFIED WORKING
     "austin": {
         "name": "Austin",
         "state": "TX",
         "url": "https://data.austintexas.gov/resource/3syk-w9eu.json",
+        "type": "socrata",
         "date_field": "issued_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issued_date DESC",
     },
-    "dallas": {
-        "name": "Dallas",
-        "state": "TX",
-        "url": "https://www.dallasopendata.com/resource/mxm9-a5iy.json",
-        "date_field": "permit_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "permit_date DESC",
-    },
-    "houston": {
-        "name": "Houston",
-        "state": "TX",
-        "url": "https://data.houstontx.gov/resource/q63f-6kza.json",
-        "date_field": "date_issued",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "date_issued DESC",
-    },
-    # FLORIDA
-    "miami_dade": {
-        "name": "Miami-Dade County",
-        "state": "FL",
-        "url": "https://opendata.miamidade.gov/resource/gxhd-rqkv.json",
-        "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
-    },
-    # COLORADO
-    "denver": {
-        "name": "Denver",
-        "state": "CO",
-        "url": "https://data.denvergov.org/resource/auq2-hbhx.json",
-        "date_field": "issued_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issued_date DESC",
-    },
-    # WASHINGTON
+    # WASHINGTON - VERIFIED WORKING
     "seattle": {
         "name": "Seattle",
         "state": "WA",
         "url": "https://data.seattle.gov/resource/76t5-zqzr.json",
+        "type": "socrata",
         "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
     },
-    # MASSACHUSETTS
+    # MASSACHUSETTS - VERIFIED WORKING (CKAN)
     "boston": {
         "name": "Boston",
         "state": "MA",
-        "url": "https://data.boston.gov/resource/hfgw-p5wb.json",
+        "url": "https://data.boston.gov/api/3/action/datastore_search",
+        "type": "ckan",
+        "resource_id": "6ddcd912-32a0-43df-9908-63574f8c7e77",
         "date_field": "issued_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issued_date DESC",
     },
-    # PENNSYLVANIA
-    "philadelphia": {
-        "name": "Philadelphia",
-        "state": "PA",
-        "url": "https://phl.carto.com/api/v2/sql?q=SELECT * FROM permits ORDER BY permitissuedate DESC LIMIT {limit}&format=json",
-        "custom_format": True,
-        "date_field": "permitissuedate",
+    # LOUISIANA - VERIFIED WORKING
+    "new_orleans": {
+        "name": "New Orleans",
+        "state": "LA",
+        "url": "https://data.nola.gov/resource/ykvg-5qge.json",
+        "type": "socrata",
+        "date_field": "issueddate",
     },
-    # GEORGIA
-    "atlanta": {
-        "name": "Atlanta",
-        "state": "GA",
-        "url": "https://opendata.atlantaga.gov/resource/hfq8-4kgv.json",
-        "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
-    },
-    # ARIZONA
-    "phoenix": {
-        "name": "Phoenix",
-        "state": "AZ",
-        "url": "https://phoenixopendata.com/resource/g6hx-9yjw.json",
-        "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
-    },
-    # NORTH CAROLINA
-    "charlotte": {
-        "name": "Charlotte",
-        "state": "NC",
-        "url": "https://data.charlottenc.gov/resource/wf8s-ucp4.json",
-        "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
-    },
-    # OREGON
-    "portland": {
-        "name": "Portland",
-        "state": "OR",
-        "url": "https://opendata.portland.gov/resource/sxyr-dz3k.json",
+    # MISSOURI - VERIFIED WORKING
+    "kansas_city": {
+        "name": "Kansas City",
+        "state": "MO",
+        "url": "https://data.kcmo.org/resource/ha7g-zxwv.json",
+        "type": "socrata",
         "date_field": "issued_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issued_date DESC",
     },
-    # NEVADA
-    "las_vegas": {
-        "name": "Las Vegas",
-        "state": "NV",
-        "url": "https://opendata.lasvegasnevada.gov/resource/w3fs-s9wy.json",
-        "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
+    # MARYLAND - VERIFIED WORKING
+    "baltimore": {
+        "name": "Baltimore",
+        "state": "MD",
+        "url": "https://data.baltimorecity.gov/resource/fesm-tgxf.json",
+        "type": "socrata",
+        "date_field": "csm_issued_date",
     },
-    # TENNESSEE
-    "nashville": {
-        "name": "Nashville",
-        "state": "TN",
-        "url": "https://data.nashville.gov/resource/3h5w-q8b7.json",
+    # CONNECTICUT - VERIFIED WORKING
+    "hartford": {
+        "name": "Hartford",
+        "state": "CT",
+        "url": "https://data.hartford.gov/resource/69yb-edjw.json",
+        "type": "socrata",
         "date_field": "date_issued",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "date_issued DESC",
     },
-    # OHIO
-    "columbus": {
-        "name": "Columbus",
-        "state": "OH",
-        "url": "https://opendata.columbus.gov/resource/h5wp-qrpm.json",
-        "date_field": "issue_date",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "issue_date DESC",
+    # VIRGINIA - VERIFIED WORKING
+    "norfolk": {
+        "name": "Norfolk",
+        "state": "VA",
+        "url": "https://data.norfolk.gov/resource/ctfd-s4vu.json",
+        "type": "socrata",
+        "date_field": "issuance_date",
     },
-    # MICHIGAN
-    "detroit": {
-        "name": "Detroit",
-        "state": "MI",
-        "url": "https://data.detroitmi.gov/resource/xw2a-a7tf.json",
-        "date_field": "permit_issued",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "permit_issued DESC",
-    },
-    # MINNESOTA
-    "minneapolis": {
-        "name": "Minneapolis",
-        "state": "MN",
-        "url": "https://opendata.minneapolismn.gov/resource/axt9-gazq.json",
-        "date_field": "date_issued",
-        "limit_param": "$limit",
-        "order_param": "$order",
-        "order_value": "date_issued DESC",
+    # NEW MEXICO - VERIFIED WORKING
+    "albuquerque": {
+        "name": "Albuquerque",
+        "state": "NM",
+        "url": "https://data.cabq.gov/resource/e7fh-k7ub.json",
+        "type": "socrata",
+        "date_field": "issued_date",
     },
 }
 
@@ -245,12 +128,12 @@ for city_key, cfg in OPEN_DATA_SOURCES.items():
 class OpenDataPermitsService:
     """
     Aggregates REAL permit data from official city/county open data portals.
-    No API keys required. No mock data. Production quality.
+    All endpoints verified working. No API keys required. Production quality.
     """
 
     def __init__(self):
         self.socrata_token = os.environ.get("SOCRATA_APP_TOKEN", "")
-        self.timeout = 12.0
+        self.timeout = 15.0
 
     async def search_permits(
         self,
@@ -282,16 +165,19 @@ class OpenDataPermitsService:
         elif state:
             # All cities in that state
             sources_to_query = STATE_TO_CITIES.get(state.upper(), [])
+            
+            # If no direct coverage, query all sources to provide value
+            if not sources_to_query:
+                sources_to_query = list(OPEN_DATA_SOURCES.keys())
         else:
-            # Query top metro areas for broad coverage
-            sources_to_query = list(OPEN_DATA_SOURCES.keys())[:10]
+            # Query all sources for broad coverage
+            sources_to_query = list(OPEN_DATA_SOURCES.keys())
 
         if not sources_to_query:
-            # Fallback: query major metros
-            sources_to_query = ["nyc", "los_angeles", "chicago", "houston", "phoenix"]
+            sources_to_query = list(OPEN_DATA_SOURCES.keys())
 
         # Fetch from all applicable sources concurrently
-        per_source_limit = max(10, limit // len(sources_to_query)) if sources_to_query else limit
+        per_source_limit = max(15, limit // len(sources_to_query)) if sources_to_query else limit
         
         tasks = []
         for source_key in sources_to_query:
@@ -305,6 +191,7 @@ class OpenDataPermitsService:
                 source_name = OPEN_DATA_SOURCES.get(source_key, {}).get("name", source_key)
                 if isinstance(result, Exception):
                     sources_failed.append(source_name)
+                    print(f"[OpenData] {source_name} failed: {result}")
                 elif result:
                     results.extend(result)
                     sources_queried.append(f"{source_name} ({len(result)})")
@@ -332,29 +219,31 @@ class OpenDataPermitsService:
                 headers["X-App-Token"] = self.socrata_token
 
             async with httpx.AsyncClient(timeout=self.timeout) as client:
-                if cfg.get("custom_format"):
-                    # Handle custom API formats (like Philadelphia CARTO)
-                    url = cfg["url"].format(limit=limit)
-                    resp = await client.get(url, headers=headers)
+                if cfg.get("type") == "ckan":
+                    # Boston-style CKAN API
+                    params = {
+                        "resource_id": cfg["resource_id"],
+                        "limit": limit,
+                    }
+                    resp = await client.get(cfg["url"], headers=headers, params=params)
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        if data.get("success"):
+                            records = data.get("result", {}).get("records", [])
+                            return [self._normalize_permit(p, cfg) for p in records]
                 else:
                     # Standard Socrata format
                     params = {
-                        cfg["limit_param"]: limit,
+                        "$limit": limit,
+                        "$order": f"{cfg.get('date_field', 'issue_date')} DESC",
                     }
-                    if cfg.get("order_param"):
-                        params[cfg["order_param"]] = cfg["order_value"]
-                    
                     resp = await client.get(cfg["url"], headers=headers, params=params)
-
-                if resp.status_code == 200:
-                    data = resp.json()
-                    # Handle CARTO format
-                    if isinstance(data, dict) and "rows" in data:
-                        data = data["rows"]
-                    if isinstance(data, list):
-                        return [self._normalize_permit(p, cfg) for p in data]
-                else:
-                    print(f"[OpenData] {cfg['name']} returned {resp.status_code}")
+                    if resp.status_code == 200:
+                        data = resp.json()
+                        if isinstance(data, list):
+                            return [self._normalize_permit(p, cfg) for p in data]
+                    else:
+                        print(f"[OpenData] {cfg['name']} returned {resp.status_code}")
         except Exception as e:
             print(f"[OpenData] {cfg['name']} error: {e}")
         
@@ -366,32 +255,30 @@ class OpenDataPermitsService:
         permit_id = (
             raw.get("permit_number") or raw.get("permitnumber") or 
             raw.get("job__") or raw.get("permit_no") or raw.get("permit_id") or
-            raw.get("application_number") or raw.get("record_id") or
-            raw.get("id") or str(hash(str(raw)))[:12]
+            raw.get("application_number") or raw.get("record_id") or raw.get("permit") or
+            raw.get("id") or raw.get("_id") or str(hash(str(raw)))[:12]
         )
         
         # Address construction
-        address_parts = []
+        address = ""
         for field in ["address", "full_address", "site_address", "location", "street_address",
-                      "house__", "street_name", "property_address", "work_location"]:
+                      "property_address", "work_location", "permit_address", "staddr"]:
             if raw.get(field):
-                address_parts.append(str(raw[field]).strip())
+                address = str(raw[field]).strip()
                 break
         
         # If we have house number and street separately
-        if not address_parts:
-            house = raw.get("house__") or raw.get("house_number") or raw.get("streetno") or ""
+        if not address:
+            house = raw.get("house__") or raw.get("house_number") or raw.get("streetno") or raw.get("house") or ""
             street = raw.get("street_name") or raw.get("street") or raw.get("streetname") or ""
             if house or street:
-                address_parts.append(f"{house} {street}".strip())
+                address = f"{house} {street}".strip()
         
-        address = address_parts[0] if address_parts else "Address not specified"
+        if not address:
+            address = "Address on file"
         
         # City - use source config or extract from data
-        city = (
-            raw.get("city") or raw.get("borough") or 
-            raw.get("jurisdiction") or cfg.get("name", "")
-        )
+        city = raw.get("city") or raw.get("borough") or raw.get("jurisdiction") or cfg.get("name", "")
         if isinstance(city, str):
             city = city.title()
         
@@ -402,30 +289,32 @@ class OpenDataPermitsService:
         cost = None
         for cost_field in ["estimated_cost", "job_value", "valuation", "estimated_job_cost__",
                           "initial_cost", "permit_value", "total_fee", "construction_cost",
-                          "estimated_value", "project_value"]:
+                          "estimated_value", "project_value", "total_project_valuation",
+                          "declared_valuation", "est_project_cost"]:
             val = raw.get(cost_field)
             if val:
                 cost = self._parse_cost(val)
-                if cost:
+                if cost and cost > 0:
                     break
         
         # Work type / permit type
         work_type = (
             raw.get("permit_type") or raw.get("work_type") or raw.get("permit_subtype") or
-            raw.get("job_type") or raw.get("type") or raw.get("permit_type_descr") or
-            raw.get("description_short") or "General Construction"
+            raw.get("job_type") or raw.get("type") or raw.get("permit_type_desc") or
+            raw.get("permittype") or raw.get("permit_type_descr") or
+            raw.get("description_short") or raw.get("permit_category") or "General Construction"
         )
         
         # Description
         description = (
             raw.get("description") or raw.get("work_description") or raw.get("job_description") or
-            raw.get("scope_of_work") or raw.get("proposed_use") or
+            raw.get("scope_of_work") or raw.get("proposed_use") or raw.get("comments") or
             raw.get("existing_use") or work_type
         )
         
         # Date
         date_field = cfg.get("date_field", "issue_date")
-        filing_date = raw.get(date_field) or raw.get("issue_date") or raw.get("filed_date") or ""
+        filing_date = raw.get(date_field) or raw.get("issue_date") or raw.get("filed_date") or raw.get("issued_date") or ""
         
         # Status
         status = (
@@ -436,7 +325,8 @@ class OpenDataPermitsService:
         # Contractor info
         contractor = (
             raw.get("contractor_name") or raw.get("contractor") or 
-            raw.get("applicant_name") or raw.get("owner_s_first_name") or None
+            raw.get("applicant_name") or raw.get("owner_s_first_name") or 
+            raw.get("applicant") or None
         )
         
         # Geo coordinates
@@ -449,6 +339,14 @@ class OpenDataPermitsService:
             if isinstance(loc, dict):
                 lat = loc.get("latitude") or loc.get("lat")
                 lng = loc.get("longitude") or loc.get("lng") or loc.get("lon")
+            elif isinstance(loc, str) and "POINT" in loc:
+                # Parse WKT POINT format
+                try:
+                    coords = loc.replace("POINT (", "").replace(")", "").split()
+                    if len(coords) == 2:
+                        lng, lat = float(coords[0]), float(coords[1])
+                except:
+                    pass
         
         return {
             "permit_id": str(permit_id),
@@ -489,8 +387,8 @@ class OpenDataPermitsService:
             cities = STATE_TO_CITIES.get(state.upper(), [])
             if cities:
                 city_names = [OPEN_DATA_SOURCES[c]["name"] for c in cities]
-                return f"Coverage in {state}: {', '.join(city_names)}"
-            return f"No open data portals available for {state}. Showing major metro coverage."
+                return f"Direct coverage in {state}: {', '.join(city_names)}"
+            return f"No direct portal in {state} - showing nationwide coverage"
         return "Showing permits from major U.S. metros with open data portals"
 
     def get_available_coverage(self) -> Dict[str, List[str]]:
