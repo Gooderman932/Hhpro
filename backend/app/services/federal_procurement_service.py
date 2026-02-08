@@ -124,11 +124,21 @@ class FederalProcurementService:
         
         def sync_fetch():
             try:
-                resp = requests.post(
+                # Disable SSL verification as workaround for container environments
+                import urllib3
+                urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+                
+                session = requests.Session()
+                resp = session.post(
                     f"{USA_SPENDING_BASE}/search/spending_by_award/",
                     json=payload,
-                    headers={"Content-Type": "application/json", "Accept": "application/json"},
-                    timeout=30
+                    headers={
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                        "User-Agent": "Mozilla/5.0 (compatible; HHDrywallPro/2.0)"
+                    },
+                    timeout=30,
+                    verify=False  # Workaround for container SSL issues
                 )
                 if resp.status_code == 200:
                     data = resp.json()
@@ -136,7 +146,7 @@ class FederalProcurementService:
                     print(f"USAspending returned {len(results)} results")
                     return results
                 else:
-                    print(f"USAspending returned {resp.status_code}")
+                    print(f"USAspending returned {resp.status_code}: {resp.text[:100]}")
             except Exception as e:
                 print(f"USAspending error: {e}")
             return []
