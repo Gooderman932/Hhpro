@@ -24,9 +24,7 @@ class NYCPermitsService:
         self, limit: int = 100, days_back: int = 30
     ) -> List[Dict[str, Any]]:
         try:
-            cutoff = (datetime.utcnow() - timedelta(days=days_back)).strftime("%Y-%m-%dT00:00:00")
             params = {
-                "$where": f"issuance_date > '{cutoff}'",
                 "$limit": limit,
                 "$order": "issuance_date DESC",
             }
