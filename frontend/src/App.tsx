@@ -80,6 +80,10 @@ const Navigation = () => {
                 </Link>
                 {(subscription.tier_id === 'professional' || subscription.tier_id === 'enterprise') && (
                   <>
+                    <Link to="/federal-opportunities" className="text-slate-300 hover:text-white transition flex items-center" data-testid="federal-opps-nav">
+                      <Landmark className="h-4 w-4 mr-1" />
+                      Federal Opps
+                    </Link>
                     <Link to="/predictions" className="text-slate-300 hover:text-white transition flex items-center">
                       <TrendingUp className="h-4 w-4 mr-1" />
                       ML Insights
