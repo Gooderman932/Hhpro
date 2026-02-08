@@ -20,7 +20,6 @@ const tierColors: Record<string, string> = {
 }
 
 export const PricingPage = () => {
-  const navigate = useNavigate()
   const [tiers, setTiers] = useState<PricingTier[]>([])
   const [currentSubscription, setCurrentSubscription] = useState<Subscription | null>(null)
   const [loading, setLoading] = useState(true)
