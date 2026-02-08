@@ -11,7 +11,7 @@ import os
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 if not BASE_URL:
-    BASE_URL = "https://permit-forecast.preview.emergentagent.com"
+    BASE_URL = "https://construdata-2.preview.emergentagent.com"
 
 # Test credentials from the review request
 ADMIN_USER = {"email": "malcolmgoodmen@gmail.com", "password": "Test123!"}

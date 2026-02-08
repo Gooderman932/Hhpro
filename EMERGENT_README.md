@@ -20,9 +20,9 @@ This script will:
 - **Password**: demo123
 
 ### Access Your App
-🌐 **Frontend**: https://permit-forecast.preview.emergentagent.com
+🌐 **Frontend**: https://construdata-2.preview.emergentagent.com
 
-📡 **API Docs**: https://permit-forecast.preview.emergentagent.com/api/docs
+📡 **API Docs**: https://construdata-2.preview.emergentagent.com/api/docs
 
 ## 📋 Manual Commands
 
