@@ -45,6 +45,8 @@ from app.services.commercial_permits_service import CommercialPermitsService
 from app.services.nyc_permits_service import NYCPermitsService
 from app.services.census_permits_service import CensusPermitsService
 from app.services.permit_enrichment_service import PermitEnrichmentService
+from app.services.federal_procurement_service import FederalProcurementService
+from app.services.procurement_enrichment_service import ProcurementEnrichmentService
 
 # Import Proprietary ML Models (Poor Dude Holdings LLC IP)
 from app.ml.proprietary import (
